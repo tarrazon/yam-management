@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { X, Save, Upload, CheckCircle2, Loader2, Image as ImageIcon, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
+import { uploadFile } from "@/api/uploadService";
 
 export default function ResidenceGestionForm({ residence, onSubmit, onCancel, isLoading }) {
   const [formData, setFormData] = useState(residence || {
@@ -58,8 +59,8 @@ export default function ResidenceGestionForm({ residence, onSubmit, onCancel, is
     setUploadError("");
     
     try {
-      const result = await base44.integrations.Core.UploadFile({ file });
-      
+      const result = await uploadFile(file);
+
       if (isMultiple) {
         const currentFiles = formData.documents?.[docKey] || [];
         setFormData({

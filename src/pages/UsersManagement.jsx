@@ -509,68 +509,6 @@ export default function UsersManagement() {
           </DialogContent>
         </Dialog>
 
-        {/* Suppression ancien TabsContent invitations */}
-        <div style={{display: 'none'}}>
-          <TabsContent value="invitations">
-            <Card>
-              <CardHeader>
-                <CardTitle>Invitations envoyées</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {invitations.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Mail className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                    <p className="text-slate-400">Aucune invitation envoyée</p>
-                    <Button 
-                      onClick={() => setShowInviteDialog(true)}
-                      className="mt-4 bg-[#F59E0B] hover:bg-[#D97706]"
-                    >
-                      Envoyer votre première invitation
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {invitations.map((invitation) => {
-                      const statusConfig = {
-                        en_attente: { icon: Clock, color: "bg-yellow-100 text-yellow-800", label: "En attente" },
-                        inscrit: { icon: CheckCircle, color: "bg-blue-100 text-blue-800", label: "Inscrit" },
-                        actif: { icon: CheckCircle, color: "bg-green-100 text-green-800", label: "Actif" },
-                      };
-                      const config = statusConfig[invitation.statut];
-                      const Icon = config.icon;
-
-                      return (
-                        <div key={invitation.id} className="p-4 bg-white border border-slate-200 rounded-lg">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <p className="font-semibold text-slate-700">{invitation.nom_entreprise}</p>
-                                <Badge className={config.color}>
-                                  <Icon className="w-3 h-3 mr-1" />
-                                  {config.label}
-                                </Badge>
-                              </div>
-                              <p className="text-sm text-slate-600 mb-1">{invitation.email}</p>
-                              {invitation.contact_principal && (
-                                <p className="text-xs text-slate-500">Contact: {invitation.contact_principal}</p>
-                              )}
-                              <p className="text-xs text-slate-400 mt-2">
-                                Créée le {new Date(invitation.date_invitation).toLocaleDateString('fr-FR')} par {invitation.invite_par}
-                              </p>
-                            </div>
-                            <Badge variant="outline" className="text-xs">
-                              {invitation.type_partenaire.toUpperCase()}
-                            </Badge>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </div>
 
         {/* Dialog d'édition */}
         <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
