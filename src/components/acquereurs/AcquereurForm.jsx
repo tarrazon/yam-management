@@ -10,6 +10,7 @@ import { X, Save, Upload, CheckCircle2, Loader2, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
+import { autoCleanFormData } from "@/utils/formHelpers";
 
 export default function AcquereurForm({ acquereur, onSubmit, onCancel, isLoading, isPartner = false }) {
   const [formData, setFormData] = useState(acquereur || {
@@ -84,21 +85,15 @@ export default function AcquereurForm({ acquereur, onSubmit, onCancel, isLoading
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     const partenaire = partenaires.find(p => p.id === formData.partenaire_id);
-    
-    // Convertir les chaînes vides en null pour les champs numériques
+
+    // Nettoyer automatiquement toutes les données (nombres et dates)
     const cleanedData = {
-      ...formData,
+      ...autoCleanFormData(formData),
       partenaire_nom: partenaire?.nom || "",
-      budget_min: formData.budget_min === "" ? null : parseFloat(formData.budget_min),
-      budget_max: formData.budget_max === "" ? null : parseFloat(formData.budget_max),
-      budget: formData.budget === "" ? null : parseFloat(formData.budget),
-      apport: formData.apport === "" ? null : parseFloat(formData.apport),
-      endettement_estime: formData.endettement_estime === "" ? null : parseFloat(formData.endettement_estime),
-      revenus_mensuels: formData.revenus_mensuels === "" ? null : parseFloat(formData.revenus_mensuels),
     };
-    
+
     onSubmit(cleanedData);
   };
 

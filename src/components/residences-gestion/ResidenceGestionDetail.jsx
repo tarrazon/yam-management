@@ -57,7 +57,7 @@ export default function ResidenceGestionDetail({ residence, lotsCount, onClose, 
   const photos = documents.photos || [];
 
   // Générer les URLs signées pour tous les documents
-  const { urls: signedDocUrls } = useSignedUrls(documents);
+  const { urls: signedDocUrls, loading: loadingDocUrls } = useSignedUrls(documents);
 
   // Générer les URLs signées pour les photos
   const photoUrlsObj = photos.reduce((acc, photo, index) => {
@@ -428,15 +428,25 @@ export default function ResidenceGestionDetail({ residence, lotsCount, onClose, 
                               {doc.label}
                             </span>
                           </div>
-                          {hasDocument && signedDocUrls[doc.key] && (
-                            <a
-                              href={signedDocUrls[doc.key]}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-green-600 hover:text-green-800"
-                            >
-                              <Download className="w-4 h-4" />
-                            </a>
+                          {hasDocument && (
+                            loadingDocUrls ? (
+                              <div className="text-slate-400">
+                                <Download className="w-4 h-4 animate-pulse" />
+                              </div>
+                            ) : signedDocUrls[doc.key] ? (
+                              <a
+                                href={signedDocUrls[doc.key]}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-green-600 hover:text-green-800"
+                              >
+                                <Download className="w-4 h-4" />
+                              </a>
+                            ) : (
+                              <div className="text-slate-400" title="Erreur de chargement">
+                                <Download className="w-4 h-4" />
+                              </div>
+                            )
                           )}
                         </div>
                       );

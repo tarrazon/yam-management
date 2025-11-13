@@ -12,6 +12,7 @@ import { X, Save } from "lucide-react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { autoCleanFormData } from "@/utils/formHelpers";
 
 export default function LotLMNPForm({ lot, residences, vendeurs, onSubmit, onCancel, isLoading }) {
   const [formData, setFormData] = useState(lot || {
@@ -63,27 +64,15 @@ export default function LotLMNPForm({ lot, residences, vendeurs, onSubmit, onCan
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // Nettoyer les données : convertir les strings vides en null pour les champs numériques
-    const cleanedData = {
-      ...formData,
-      surface: formData.surface === "" ? null : Number(formData.surface),
-      prix_net_vendeur: formData.prix_net_vendeur === "" ? null : Number(formData.prix_net_vendeur),
-      honoraires: formData.honoraires === "" ? null : Number(formData.honoraires),
-      tva_honoraires: formData.tva_honoraires === "" ? null : Number(formData.tva_honoraires),
-      pourcentage_honoraires: formData.pourcentage_honoraires === "" ? null : Number(formData.pourcentage_honoraires),
-      honoraires_acquereur_ht: formData.honoraires_acquereur_ht === "" ? null : Number(formData.honoraires_acquereur_ht),
-      tva_honoraires_acquereur: formData.tva_honoraires_acquereur === "" ? null : Number(formData.tva_honoraires_acquereur),
-      prix_fai: formData.prix_fai === "" ? null : Number(formData.prix_fai),
-      rentabilite: formData.rentabilite === "" ? null : Number(formData.rentabilite),
-      loyer_mensuel: formData.loyer_mensuel === "" ? null : Number(formData.loyer_mensuel),
-    };
+
+    // Nettoyer automatiquement toutes les données (nombres et dates)
+    const cleanedData = autoCleanFormData(formData);
 
     // Auto-générer la date de prise d'option si le statut passe à "sous_option" et qu'il n'y a pas encore de date
     if (cleanedData.statut === 'sous_option' && !lot?.date_prise_option && !cleanedData.date_prise_option) {
       cleanedData.date_prise_option = new Date().toISOString().split('T')[0];
     }
-    
+
     onSubmit(cleanedData);
   };
 

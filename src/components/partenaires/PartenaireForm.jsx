@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { X, Save } from "lucide-react";
 import { motion } from "framer-motion";
+import { autoCleanFormData } from "@/utils/formHelpers";
 
 export default function PartenaireForm({ partenaire, onSubmit, onCancel, isLoading }) {
   const [formData, setFormData] = useState(partenaire || {
@@ -32,14 +33,10 @@ export default function PartenaireForm({ partenaire, onSubmit, onCancel, isLoadi
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // Nettoyer les données : convertir les strings vides en null pour les champs numériques
-    const cleanedData = {
-      ...formData,
-      taux_retrocession: formData.taux_retrocession ? Number(formData.taux_retrocession) : null,
-      volume_annuel_attendu: formData.volume_annuel_attendu ? Number(formData.volume_annuel_attendu) : null,
-    };
-    
+
+    // Nettoyer automatiquement toutes les données (nombres et dates)
+    const cleanedData = autoCleanFormData(formData);
+
     onSubmit(cleanedData);
   };
 
