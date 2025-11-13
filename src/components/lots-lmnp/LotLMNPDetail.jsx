@@ -3,7 +3,7 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { X, Edit, MapPin, Home, Euro, TrendingUp, Building2, FileText, Download, Image, User, Handshake, Trash2 } from "lucide-react";
+import { X, Edit, MapPin, Home, Euro, TrendingUp, Building2, FileText, Download, Image, User, Handshake, Trash2, ExternalLink } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
