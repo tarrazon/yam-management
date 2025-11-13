@@ -152,9 +152,20 @@ export default function LotsLMNP() {
   });
 
   const handlePoserOption = async (formData) => {
+    // Vérifier s'il existe déjà une option active sur ce lot
+    const optionActiveExistante = allOptions.find(
+      o => o.lot_lmnp_id === lotForOption.id && o.statut === 'active'
+    );
+
+    if (optionActiveExistante) {
+      alert('Une option est déjà active sur ce lot. Veuillez d\'abord l\'annuler.');
+      setLotForOption(null);
+      return;
+    }
+
     const partenaire = partenaires.find(p => p.id === formData.partenaire_id);
     const acquereur = acquereurs.find(a => a.id === formData.acquereur_id);
-    
+
     const dateDebut = new Date();
     const dateFin = new Date(dateDebut.getTime() + formData.duree_jours * 24 * 60 * 60 * 1000);
 
@@ -169,16 +180,16 @@ export default function LotsLMNP() {
 
     try {
       await createOptionMutation.mutateAsync(optionData);
-      await updateMutation.mutateAsync({ 
-        id: lotForOption.id, 
-        data: { 
-          statut: 'sous_option', 
+      await updateMutation.mutateAsync({
+        id: lotForOption.id,
+        data: {
+          statut: 'sous_option',
           date_prise_option: dateDebut.toISOString().split('T')[0],
           partenaire_id: formData.partenaire_id,
           partenaire_nom: partenaire?.nom || "",
           acquereur_id: formData.acquereur_id || null,
           acquereur_nom: acquereur ? `${acquereur.prenom} ${acquereur.nom}` : "",
-        } 
+        }
       });
       alert('Option posée avec succès !');
       setError(null);

@@ -67,6 +67,11 @@ export default function LotsPartenaire() {
     enabled: !!currentUser?.partenaire_id,
   });
 
+  const { data: allOptions = [] } = useQuery({
+    queryKey: ['all_options_partenaire'],
+    queryFn: () => base44.entities.OptionLot.list(),
+  });
+
   const { data: mesAcquereurs = [] } = useQuery({
     queryKey: ['mes_acquereurs_select'],
     queryFn: () => base44.entities.Acquereur.filter({ partenaire_id: currentUser?.partenaire_id }),
@@ -89,6 +94,17 @@ export default function LotsPartenaire() {
   });
 
   const handlePoserOption = async (lot, acquereurId) => {
+    // Vérifier s'il existe déjà une option active sur ce lot
+    const optionActiveExistante = allOptions.find(
+      o => o.lot_lmnp_id === lot.id && o.statut === 'active'
+    );
+
+    if (optionActiveExistante) {
+      alert('Une option est déjà active sur ce lot.');
+      setLotForOption(null);
+      return;
+    }
+
     const optionsActives = mesOptions.filter(o => o.statut === 'active').length;
     const optionsMax = currentUser?.options_max || 3;
 
@@ -113,15 +129,15 @@ export default function LotsPartenaire() {
     };
 
     await createOptionMutation.mutateAsync(optionData);
-    await updateLotMutation.mutateAsync({ 
-      id: lot.id, 
-      data: { 
-        statut: 'sous_option', 
+    await updateLotMutation.mutateAsync({
+      id: lot.id,
+      data: {
+        statut: 'sous_option',
         date_prise_option: dateDebut.toISOString().split('T')[0],
         partenaire_id: currentUser.partenaire_id,
         acquereur_id: acquereurId,
         acquereur_nom: acquereur ? `${acquereur.prenom} ${acquereur.nom}` : '',
-      } 
+      }
     });
 
     setLotForOption(null);
