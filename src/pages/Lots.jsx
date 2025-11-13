@@ -16,7 +16,7 @@ export default function Lots() {
 
   const { data: lots = [], isLoading } = useQuery({
     queryKey: ['lots'],
-    queryFn: () => base44.entities.Lot.list('-created_date'),
+    queryFn: () => base44.entities.Lot.list('-created_at'),
   });
 
   const { data: residences = [] } = useQuery({
@@ -27,7 +27,7 @@ export default function Lots() {
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Lot.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['lots'] });
+      queryClient.refetchQueries({ queryKey: ['lots'] });
       setShowForm(false);
       setEditingLot(null);
     },
@@ -36,7 +36,7 @@ export default function Lots() {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Lot.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['lots'] });
+      queryClient.refetchQueries({ queryKey: ['lots'] });
       setShowForm(false);
       setEditingLot(null);
     },

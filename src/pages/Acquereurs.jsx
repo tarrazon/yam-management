@@ -26,7 +26,7 @@ export default function Acquereurs() {
 
   const { data: acquereurs = [], isLoading } = useQuery({
     queryKey: ['acquereurs'],
-    queryFn: () => base44.entities.Acquereur.list('-created_date'),
+    queryFn: () => base44.entities.Acquereur.list('-created_at'),
   });
 
   const { data: partenaires = [] } = useQuery({
@@ -42,7 +42,7 @@ export default function Acquereurs() {
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Acquereur.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['acquereurs'] });
+      queryClient.refetchQueries({ queryKey: ['acquereurs'] });
       setShowForm(false);
       setEditingAcquereur(null);
       setError(null); // Clear error on success
@@ -56,7 +56,7 @@ export default function Acquereurs() {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Acquereur.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['acquereurs'] });
+      queryClient.refetchQueries({ queryKey: ['acquereurs'] });
       setShowForm(false);
       setEditingAcquereur(null);
       setViewingAcquereur(null);
@@ -80,8 +80,8 @@ export default function Acquereurs() {
       return base44.entities.Acquereur.delete(id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['acquereurs'] });
-      queryClient.invalidateQueries({ queryKey: ['lots_lmnp'] });
+      queryClient.refetchQueries({ queryKey: ['acquereurs'] });
+      queryClient.refetchQueries({ queryKey: ['lots_lmnp'] });
       setDeletingAcquereur(null);
       setViewingAcquereur(null); // Close detail view if the deleted acquereur was being viewed
       setError(null); // Clear error on success

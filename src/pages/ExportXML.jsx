@@ -97,7 +97,7 @@ export default function ExportXML() {
       if (lot.date_mise_en_ligne) {
         xml += `      <mise_en_ligne>${lot.date_mise_en_ligne}</mise_en_ligne>\n`;
       }
-      xml += `      <derniere_modification>${lot.updated_date || ''}</derniere_modification>\n`;
+      xml += `      <derniere_modification>${lot.updated_at || ''}</derniere_modification>\n`;
       xml += '    </dates>\n';
 
       xml += '  </lot>\n';

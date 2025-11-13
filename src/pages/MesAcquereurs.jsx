@@ -33,7 +33,7 @@ export default function MesAcquereurs() {
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Acquereur.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['mes_acquereurs_full'] });
+      queryClient.refetchQueries({ queryKey: ['mes_acquereurs_full'] });
       setShowForm(false);
     },
   });

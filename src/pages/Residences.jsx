@@ -14,13 +14,13 @@ export default function Residences() {
 
   const { data: residences = [], isLoading } = useQuery({
     queryKey: ['residences'],
-    queryFn: () => base44.entities.Residence.list('-created_date'),
+    queryFn: () => base44.entities.Residence.list('-created_at'),
   });
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Residence.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['residences'] });
+      queryClient.refetchQueries({ queryKey: ['residences'] });
       setShowForm(false);
       setEditingResidence(null);
     },
@@ -29,7 +29,7 @@ export default function Residences() {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Residence.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['residences'] });
+      queryClient.refetchQueries({ queryKey: ['residences'] });
       setShowForm(false);
       setEditingResidence(null);
     },

@@ -26,7 +26,7 @@ export default function Vendeurs() {
 
   const { data: vendeurs = [], isLoading } = useQuery({
     queryKey: ['vendeurs'],
-    queryFn: () => base44.entities.Vendeur.list('-created_date'),
+    queryFn: () => base44.entities.Vendeur.list('-created_at'),
   });
 
   const { data: lots = [] } = useQuery({
@@ -37,7 +37,7 @@ export default function Vendeurs() {
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Vendeur.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['vendeurs'] });
+      queryClient.refetchQueries({ queryKey: ['vendeurs'] });
       setShowForm(false);
       setEditingVendeur(null);
       setError(null); // Clear error on success
@@ -51,7 +51,7 @@ export default function Vendeurs() {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Vendeur.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['vendeurs'] });
+      queryClient.refetchQueries({ queryKey: ['vendeurs'] });
       setShowForm(false);
       setEditingVendeur(null);
       setViewingVendeur(null);
@@ -78,8 +78,8 @@ export default function Vendeurs() {
       return base44.entities.Vendeur.delete(id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['vendeurs'] });
-      queryClient.invalidateQueries({ queryKey: ['lots_lmnp'] });
+      queryClient.refetchQueries({ queryKey: ['vendeurs'] });
+      queryClient.refetchQueries({ queryKey: ['lots_lmnp'] });
       setDeletingVendeur(null);
       setViewingVendeur(null); // Close detail view if the deleted vendeur was being viewed
       setError(null); // Clear error on success

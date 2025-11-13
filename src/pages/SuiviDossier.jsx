@@ -30,7 +30,7 @@ export default function SuiviDossier() {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.LotLMNP.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['lots_lmnp'] });
+      queryClient.refetchQueries({ queryKey: ['lots_lmnp'] });
       setEditingLot(null);
       setViewingLot(null);
     },
@@ -49,7 +49,7 @@ export default function SuiviDossier() {
     )
     .filter(l => {
       if (!dateDebut && !dateFin) return true;
-      const dateLot = l.date_prise_option || l.date_premier_contact || l.date_signature_compromis || l.updated_date;
+      const dateLot = l.date_prise_option || l.date_premier_contact || l.date_signature_compromis || l.updated_at;
       if (!dateLot) return false;
       
       const date = new Date(dateLot);

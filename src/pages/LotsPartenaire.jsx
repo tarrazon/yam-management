@@ -76,15 +76,15 @@ export default function LotsPartenaire() {
   const createOptionMutation = useMutation({
     mutationFn: (data) => base44.entities.OptionLot.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['mes_options_partenaire'] });
-      queryClient.invalidateQueries({ queryKey: ['lots_disponibles'] });
+      queryClient.refetchQueries({ queryKey: ['mes_options_partenaire'] });
+      queryClient.refetchQueries({ queryKey: ['lots_disponibles'] });
     },
   });
 
   const updateLotMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.LotLMNP.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['lots_disponibles'] });
+      queryClient.refetchQueries({ queryKey: ['lots_disponibles'] });
     },
   });
 

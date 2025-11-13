@@ -38,7 +38,7 @@ export default function UsersManagement() {
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['users'],
-    queryFn: () => base44.entities.User.list('-created_date'),
+    queryFn: () => base44.entities.User.list('-created_at'),
   });
 
   const { data: partenaires = [] } = useQuery({
@@ -49,7 +49,7 @@ export default function UsersManagement() {
   const updateUserMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.User.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.refetchQueries({ queryKey: ['users'] });
       setEditingUser(null);
       setEditFormData(null);
     },
@@ -58,7 +58,7 @@ export default function UsersManagement() {
   const deleteUserMutation = useMutation({
     mutationFn: (id) => base44.entities.User.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.refetchQueries({ queryKey: ['users'] });
       setDeletingUser(null);
     },
   });
@@ -84,7 +84,7 @@ export default function UsersManagement() {
       return await response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.refetchQueries({ queryKey: ['users'] });
       setShowCreateDialog(false);
       setCreateFormData({
         email: "",

@@ -23,7 +23,7 @@ export default function ResidencesPartenaire() {
 
   const { data: residences = [], isLoading } = useQuery({
     queryKey: ['residences_gestion'],
-    queryFn: () => base44.entities.ResidenceGestion.list('-created_date'),
+    queryFn: () => base44.entities.ResidenceGestion.list('-created_at'),
   });
 
   const { data: lots = [] } = useQuery({

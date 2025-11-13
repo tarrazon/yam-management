@@ -26,7 +26,7 @@ export default function NotairesPage() {
 
   const { data: notaires = [], isLoading } = useQuery({
     queryKey: ['notaires'],
-    queryFn: () => base44.entities.Notaire.list('-created_date'),
+    queryFn: () => base44.entities.Notaire.list('-created_at'),
   });
 
   const { data: dossiers = [] } = useQuery({
@@ -37,7 +37,7 @@ export default function NotairesPage() {
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Notaire.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notaires'] });
+      queryClient.refetchQueries({ queryKey: ['notaires'] });
       setShowForm(false);
       setEditingNotaire(null);
       setError(null); // Clear error on success
@@ -51,7 +51,7 @@ export default function NotairesPage() {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Notaire.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notaires'] });
+      queryClient.refetchQueries({ queryKey: ['notaires'] });
       setShowForm(false);
       setEditingNotaire(null);
       setViewingNotaire(null);
@@ -78,8 +78,8 @@ export default function NotairesPage() {
       return base44.entities.Notaire.delete(id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notaires'] });
-      queryClient.invalidateQueries({ queryKey: ['dossiers_vente'] });
+      queryClient.refetchQueries({ queryKey: ['notaires'] });
+      queryClient.refetchQueries({ queryKey: ['dossiers_vente'] });
       setDeletingNotaire(null);
       setViewingNotaire(null);
       setError(null); // Clear error on success

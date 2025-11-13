@@ -16,13 +16,13 @@ export default function Clients() {
 
   const { data: clients = [], isLoading } = useQuery({
     queryKey: ['clients'],
-    queryFn: () => base44.entities.Client.list('-created_date'),
+    queryFn: () => base44.entities.Client.list('-created_at'),
   });
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Client.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.refetchQueries({ queryKey: ['clients'] });
       setShowForm(false);
       setEditingClient(null);
     },
@@ -31,7 +31,7 @@ export default function Clients() {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Client.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.refetchQueries({ queryKey: ['clients'] });
       setShowForm(false);
       setEditingClient(null);
     },

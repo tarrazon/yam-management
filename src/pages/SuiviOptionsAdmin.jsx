@@ -20,7 +20,7 @@ export default function SuiviOptionsAdmin() {
 
   const { data: toutesOptions = [] } = useQuery({
     queryKey: ['toutes_options_admin'],
-    queryFn: () => base44.entities.OptionLot.list('-created_date'),
+    queryFn: () => base44.entities.OptionLot.list('-created_at'),
   });
 
   const { data: lots = [] } = useQuery({
@@ -36,8 +36,8 @@ export default function SuiviOptionsAdmin() {
   const updateLotMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.LotLMNP.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['lots_suivi_admin'] });
-      queryClient.invalidateQueries({ queryKey: ['toutes_options_admin'] });
+      queryClient.refetchQueries({ queryKey: ['lots_suivi_admin'] });
+      queryClient.refetchQueries({ queryKey: ['toutes_options_admin'] });
       setEditingOptionId(null);
     },
   });

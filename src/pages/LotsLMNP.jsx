@@ -47,7 +47,7 @@ export default function LotsLMNP() {
 
   const { data: lots = [], isLoading } = useQuery({
     queryKey: ['lots_lmnp'],
-    queryFn: () => base44.entities.LotLMNP.list('-created_date'),
+    queryFn: () => base44.entities.LotLMNP.list('-created_at'),
   });
 
   const { data: residences = [] } = useQuery({
@@ -78,7 +78,7 @@ export default function LotsLMNP() {
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.LotLMNP.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['lots_lmnp'] });
+      queryClient.refetchQueries({ queryKey: ['lots_lmnp'] });
       setShowForm(false);
       setEditingLot(null);
       setError(null);
@@ -101,8 +101,8 @@ export default function LotsLMNP() {
       return base44.entities.LotLMNP.update(id, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['lots_lmnp'] });
-      queryClient.invalidateQueries({ queryKey: ['all_options'] });
+      queryClient.refetchQueries({ queryKey: ['lots_lmnp'] });
+      queryClient.refetchQueries({ queryKey: ['all_options'] });
       setShowForm(false);
       setEditingLot(null);
       setViewingLot(null);
@@ -126,8 +126,8 @@ export default function LotsLMNP() {
       return base44.entities.LotLMNP.delete(id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['lots_lmnp'] });
-      queryClient.invalidateQueries({ queryKey: ['all_options'] });
+      queryClient.refetchQueries({ queryKey: ['lots_lmnp'] });
+      queryClient.refetchQueries({ queryKey: ['all_options'] });
       setDeletingLot(null);
       setViewingLot(null); // Close detail view if lot was deleted from there
       setError(null);
@@ -141,7 +141,7 @@ export default function LotsLMNP() {
   const createOptionMutation = useMutation({
     mutationFn: (data) => base44.entities.OptionLot.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['lots_lmnp'] });
+      queryClient.refetchQueries({ queryKey: ['lots_lmnp'] });
       setLotForOption(null);
       setError(null);
     },
@@ -290,7 +290,7 @@ export default function LotsLMNP() {
         "Vendeur": lot.vendeur_nom || "",
         "Acquéreur": lot.acquereur_nom || "",
         "Partenaire": lot.partenaire_nom || "",
-        "Date création": lot.created_date ? new Date(lot.created_date).toLocaleDateString('fr-FR') : "",
+        "Date création": lot.created_at ? new Date(lot.created_at).toLocaleDateString('fr-FR') : "",
       };
     });
 

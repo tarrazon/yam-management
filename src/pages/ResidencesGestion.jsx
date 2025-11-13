@@ -27,7 +27,7 @@ export default function ResidencesGestion() {
 
   const { data: residences = [], isLoading } = useQuery({
     queryKey: ['residences_gestion'],
-    queryFn: () => base44.entities.ResidenceGestion.list('-created_date'),
+    queryFn: () => base44.entities.ResidenceGestion.list('-created_at'),
   });
 
   const { data: lots = [] } = useQuery({
@@ -43,7 +43,7 @@ export default function ResidencesGestion() {
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.ResidenceGestion.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['residences_gestion'] });
+      queryClient.refetchQueries({ queryKey: ['residences_gestion'] });
       setShowForm(false);
       setEditingResidence(null);
       setError(null); // Clear error on success
@@ -57,7 +57,7 @@ export default function ResidencesGestion() {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.ResidenceGestion.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['residences_gestion'] });
+      queryClient.refetchQueries({ queryKey: ['residences_gestion'] });
       setShowForm(false);
       setEditingResidence(null);
       setViewingResidence(null);
@@ -87,9 +87,9 @@ export default function ResidencesGestion() {
       return base44.entities.ResidenceGestion.delete(id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['residences_gestion'] });
-      queryClient.invalidateQueries({ queryKey: ['lots_lmnp'] });
-      queryClient.invalidateQueries({ queryKey: ['contacts_residence'] });
+      queryClient.refetchQueries({ queryKey: ['residences_gestion'] });
+      queryClient.refetchQueries({ queryKey: ['lots_lmnp'] });
+      queryClient.refetchQueries({ queryKey: ['contacts_residence'] });
       setDeletingResidence(null);
       setError(null); // Clear error on success
     },

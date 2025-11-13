@@ -22,7 +22,7 @@ export default function ContactsPage() {
 
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ['contacts_residence'],
-    queryFn: () => base44.entities.ContactResidence.list('-created_date'),
+    queryFn: () => base44.entities.ContactResidence.list('-created_at'),
   });
 
   const { data: residences = [] } = useQuery({
@@ -33,7 +33,7 @@ export default function ContactsPage() {
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.ContactResidence.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['contacts_residence'] });
+      queryClient.refetchQueries({ queryKey: ['contacts_residence'] });
       setShowForm(false);
       setEditingContact(null);
       setError(null); // Clear error on success
@@ -47,7 +47,7 @@ export default function ContactsPage() {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.ContactResidence.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['contacts_residence'] });
+      queryClient.refetchQueries({ queryKey: ['contacts_residence'] });
       setShowForm(false);
       setEditingContact(null);
       setError(null); // Clear error on success
@@ -61,7 +61,7 @@ export default function ContactsPage() {
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.ContactResidence.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['contacts_residence'] });
+      queryClient.refetchQueries({ queryKey: ['contacts_residence'] });
       setDeletingContact(null);
       setError(null); // Clear error on success
     },

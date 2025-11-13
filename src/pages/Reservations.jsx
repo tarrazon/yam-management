@@ -16,7 +16,7 @@ export default function Reservations() {
 
   const { data: reservations = [], isLoading } = useQuery({
     queryKey: ['reservations'],
-    queryFn: () => base44.entities.Reservation.list('-created_date'),
+    queryFn: () => base44.entities.Reservation.list('-created_at'),
   });
 
   const { data: lots = [] } = useQuery({
@@ -32,7 +32,7 @@ export default function Reservations() {
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Reservation.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reservations'] });
+      queryClient.refetchQueries({ queryKey: ['reservations'] });
       setShowForm(false);
       setEditingReservation(null);
     },
@@ -41,7 +41,7 @@ export default function Reservations() {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Reservation.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reservations'] });
+      queryClient.refetchQueries({ queryKey: ['reservations'] });
       setShowForm(false);
       setEditingReservation(null);
     },

@@ -36,7 +36,7 @@ export default function PartenairesPage() {
 
   const { data: partenaires = [], isLoading } = useQuery({
     queryKey: ['partenaires'],
-    queryFn: () => base44.entities.Partenaire.list('-created_date'),
+    queryFn: () => base44.entities.Partenaire.list('-created_at'),
   });
 
   const { data: acquereurs = [] } = useQuery({
@@ -52,7 +52,7 @@ export default function PartenairesPage() {
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Partenaire.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['partenaires'] });
+      queryClient.refetchQueries({ queryKey: ['partenaires'] });
       setShowForm(false);
       setEditingPartenaire(null);
       setError(null);
@@ -66,7 +66,7 @@ export default function PartenairesPage() {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Partenaire.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['partenaires'] });
+      queryClient.refetchQueries({ queryKey: ['partenaires'] });
       setShowForm(false);
       setEditingPartenaire(null);
       setViewingPartenaire(null);
@@ -96,9 +96,9 @@ export default function PartenairesPage() {
       return base44.entities.Partenaire.delete(id);
     },
     onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: ['partenaires'] });
-      queryClient.invalidateQueries({ queryKey: ['acquereurs'] });
-      queryClient.invalidateQueries({ queryKey: ['lots_lmnp'] });
+      queryClient.refetchQueries({ queryKey: ['partenaires'] });
+      queryClient.refetchQueries({ queryKey: ['acquereurs'] });
+      queryClient.refetchQueries({ queryKey: ['lots_lmnp'] });
       setDeletingPartenaire(null);
       setViewingPartenaire(null);
       setError(null);
@@ -148,7 +148,7 @@ export default function PartenairesPage() {
     .filter(p => typeFilter === "all" || p.type_partenaire === typeFilter)
     .filter(p => {
       if (!dateDebut && !dateFin) return true;
-      const datePartenaire = p.date_convention || p.created_date;
+      const datePartenaire = p.date_convention || p.created_at;
       if (!datePartenaire) return false;
 
       const date = new Date(datePartenaire);
@@ -191,8 +191,8 @@ export default function PartenairesPage() {
         "CA généré (calculé)": caGenere,
         "Commissions totales (calculé)": commissionTotale,
         "Notes": p.notes || "",
-        "Date de création": p.created_date ? new Date(p.created_date).toLocaleDateString('fr-FR') : "",
-        "Dernière modification": p.updated_date ? new Date(p.updated_date).toLocaleDateString('fr-FR') : "",
+        "Date de création": p.created_at ? new Date(p.created_at).toLocaleDateString('fr-FR') : "",
+        "Dernière modification": p.updated_at ? new Date(p.updated_at).toLocaleDateString('fr-FR') : "",
       };
     });
 

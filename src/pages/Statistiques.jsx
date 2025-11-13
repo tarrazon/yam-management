@@ -44,7 +44,7 @@ export default function Statistiques() {
       if (residenceFilter !== "all" && lot.residence_id !== residenceFilter) return false;
       
       if (dateDebut || dateFin) {
-        const dateLot = lot.date_signature_acte || lot.date_signature_compromis || lot.updated_date;
+        const dateLot = lot.date_signature_acte || lot.date_signature_compromis || lot.updated_at;
         if (!dateLot) return false;
         const date = new Date(dateLot);
         if (dateDebut && date < new Date(dateDebut)) return false;
@@ -170,7 +170,7 @@ export default function Statistiques() {
   const ventesParMois = useMemo(() => {
     const data = {};
     filteredLots.filter(l => l.statut === 'vendu').forEach(lot => {
-      const date = lot.date_signature_acte || lot.date_signature_compromis || lot.updated_date;
+      const date = lot.date_signature_acte || lot.date_signature_compromis || lot.updated_at;
       if (date) {
         const mois = new Date(date).toLocaleDateString('fr-FR', { year: 'numeric', month: 'short' });
         if (!data[mois]) {

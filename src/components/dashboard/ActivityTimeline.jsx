@@ -24,10 +24,10 @@ const statusLabels = {
 export default function ActivityTimeline({ lots }) {
   // Récupérer les lots les plus récemment modifiés/créés
   const recentLots = [...lots]
-    .filter(lot => lot.updated_date || lot.created_date)
+    .filter(lot => lot.updated_at || lot.created_at)
     .sort((a, b) => {
-      const dateA = new Date(a.updated_date || a.created_date);
-      const dateB = new Date(b.updated_date || b.created_date);
+      const dateA = new Date(a.updated_at || a.created_at);
+      const dateB = new Date(b.updated_at || b.created_at);
       return dateB - dateA;
     })
     .slice(0, 8);
@@ -61,9 +61,9 @@ export default function ActivityTimeline({ lots }) {
                     <Badge className={`${statusColors[lot.statut]} border text-xs`}>
                       {statusLabels[lot.statut]}
                     </Badge>
-                    {(lot.updated_date || lot.created_date) && (
+                    {(lot.updated_at || lot.created_at) && (
                       <span className="text-xs text-slate-400">
-                        {format(new Date(lot.updated_date || lot.created_date), "d MMM", { locale: fr })}
+                        {format(new Date(lot.updated_at || lot.created_at), "d MMM", { locale: fr })}
                       </span>
                     )}
                   </div>

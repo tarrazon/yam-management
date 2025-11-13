@@ -9,7 +9,7 @@ export default function SalesChartCRM({ lots }) {
     
     // Utiliser les lots vendus avec leur date de signature
     lots.filter(lot => lot.statut === 'vendu' || lot.date_signature_acte || lot.date_signature_compromis).forEach(lot => {
-      const date = lot.date_signature_acte || lot.date_signature_compromis || lot.updated_date;
+      const date = lot.date_signature_acte || lot.date_signature_compromis || lot.updated_at;
       if (date) {
         const month = new Date(date).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
         if (!monthlyStats[month]) {
@@ -25,7 +25,7 @@ export default function SalesChartCRM({ lots }) {
 
     // Inclure aussi les lots en cours (compromis, réservés)
     lots.filter(lot => ['compromis', 'reserve'].includes(lot.statut)).forEach(lot => {
-      const date = lot.date_signature_compromis || lot.updated_date;
+      const date = lot.date_signature_compromis || lot.updated_at;
       if (date) {
         const month = new Date(date).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
         if (!monthlyStats[month]) {

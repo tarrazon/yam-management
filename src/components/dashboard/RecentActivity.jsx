@@ -50,7 +50,7 @@ export default function RecentActivity({ reservations }) {
                       {statusLabels[reservation.statut]}
                     </Badge>
                     <span className="text-xs text-slate-400">
-                      {format(new Date(reservation.created_date), "d MMM", { locale: fr })}
+                      {format(new Date(reservation.created_at), "d MMM", { locale: fr })}
                     </span>
                   </div>
                 </div>
