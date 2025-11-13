@@ -6,6 +6,7 @@ import { Home, Edit, Eye, MapPin, Euro, TrendingUp, Building2, Clock, Trash2 } f
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import StorageImage from "@/components/common/StorageImage";
 
 const statusColors = {
   disponible: "bg-green-100 text-green-800",
@@ -47,9 +48,38 @@ export default function LotLMNPListItem({ lot, onEdit, onView, onDelete, onPoser
         {/* Miniature de la résidence */}
         <div className="w-20 h-20 rounded-lg overflow-hidden bg-slate-200 flex-shrink-0">
           {residencePhoto ? (
-            <img src={residencePhoto} alt={lot.residence_nom} className="w-full h-full object-cover" />
+            <StorageImage
+              src={residencePhoto}
+              alt={lot.residence_nom}
+              className="w-full h-full object-cover"
+              fallback={firstPhoto ? (
+                <StorageImage
+                  src={firstPhoto}
+                  alt={`Lot ${lot.reference}`}
+                  className="w-full h-full object-cover"
+                  fallback={
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Building2 className="w-8 h-8 text-slate-400" />
+                    </div>
+                  }
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Building2 className="w-8 h-8 text-slate-400" />
+                </div>
+              )}
+            />
           ) : firstPhoto ? (
-            <img src={firstPhoto} alt={`Lot ${lot.reference}`} className="w-full h-full object-cover" />
+            <StorageImage
+              src={firstPhoto}
+              alt={`Lot ${lot.reference}`}
+              className="w-full h-full object-cover"
+              fallback={
+                <div className="w-full h-full flex items-center justify-center">
+                  <Building2 className="w-8 h-8 text-slate-400" />
+                </div>
+              }
+            />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <Building2 className="w-8 h-8 text-slate-400" />

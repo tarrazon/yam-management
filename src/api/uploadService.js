@@ -42,14 +42,12 @@ export const uploadFile = async (file) => {
     throw new Error(`Erreur lors de l'upload: ${error.message}`);
   }
 
-  console.log('Upload - Success, getting public URL');
+  console.log('Upload - Success, file path:', data.path);
 
-  const { data: { publicUrl } } = supabase.storage
-    .from('documents')
-    .getPublicUrl(filePath);
-
+  // Pour un bucket privé, on retourne le path
+  // L'URL signée sera générée à la demande
   return {
-    file_url: publicUrl,
+    file_url: data.path,
     file_path: data.path
   };
 };
@@ -65,4 +63,22 @@ export const deleteFile = async (filePath) => {
   }
 
   return { success: true };
+};
+
+export const getSignedUrl = async (filePath, expiresIn = 3600) => {
+  if (!filePath) return null;
+
+  // Si c'est déjà une URL complète, la retourner
+  if (filePath.startsWith('http')) return filePath;
+
+  const { data, error } = await supabase.storage
+    .from('documents')
+    .createSignedUrl(filePath, expiresIn);
+
+  if (error) {
+    console.error('Error creating signed URL:', error);
+    return null;
+  }
+
+  return data.signedUrl;
 };

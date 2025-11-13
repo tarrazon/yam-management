@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye, Building2, MapPin, Home, FileText } from "lucide-react";
 import { motion } from "framer-motion";
+import StorageImage from "@/components/common/StorageImage";
 
 const statusColors = {
   active: "bg-green-100 text-green-800",
@@ -60,7 +61,16 @@ export default function ResidenceGestionListItemPartenaire({ residence, lots, on
         {/* Miniature */}
         <div className="w-20 h-20 rounded-lg overflow-hidden bg-slate-200 flex-shrink-0">
           {firstPhoto ? (
-            <img src={firstPhoto} alt={residence.nom} className="w-full h-full object-cover" />
+            <StorageImage
+              src={firstPhoto}
+              alt={residence.nom}
+              className="w-full h-full object-cover"
+              fallback={
+                <div className="w-full h-full flex items-center justify-center">
+                  <Building2 className="w-8 h-8 text-slate-400" />
+                </div>
+              }
+            />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <Building2 className="w-8 h-8 text-slate-400" />

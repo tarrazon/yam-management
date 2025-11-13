@@ -11,6 +11,7 @@ import { X, Save, Upload, CheckCircle2, Loader2, Image as ImageIcon, Trash2 } fr
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { uploadFile } from "@/api/uploadService";
+import StorageImage from "@/components/common/StorageImage";
 
 export default function ResidenceGestionForm({ residence, onSubmit, onCancel, isLoading }) {
   const [formData, setFormData] = useState(residence || {
@@ -426,7 +427,16 @@ export default function ResidenceGestionForm({ residence, onSubmit, onCancel, is
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {formData.documents?.photos?.map((photo, index) => (
                       <div key={index} className="relative aspect-video rounded-lg overflow-hidden border-2 border-slate-200 group">
-                        <img src={photo} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" />
+                        <StorageImage
+                          src={photo}
+                          alt={`Photo ${index + 1}`}
+                          className="w-full h-full object-cover"
+                          fallback={
+                            <div className="w-full h-full flex items-center justify-center bg-slate-100">
+                              <ImageIcon className="w-8 h-8 text-slate-400" />
+                            </div>
+                          }
+                        />
                         <button
                           type="button"
                           onClick={() => removeFile('photos', index)}
