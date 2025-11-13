@@ -1,5 +1,9 @@
 import Layout from "./Layout.jsx";
 
+import Login from "./Login";
+
+import Signup from "./Signup";
+
 import Dashboard from "./Dashboard";
 
 import Residences from "./Residences";
@@ -51,9 +55,15 @@ import ResidencesPartenaire from "./ResidencesPartenaire";
 import OnboardingPartenaire from "./OnboardingPartenaire";
 
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import { AuthProvider } from '@/contexts/AuthContext';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 const PAGES = {
-    
+
+    Login: Login,
+
+    Signup: Signup,
+
     Dashboard: Dashboard,
     
     Residences: Residences,
@@ -126,60 +136,77 @@ function PagesContent() {
     
     return (
         <Layout currentPageName={currentPage}>
-            <Routes>            
+            <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+
+                <Route path="/" element={
+                    <ProtectedRoute>
+                        <Dashboard />
+                    </ProtectedRoute>
+                } />
+
+                <Route path="/Dashboard" element={
+                    <ProtectedRoute>
+                        <Dashboard />
+                    </ProtectedRoute>
+                } />
                 
-                    <Route path="/" element={<Dashboard />} />
+                <Route path="/Residences" element={
+                    <ProtectedRoute>
+                        <Residences />
+                    </ProtectedRoute>
+                } />
                 
+                <Route path="/Lots" element={
+                    <ProtectedRoute>
+                        <Lots />
+                    </ProtectedRoute>
+                } />
                 
-                <Route path="/Dashboard" element={<Dashboard />} />
-                
-                <Route path="/Residences" element={<Residences />} />
-                
-                <Route path="/Lots" element={<Lots />} />
-                
-                <Route path="/Clients" element={<Clients />} />
-                
-                <Route path="/Reservations" element={<Reservations />} />
-                
-                <Route path="/DashboardCRM" element={<DashboardCRM />} />
-                
-                <Route path="/Vendeurs" element={<Vendeurs />} />
-                
-                <Route path="/LotsLMNP" element={<LotsLMNP />} />
-                
-                <Route path="/Acquereurs" element={<Acquereurs />} />
-                
-                <Route path="/PartenairesPage" element={<PartenairesPage />} />
-                
-                <Route path="/ResidencesGestion" element={<ResidencesGestion />} />
-                
-                <Route path="/NotairesPage" element={<NotairesPage />} />
-                
-                <Route path="/ContactsPage" element={<ContactsPage />} />
-                
-                <Route path="/SuiviDossier" element={<SuiviDossier />} />
-                
-                <Route path="/UsersManagement" element={<UsersManagement />} />
-                
-                <Route path="/Statistiques" element={<Statistiques />} />
-                
-                <Route path="/ExportXML" element={<ExportXML />} />
-                
-                <Route path="/WordPressPluginGuide" element={<WordPressPluginGuide />} />
-                
-                <Route path="/PartenairesDashboard" element={<PartenairesDashboard />} />
-                
-                <Route path="/LotsPartenaire" element={<LotsPartenaire />} />
-                
-                <Route path="/SuiviOptions" element={<SuiviOptions />} />
-                
-                <Route path="/MesAcquereurs" element={<MesAcquereurs />} />
-                
-                <Route path="/SuiviOptionsAdmin" element={<SuiviOptionsAdmin />} />
-                
-                <Route path="/ResidencesPartenaire" element={<ResidencesPartenaire />} />
-                
-                <Route path="/OnboardingPartenaire" element={<OnboardingPartenaire />} />
+                <Route path="/Clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
+
+                <Route path="/Reservations" element={<ProtectedRoute><Reservations /></ProtectedRoute>} />
+
+                <Route path="/DashboardCRM" element={<ProtectedRoute><DashboardCRM /></ProtectedRoute>} />
+
+                <Route path="/Vendeurs" element={<ProtectedRoute><Vendeurs /></ProtectedRoute>} />
+
+                <Route path="/LotsLMNP" element={<ProtectedRoute><LotsLMNP /></ProtectedRoute>} />
+
+                <Route path="/Acquereurs" element={<ProtectedRoute><Acquereurs /></ProtectedRoute>} />
+
+                <Route path="/PartenairesPage" element={<ProtectedRoute><PartenairesPage /></ProtectedRoute>} />
+
+                <Route path="/ResidencesGestion" element={<ProtectedRoute><ResidencesGestion /></ProtectedRoute>} />
+
+                <Route path="/NotairesPage" element={<ProtectedRoute><NotairesPage /></ProtectedRoute>} />
+
+                <Route path="/ContactsPage" element={<ProtectedRoute><ContactsPage /></ProtectedRoute>} />
+
+                <Route path="/SuiviDossier" element={<ProtectedRoute><SuiviDossier /></ProtectedRoute>} />
+
+                <Route path="/UsersManagement" element={<ProtectedRoute allowedRoles={['admin']}><UsersManagement /></ProtectedRoute>} />
+
+                <Route path="/Statistiques" element={<ProtectedRoute><Statistiques /></ProtectedRoute>} />
+
+                <Route path="/ExportXML" element={<ProtectedRoute><ExportXML /></ProtectedRoute>} />
+
+                <Route path="/WordPressPluginGuide" element={<ProtectedRoute><WordPressPluginGuide /></ProtectedRoute>} />
+
+                <Route path="/PartenairesDashboard" element={<ProtectedRoute allowedRoles={['partenaire']}><PartenairesDashboard /></ProtectedRoute>} />
+
+                <Route path="/LotsPartenaire" element={<ProtectedRoute allowedRoles={['partenaire']}><LotsPartenaire /></ProtectedRoute>} />
+
+                <Route path="/SuiviOptions" element={<ProtectedRoute><SuiviOptions /></ProtectedRoute>} />
+
+                <Route path="/MesAcquereurs" element={<ProtectedRoute><MesAcquereurs /></ProtectedRoute>} />
+
+                <Route path="/SuiviOptionsAdmin" element={<ProtectedRoute allowedRoles={['admin']}><SuiviOptionsAdmin /></ProtectedRoute>} />
+
+                <Route path="/ResidencesPartenaire" element={<ProtectedRoute allowedRoles={['partenaire']}><ResidencesPartenaire /></ProtectedRoute>} />
+
+                <Route path="/OnboardingPartenaire" element={<ProtectedRoute allowedRoles={['partenaire']}><OnboardingPartenaire /></ProtectedRoute>} />
                 
             </Routes>
         </Layout>
@@ -188,8 +215,10 @@ function PagesContent() {
 
 export default function Pages() {
     return (
-        <Router>
-            <PagesContent />
-        </Router>
+        <AuthProvider>
+            <Router>
+                <PagesContent />
+            </Router>
+        </AuthProvider>
     );
 }

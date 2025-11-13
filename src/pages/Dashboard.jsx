@@ -1,22 +1,23 @@
 import React, { useEffect } from "react";
-import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
-import { createPageUrl } from "@/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
-  // Rediriger vers DashboardCRM ou PartenairesPage selon le rôle
+  const { profile } = useAuth();
+  const navigate = useNavigate();
+
   useEffect(() => {
-    base44.auth.me().then(user => {
-      const userRole = user?.role_custom || 'admin';
+    if (profile) {
+      const userRole = profile.role_custom || 'admin';
       if (userRole === 'commercial') {
-        window.location.href = createPageUrl("PartenairesPage");
+        navigate('/PartenairesPage');
+      } else if (userRole === 'partenaire') {
+        navigate('/PartenairesDashboard');
       } else {
-        window.location.href = createPageUrl("DashboardCRM");
+        navigate('/DashboardCRM');
       }
-    }).catch(() => {
-      window.location.href = createPageUrl("DashboardCRM");
-    });
-  }, []);
+    }
+  }, [profile, navigate]);
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#F9FAFB]">
       <div className="text-center">

@@ -18,7 +18,8 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/contexts/AuthContext";
+import { Partenaire } from "@/api/entities";
 
 const getNavigationItems = (userRole) => {
   const adminItems = [
@@ -141,47 +142,29 @@ const getNavigationItems = (userRole) => {
 
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
-  const [user, setUser] = React.useState(null);
-  const [isLoadingUser, setIsLoadingUser] = React.useState(true);
-
-  React.useEffect(() => {
-    base44.auth.me()
-      .then(setUser)
-      .catch(() => {})
-      .finally(() => setIsLoadingUser(false));
-  }, []);
-
-  // Rediriger vers onboarding si nécessaire
-  React.useEffect(() => {
-    if (!isLoadingUser && user && currentPageName !== "OnboardingPartenaire") {
-      const userRole = user.role_custom || user.role || 'admin';
-      
-      // Si l'utilisateur est partenaire (ou pas admin) et n'a pas de partenaire_id
-      if (userRole === 'partenaire' && !user.partenaire_id) {
-        window.location.href = createPageUrl("OnboardingPartenaire");
-      }
-      // Si l'utilisateur n'a pas de rôle défini et n'est pas admin de base
-      else if (!user.role_custom && user.role !== 'admin' && !user.partenaire_id) {
-        window.location.href = createPageUrl("OnboardingPartenaire");
-      }
-    }
-  }, [user, currentPageName, isLoadingUser]);
-
-  const userRole = user?.role_custom || user?.role || 'admin';
-  const navigationItems = getNavigationItems(userRole);
-
+  const { user, profile, loading: isLoadingUser, signOut } = useAuth();
   const [partenaireInfo, setPartenaireInfo] = React.useState(null);
 
-  React.useEffect(() => {
-    if (user?.partenaire_id) {
-      base44.entities.Partenaire.filter({ id: user.partenaire_id })
-        .then(res => setPartenaireInfo(res[0]))
-        .catch(() => {});
-    }
-  }, [user?.partenaire_id]);
+  const userRole = profile?.role_custom || 'admin';
+  const navigationItems = getNavigationItems(userRole);
 
-  // Si on est sur la page d'onboarding, ne pas afficher le layout
-  if (currentPageName === "OnboardingPartenaire") {
+  React.useEffect(() => {
+    const fetchPartenaireInfo = async () => {
+      if (profile?.partenaire_id) {
+        try {
+          const data = await Partenaire.findMany({ where: { id: profile.partenaire_id } });
+          if (data && data.length > 0) {
+            setPartenaireInfo(data[0]);
+          }
+        } catch (error) {
+          console.error('Error fetching partenaire info:', error);
+        }
+      }
+    };
+    fetchPartenaireInfo();
+  }, [profile?.partenaire_id]);
+
+  if (location.pathname === '/login' || location.pathname === '/signup') {
     return children;
   }
 
@@ -276,18 +259,18 @@ export default function Layout({ children, currentPageName }) {
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 bg-gradient-to-br from-[#F59E0B] to-[#D97706] rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">
-                    {user?.full_name?.[0]?.toUpperCase() || 'U'}
+                    {profile?.prenom?.[0]?.toUpperCase() || 'U'}
                   </span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-[#1E40AF] text-sm truncate">
-                    {user?.full_name || 'Utilisateur'}
+                    {profile?.prenom && profile?.nom ? `${profile.prenom} ${profile.nom}` : 'Utilisateur'}
                   </p>
-                  <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+                  <p className="text-xs text-slate-500 truncate">{profile?.email || user?.email}</p>
                 </div>
               </div>
               <button
-                onClick={() => base44.auth.logout()}
+                onClick={() => signOut()}
                 className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
                 title="Déconnexion"
               >

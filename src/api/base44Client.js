@@ -1,8 +1,39 @@
-import { createClient } from '@base44/sdk';
-// import { getAccessToken } from '@base44/sdk/utils/auth-utils';
+import { supabase } from '@/lib/supabase';
+import * as entities from './entities';
 
-// Create a client with authentication required
-export const base44 = createClient({
-  appId: "69145453c61abf56db426be9", 
-  requiresAuth: true // Ensure authentication is required for all operations
-});
+export const base44 = {
+  entities: {
+    Residence: entities.Residence,
+    Lot: entities.Lot,
+    Client: entities.Client,
+    Reservation: entities.Reservation,
+    Vendeur: entities.Vendeur,
+    LotLMNP: entities.LotLMNP,
+    Acquereur: entities.Acquereur,
+    Notaire: entities.Notaire,
+    NotaireProgramme: entities.NotaireProgramme,
+    Partenaire: entities.Partenaire,
+    ResidenceGestion: entities.ResidenceGestion,
+    ContactResidence: entities.ContactResidence,
+    DossierVente: entities.DossierVente,
+    OptionLot: entities.OptionLot,
+  },
+  auth: {
+    me: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      return profile;
+    },
+    logout: async () => {
+      await supabase.auth.signOut();
+      window.location.href = '/login';
+    }
+  }
+};
