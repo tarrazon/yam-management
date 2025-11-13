@@ -16,9 +16,12 @@ import { autoCleanFormData } from "@/utils/formHelpers";
 
 export default function LotLMNPForm({ lot, residences, vendeurs, onSubmit, onCancel, isLoading }) {
   const [formData, setFormData] = useState(lot || {
+    numero: "",
     reference: "",
+    type: "",
     type_residence: "etudiante",
     residence_id: "",
+    residence_gestion_id: "",
     vendeur_id: "",
     partenaire_id: "",
     acquereur_id: "",
@@ -37,7 +40,7 @@ export default function LotLMNPForm({ lot, residences, vendeurs, onSubmit, onCan
     honoraires_acquereur_ht: "",
     tva_honoraires_acquereur: "",
     prix_fai: "",
-    statut: "disponible", // Default for new lots
+    statut: "disponible",
     description: "",
     rentabilite: "",
     loyer_mensuel: "",
@@ -131,12 +134,23 @@ export default function LotLMNPForm({ lot, residences, vendeurs, onSubmit, onCan
               <TabsContent value="general" className="space-y-6 mt-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="reference">Référence *</Label>
+                    <Label htmlFor="numero">Numéro de lot *</Label>
+                    <Input
+                      id="numero"
+                      value={formData.numero}
+                      onChange={(e) => setFormData({ ...formData, numero: e.target.value })}
+                      placeholder="ex: A101, B204..."
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="reference">Référence</Label>
                     <Input
                       id="reference"
                       value={formData.reference}
                       onChange={(e) => setFormData({ ...formData, reference: e.target.value })}
-                      required
+                      placeholder="Référence interne"
                     />
                   </div>
 
