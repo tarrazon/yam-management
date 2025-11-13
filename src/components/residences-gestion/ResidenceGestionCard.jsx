@@ -7,6 +7,7 @@ import { Building2, Edit, MapPin, Users, TrendingUp, Calendar, Eye, Image, FileT
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import StorageImage from "@/components/common/StorageImage";
 
 const statusColors = {
   active: "bg-green-100 text-green-800 border-green-200",
@@ -72,10 +73,15 @@ export default function ResidenceGestionCard({ residence, onEdit, onView, onDele
         {/* Image de couverture */}
         <div className="h-48 bg-gradient-to-br from-slate-200 to-slate-300 relative overflow-hidden">
           {firstPhoto ? (
-            <img 
-              src={firstPhoto} 
+            <StorageImage
+              src={firstPhoto}
               alt={residence.nom}
               className="w-full h-full object-cover"
+              fallback={
+                <div className="w-full h-full flex items-center justify-center">
+                  <Building2 className="w-16 h-16 text-slate-400" />
+                </div>
+              }
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">

@@ -7,6 +7,8 @@ import { X, Edit, Mail, Phone, MapPin, Building2, FileText, Download, Image, Tre
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useSignedUrls } from "@/hooks/useSignedUrl";
+import StorageImage from "@/components/common/StorageImage";
 
 const statusColors = {
   active: "bg-green-100 text-green-800 border-green-200",
@@ -45,7 +47,7 @@ const documentsConfig = [
 
 export default function ResidenceGestionDetail({ residence, lotsCount, onClose, onEdit, onDelete }) {
   const documents = residence.documents || {};
-  
+
   const groupedDocuments = documentsConfig.reduce((acc, doc) => {
     if (!acc[doc.category]) acc[doc.category] = [];
     acc[doc.category].push(doc);
@@ -53,6 +55,16 @@ export default function ResidenceGestionDetail({ residence, lotsCount, onClose, 
   }, {});
 
   const photos = documents.photos || [];
+
+  // Générer les URLs signées pour tous les documents
+  const { urls: signedDocUrls } = useSignedUrls(documents);
+
+  // Générer les URLs signées pour les photos
+  const photoUrlsObj = photos.reduce((acc, photo, index) => {
+    acc[`photo_${index}`] = photo;
+    return acc;
+  }, {});
+  const { urls: signedPhotoUrls } = useSignedUrls(photoUrlsObj);
 
   // Récupérer les contacts liés à cette résidence
   const { data: contacts = [] } = useQuery({
@@ -141,24 +153,33 @@ export default function ResidenceGestionDetail({ residence, lotsCount, onClose, 
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {photos.map((photo, index) => (
-                    <a
-                      key={index}
-                      href={photo}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="relative aspect-video rounded-lg overflow-hidden hover:opacity-80 transition-opacity group"
-                    >
-                      <img 
-                        src={photo} 
-                        alt={`Photo ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                        <Download className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </div>
-                    </a>
-                  ))}
+                  {photos.map((photo, index) => {
+                    const signedUrl = signedPhotoUrls[`photo_${index}`];
+                    return (
+                      <a
+                        key={index}
+                        href={signedUrl || '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="relative aspect-video rounded-lg overflow-hidden hover:opacity-80 transition-opacity group"
+                        onClick={(e) => !signedUrl && e.preventDefault()}
+                      >
+                        <StorageImage
+                          src={photo}
+                          alt={`Photo ${index + 1}`}
+                          className="w-full h-full object-cover"
+                          fallback={
+                            <div className="w-full h-full flex items-center justify-center bg-slate-100">
+                              <Image className="w-8 h-8 text-slate-400" />
+                            </div>
+                          }
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                          <Download className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </a>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -407,9 +428,9 @@ export default function ResidenceGestionDetail({ residence, lotsCount, onClose, 
                               {doc.label}
                             </span>
                           </div>
-                          {hasDocument && (
+                          {hasDocument && signedDocUrls[doc.key] && (
                             <a
-                              href={documents[doc.key]}
+                              href={signedDocUrls[doc.key]}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-green-600 hover:text-green-800"

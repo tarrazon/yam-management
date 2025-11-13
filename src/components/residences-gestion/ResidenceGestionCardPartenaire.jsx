@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Building2, MapPin, Eye, Home, FileText } from "lucide-react";
 import { motion } from "framer-motion";
+import StorageImage from "@/components/common/StorageImage";
 
 const statusColors = {
   active: "bg-green-100 text-green-800 border-green-200",
@@ -69,10 +70,15 @@ export default function ResidenceGestionCardPartenaire({ residence, lots, onView
         {/* Image de couverture */}
         <div className="h-48 bg-gradient-to-br from-slate-200 to-slate-300 relative overflow-hidden">
           {firstPhoto ? (
-            <img 
-              src={firstPhoto} 
+            <StorageImage
+              src={firstPhoto}
               alt={residence.nom}
               className="w-full h-full object-cover"
+              fallback={
+                <div className="w-full h-full flex items-center justify-center">
+                  <Building2 className="w-16 h-16 text-slate-400" />
+                </div>
+              }
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
