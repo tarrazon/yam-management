@@ -146,7 +146,7 @@ export default function LotsPartenaire() {
 
   // Filtrage
   const filteredLots = lots
-    .filter(l => l.statut === 'disponible' || (l.statut === 'sous_option' && mesOptions.some(o => o.lot_lmnp_id === l.id && o.statut === 'active')))
+    .filter(l => l.statut === 'disponible')
     .filter(l => !searchTerm || l.reference?.toLowerCase().includes(searchTerm.toLowerCase()) || l.residence_nom?.toLowerCase().includes(searchTerm.toLowerCase()))
     .filter(l => filters.fiscalite === "all" || l.statut_fiscal === filters.fiscalite)
     .filter(l => {

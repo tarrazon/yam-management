@@ -45,9 +45,9 @@ export default function ResidencesPartenaire() {
     en_liquidation: residences.filter(r => r.statut === 'en_liquidation').length,
   };
 
-  // Créer un objet pour les comptages de lots
+  // Créer un objet pour les comptages de lots disponibles uniquement
   const lotsCountByResidence = lots.reduce((acc, lot) => {
-    if (lot.residence_id) {
+    if (lot.residence_id && lot.statut === 'disponible') {
       acc[lot.residence_id] = (acc[lot.residence_id] || 0) + 1;
     }
     return acc;
