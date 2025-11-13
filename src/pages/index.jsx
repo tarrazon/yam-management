@@ -152,85 +152,91 @@ function _getCurrentPage(url) {
 function PagesContent() {
     const location = useLocation();
     const currentPage = _getCurrentPage(location.pathname);
-    
-    return (
-        <Layout currentPageName={currentPage}>
-            <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
 
-                <Route path="/" element={
+    return (
+        <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+
+            <Route path="/" element={
+                <Layout currentPageName={currentPage}>
                     <ProtectedRoute>
                         <HomeRedirect />
                     </ProtectedRoute>
-                } />
+                </Layout>
+            } />
 
-                <Route path="/Dashboard" element={
+            <Route path="/Dashboard" element={
+                <Layout currentPageName={currentPage}>
                     <ProtectedRoute>
                         <DashboardCRM />
                     </ProtectedRoute>
-                } />
-                
-                <Route path="/Residences" element={
+                </Layout>
+            } />
+
+            <Route path="/Residences" element={
+                <Layout currentPageName={currentPage}>
                     <ProtectedRoute>
                         <Residences />
                     </ProtectedRoute>
-                } />
-                
-                <Route path="/Lots" element={
+                </Layout>
+            } />
+
+            <Route path="/Lots" element={
+                <Layout currentPageName={currentPage}>
                     <ProtectedRoute>
                         <Lots />
                     </ProtectedRoute>
-                } />
-                
-                <Route path="/Clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
+                </Layout>
+            } />
 
-                <Route path="/Reservations" element={<ProtectedRoute><Reservations /></ProtectedRoute>} />
+            <Route path="/Clients" element={<Layout currentPageName={currentPage}><ProtectedRoute><Clients /></ProtectedRoute></Layout>} />
 
-                <Route path="/DashboardCRM" element={<ProtectedRoute><DashboardCRM /></ProtectedRoute>} />
+            <Route path="/Reservations" element={<Layout currentPageName={currentPage}><ProtectedRoute><Reservations /></ProtectedRoute></Layout>} />
 
-                <Route path="/Vendeurs" element={<ProtectedRoute><Vendeurs /></ProtectedRoute>} />
+            <Route path="/DashboardCRM" element={<Layout currentPageName={currentPage}><ProtectedRoute><DashboardCRM /></ProtectedRoute></Layout>} />
 
-                <Route path="/LotsLMNP" element={<ProtectedRoute><LotsLMNP /></ProtectedRoute>} />
+            <Route path="/Vendeurs" element={<Layout currentPageName={currentPage}><ProtectedRoute><Vendeurs /></ProtectedRoute></Layout>} />
 
-                <Route path="/Acquereurs" element={<ProtectedRoute><Acquereurs /></ProtectedRoute>} />
+            <Route path="/LotsLMNP" element={<Layout currentPageName={currentPage}><ProtectedRoute><LotsLMNP /></ProtectedRoute></Layout>} />
 
-                <Route path="/PartenairesPage" element={<ProtectedRoute><PartenairesPage /></ProtectedRoute>} />
+            <Route path="/Acquereurs" element={<Layout currentPageName={currentPage}><ProtectedRoute><Acquereurs /></ProtectedRoute></Layout>} />
 
-                <Route path="/ResidencesGestion" element={<ProtectedRoute><ResidencesGestion /></ProtectedRoute>} />
+            <Route path="/PartenairesPage" element={<Layout currentPageName={currentPage}><ProtectedRoute><PartenairesPage /></ProtectedRoute></Layout>} />
 
-                <Route path="/NotairesPage" element={<ProtectedRoute><NotairesPage /></ProtectedRoute>} />
+            <Route path="/ResidencesGestion" element={<Layout currentPageName={currentPage}><ProtectedRoute><ResidencesGestion /></ProtectedRoute></Layout>} />
 
-                <Route path="/ContactsPage" element={<ProtectedRoute><ContactsPage /></ProtectedRoute>} />
+            <Route path="/NotairesPage" element={<Layout currentPageName={currentPage}><ProtectedRoute><NotairesPage /></ProtectedRoute></Layout>} />
 
-                <Route path="/SuiviDossier" element={<ProtectedRoute><SuiviDossier /></ProtectedRoute>} />
+            <Route path="/ContactsPage" element={<Layout currentPageName={currentPage}><ProtectedRoute><ContactsPage /></ProtectedRoute></Layout>} />
 
-                <Route path="/UsersManagement" element={<ProtectedRoute allowedRoles={['admin']}><UsersManagement /></ProtectedRoute>} />
+            <Route path="/SuiviDossier" element={<Layout currentPageName={currentPage}><ProtectedRoute><SuiviDossier /></ProtectedRoute></Layout>} />
 
-                <Route path="/Statistiques" element={<ProtectedRoute><Statistiques /></ProtectedRoute>} />
+            <Route path="/UsersManagement" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['admin']}><UsersManagement /></ProtectedRoute></Layout>} />
 
-                <Route path="/ExportXML" element={<ProtectedRoute><ExportXML /></ProtectedRoute>} />
+            <Route path="/Statistiques" element={<Layout currentPageName={currentPage}><ProtectedRoute><Statistiques /></ProtectedRoute></Layout>} />
 
-                <Route path="/WordPressPluginGuide" element={<ProtectedRoute><WordPressPluginGuide /></ProtectedRoute>} />
+            <Route path="/ExportXML" element={<Layout currentPageName={currentPage}><ProtectedRoute><ExportXML /></ProtectedRoute></Layout>} />
 
-                <Route path="/PartenairesDashboard" element={<ProtectedRoute allowedRoles={['partenaire']}><PartenairesDashboard /></ProtectedRoute>} />
+            <Route path="/WordPressPluginGuide" element={<Layout currentPageName={currentPage}><ProtectedRoute><WordPressPluginGuide /></ProtectedRoute></Layout>} />
 
-                <Route path="/LotsPartenaire" element={<ProtectedRoute allowedRoles={['partenaire']}><LotsPartenaire /></ProtectedRoute>} />
+            <Route path="/PartenairesDashboard" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['partenaire']}><PartenairesDashboard /></ProtectedRoute></Layout>} />
 
-                <Route path="/SuiviOptions" element={<ProtectedRoute><SuiviOptions /></ProtectedRoute>} />
+            <Route path="/LotsPartenaire" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['partenaire']}><LotsPartenaire /></ProtectedRoute></Layout>} />
 
-                <Route path="/MesAcquereurs" element={<ProtectedRoute><MesAcquereurs /></ProtectedRoute>} />
+            <Route path="/SuiviOptions" element={<Layout currentPageName={currentPage}><ProtectedRoute><SuiviOptions /></ProtectedRoute></Layout>} />
 
-                <Route path="/SuiviOptionsAdmin" element={<ProtectedRoute allowedRoles={['admin']}><SuiviOptionsAdmin /></ProtectedRoute>} />
+            <Route path="/MesAcquereurs" element={<Layout currentPageName={currentPage}><ProtectedRoute><MesAcquereurs /></ProtectedRoute></Layout>} />
 
-                <Route path="/ResidencesPartenaire" element={<ProtectedRoute allowedRoles={['partenaire']}><ResidencesPartenaire /></ProtectedRoute>} />
+            <Route path="/SuiviOptionsAdmin" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['admin']}><SuiviOptionsAdmin /></ProtectedRoute></Layout>} />
 
-                <Route path="/OnboardingPartenaire" element={<ProtectedRoute allowedRoles={['partenaire']}><OnboardingPartenaire /></ProtectedRoute>} />
-                
-            </Routes>
-        </Layout>
+            <Route path="/ResidencesPartenaire" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['partenaire']}><ResidencesPartenaire /></ProtectedRoute></Layout>} />
+
+            <Route path="/OnboardingPartenaire" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['partenaire']}><OnboardingPartenaire /></ProtectedRoute></Layout>} />
+
+        </Routes>
     );
 }
 
