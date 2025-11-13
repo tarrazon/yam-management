@@ -44,7 +44,7 @@ export default function PartenairesDashboard() {
     if (mesOptions.length > 0) {
       const now = new Date();
       mesOptions.forEach(option => {
-        if (option.statut === 'active' && new Date(option.date_fin) < now) {
+        if (option.statut === 'active' && new Date(option.date_expiration) < now) {
           // Marquer l'option comme expirée
           base44.entities.OptionLot.update(option.id, { statut: 'expiree' });
           // Remettre le lot en disponible
@@ -54,7 +54,11 @@ export default function PartenairesDashboard() {
     }
   }, [mesOptions]);
 
-  const optionsActives = mesOptions.filter(o => o.statut === 'active');
+  // Options actives avec lots sous_option uniquement
+  const optionsActives = mesOptions.filter(o => {
+    const lot = lots.find(l => l.id === o.lot_lmnp_id);
+    return o.statut === 'active' && lot?.statut === 'sous_option';
+  });
   const optionsMax = currentUser?.options_max || 3;
   const optionsRestantes = optionsMax - optionsActives.length;
 
@@ -262,8 +266,8 @@ export default function PartenairesDashboard() {
               <div className="space-y-3">
                 {optionsActives.map(option => {
                   const lot = lots.find(l => l.id === option.lot_lmnp_id);
-                  const timeRemaining = getTimeRemaining(option.date_fin);
-                  const isExpiringSoon = new Date(option.date_fin) - new Date() < 24 * 60 * 60 * 1000;
+                  const timeRemaining = getTimeRemaining(option.date_expiration);
+                  const isExpiringSoon = new Date(option.date_expiration) - new Date() < 24 * 60 * 60 * 1000;
                   const isMyOption = option.user_email === currentUser?.email;
                   
                   return (

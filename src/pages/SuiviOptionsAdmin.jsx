@@ -46,7 +46,11 @@ export default function SuiviOptionsAdmin() {
     await updateLotMutation.mutateAsync({ id: lotId, data: { statut: newStatut } });
   };
 
-  const optionsActives = toutesOptions.filter(o => o.statut === 'active');
+  // Options actives : exclure les lots vendus
+  const optionsActives = toutesOptions.filter(o => {
+    const lot = lots.find(l => l.id === o.lot_lmnp_id);
+    return o.statut === 'active' && lot?.statut !== 'vendu';
+  });
   const optionsExpirees = toutesOptions.filter(o => o.statut === 'expiree');
   const optionsConverties = toutesOptions.filter(o => o.statut === 'convertie');
   const optionsAnnulees = toutesOptions.filter(o => o.statut === 'annulee');

@@ -49,11 +49,11 @@ export default function ResidenceGestionCard({ residence, onEdit, onView, onDele
 
   const lotsCount = lots.filter(lot => lot.residence_id === residence.id).length;
 
-  // Calculer le nombre de documents
-  const documentsCount = residence.documents ? 
+  // Calculer le nombre de documents (sans les photos)
+  const documentsCount = residence.documents ?
     Object.entries(residence.documents).reduce((count, [key, value]) => {
       if (key === 'photos') {
-        return count + (Array.isArray(value) ? value.filter(v => v).length : 0);
+        return count; // Ignorer les photos
       } else if (Array.isArray(value)) {
         return count + value.filter(v => v).length;
       } else if (value) {
