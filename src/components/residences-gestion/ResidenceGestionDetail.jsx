@@ -385,30 +385,44 @@ export default function ResidenceGestionDetail({ residence, lotsCount, onClose, 
                         : documents[doc.key];
                       
                       if (doc.multiple && documents[doc.key]?.length > 0) {
+                        const signedUrlsArray = signedDocUrls[doc.key] || [];
                         return (
                           <div key={doc.key} className="space-y-1">
                             <p className="text-sm font-medium text-slate-700">{doc.label}</p>
-                            {documents[doc.key].map((url, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center justify-between p-3 rounded-lg bg-green-50 border border-green-200 ml-4"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <FileText className="w-4 h-4 text-green-600" />
-                                  <span className="text-sm text-green-900 font-medium">
-                                    {doc.label} {index + 1}
-                                  </span>
-                                </div>
-                                <a
-                                  href={url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-green-600 hover:text-green-800"
+                            {documents[doc.key].map((url, index) => {
+                              const signedUrl = signedUrlsArray[index];
+                              return (
+                                <div
+                                  key={index}
+                                  className="flex items-center justify-between p-3 rounded-lg bg-green-50 border border-green-200 ml-4"
                                 >
-                                  <Download className="w-4 h-4" />
-                                </a>
-                              </div>
-                            ))}
+                                  <div className="flex items-center gap-3">
+                                    <FileText className="w-4 h-4 text-green-600" />
+                                    <span className="text-sm text-green-900 font-medium">
+                                      {doc.label} {index + 1}
+                                    </span>
+                                  </div>
+                                  {loadingDocUrls ? (
+                                    <div className="text-slate-400">
+                                      <Download className="w-4 h-4 animate-pulse" />
+                                    </div>
+                                  ) : signedUrl ? (
+                                    <a
+                                      href={signedUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-green-600 hover:text-green-800"
+                                    >
+                                      <Download className="w-4 h-4" />
+                                    </a>
+                                  ) : (
+                                    <div className="text-slate-400" title="Erreur de chargement">
+                                      <Download className="w-4 h-4" />
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
                         );
                       }

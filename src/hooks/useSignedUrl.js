@@ -61,7 +61,14 @@ export function useSignedUrls(filePaths) {
         const urlMap = {};
         await Promise.all(
           Object.entries(filePaths).map(async ([key, path]) => {
-            if (path) {
+            // Handle arrays (multiple files)
+            if (Array.isArray(path)) {
+              const signedUrls = await Promise.all(
+                path.map(p => p ? getSignedUrl(p) : Promise.resolve(null))
+              );
+              urlMap[key] = signedUrls;
+            } else if (path) {
+              // Handle single file
               const signedUrl = await getSignedUrl(path);
               urlMap[key] = signedUrl;
             }
