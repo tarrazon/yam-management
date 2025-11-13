@@ -7,6 +7,7 @@ import { Home, Edit, MapPin, Maximize2, Euro, TrendingUp, Eye, Building2, Percen
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import StorageImage from "@/components/common/StorageImage";
 
 const statusColors = {
   disponible: "bg-green-100 text-green-800 border-green-200",
@@ -64,19 +65,42 @@ export default function LotLMNPCard({ lot, onEdit, onView, onDelete, onPoserOpti
         {/* Image avec overlay résidence */}
         <div className="h-40 bg-gradient-to-br from-slate-200 to-slate-300 relative overflow-hidden">
           {firstPhoto ? (
-            <img 
-              src={firstPhoto} 
-              alt={`Lot ${lot.reference}`}
+            <StorageImage
+              src={firstPhoto}
+              alt={`Lot ${lot.numero || lot.reference}`}
               className="w-full h-full object-cover"
+              fallback={
+                residencePhoto ? (
+                  <StorageImage
+                    src={residencePhoto}
+                    alt={residence?.nom || 'Résidence'}
+                    className="w-full h-full object-cover opacity-50"
+                    fallback={
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300">
+                        <Home className="w-16 h-16 text-slate-400" />
+                      </div>
+                    }
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300">
+                    <Home className="w-16 h-16 text-slate-400" />
+                  </div>
+                )
+              }
             />
           ) : residencePhoto ? (
-            <img 
-              src={residencePhoto} 
-              alt={residence.nom}
-              className="w-full h-full object-cover opacity-50"
+            <StorageImage
+              src={residencePhoto}
+              alt={residence?.nom || 'Résidence'}
+              className="w-full h-full object-cover opacity-70"
+              fallback={
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300">
+                  <Home className="w-16 h-16 text-slate-400" />
+                </div>
+              }
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300">
               <Home className="w-16 h-16 text-slate-400" />
             </div>
           )}

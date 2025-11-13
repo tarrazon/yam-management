@@ -45,18 +45,18 @@ export default function LotLMNPListItem({ lot, onEdit, onView, onDelete, onPoser
       className="bg-white rounded-lg shadow hover:shadow-lg transition-all p-4 border border-slate-100"
     >
       <div className="flex items-center gap-4">
-        {/* Miniature de la résidence */}
+        {/* Miniature du lot ou de la résidence */}
         <div className="w-20 h-20 rounded-lg overflow-hidden bg-slate-200 flex-shrink-0">
-          {residencePhoto ? (
+          {firstPhoto ? (
             <StorageImage
-              src={residencePhoto}
-              alt={lot.residence_nom}
+              src={firstPhoto}
+              alt={`Lot ${lot.numero || lot.reference}`}
               className="w-full h-full object-cover"
-              fallback={firstPhoto ? (
+              fallback={residencePhoto ? (
                 <StorageImage
-                  src={firstPhoto}
-                  alt={`Lot ${lot.reference}`}
-                  className="w-full h-full object-cover"
+                  src={residencePhoto}
+                  alt={lot.residence_nom || 'Résidence'}
+                  className="w-full h-full object-cover opacity-70"
                   fallback={
                     <div className="w-full h-full flex items-center justify-center">
                       <Building2 className="w-8 h-8 text-slate-400" />
@@ -69,11 +69,11 @@ export default function LotLMNPListItem({ lot, onEdit, onView, onDelete, onPoser
                 </div>
               )}
             />
-          ) : firstPhoto ? (
+          ) : residencePhoto ? (
             <StorageImage
-              src={firstPhoto}
-              alt={`Lot ${lot.reference}`}
-              className="w-full h-full object-cover"
+              src={residencePhoto}
+              alt={lot.residence_nom || 'Résidence'}
+              className="w-full h-full object-cover opacity-70"
               fallback={
                 <div className="w-full h-full flex items-center justify-center">
                   <Building2 className="w-8 h-8 text-slate-400" />
