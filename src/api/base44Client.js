@@ -17,6 +17,8 @@ export const base44 = {
     ContactResidence: entities.ContactResidence,
     DossierVente: entities.DossierVente,
     OptionLot: entities.OptionLot,
+    Profile: entities.Profile,
+    User: entities.User,
   },
   auth: {
     me: async () => {
