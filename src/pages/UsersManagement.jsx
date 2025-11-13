@@ -36,12 +36,21 @@ export default function UsersManagement() {
 
   console.log('UsersManagement - currentUser from AuthContext:', currentUser);
 
-  const { data: users = [], isLoading } = useQuery({
+  const { data: users = [], isLoading, error: usersError } = useQuery({
     queryKey: ['users'],
-    queryFn: () => base44.entities.User.list('-created_at'),
+    queryFn: async () => {
+      try {
+        const result = await base44.entities.User.list('-created_at');
+        console.log('User.list() result:', result);
+        return result;
+      } catch (err) {
+        console.error('Error loading users:', err);
+        throw err;
+      }
+    },
   });
 
-  console.log('UsersManagement - loaded users:', users, 'isLoading:', isLoading);
+  console.log('UsersManagement - loaded users:', users, 'isLoading:', isLoading, 'error:', usersError);
 
   const { data: partenaires = [] } = useQuery({
     queryKey: ['partenaires_list'],
@@ -259,7 +268,12 @@ export default function UsersManagement() {
                 <CardTitle>Utilisateurs du système</CardTitle>
               </CardHeader>
               <CardContent>
-                {isLoading ? (
+                {usersError ? (
+                  <div className="text-center py-12">
+                    <p className="text-red-500 mb-2">Erreur lors du chargement des utilisateurs</p>
+                    <p className="text-sm text-slate-500">{usersError.message}</p>
+                  </div>
+                ) : isLoading ? (
                   <div className="space-y-3">
                     {[1, 2, 3].map((i) => (
                       <div key={i} className="h-20 bg-slate-100 rounded-lg animate-pulse" />
@@ -268,6 +282,7 @@ export default function UsersManagement() {
                 ) : filteredUsers.length === 0 ? (
                   <div className="text-center py-12">
                     <p className="text-slate-400">Aucun utilisateur trouvé</p>
+                    <p className="text-xs text-slate-400 mt-2">Total users: {users.length}</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
