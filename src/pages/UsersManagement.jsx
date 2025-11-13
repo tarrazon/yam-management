@@ -189,7 +189,7 @@ L'équipe Yam Management`.trim();
   };
 
   // Vérifier que l'utilisateur actuel est admin
-  if (currentUser?.role !== 'admin') {
+  if (!currentUser || currentUser?.role_custom !== 'admin') {
     return (
       <div className="p-6 md:p-8 bg-[#F9FAFB] min-h-screen">
         <div className="max-w-7xl mx-auto">
