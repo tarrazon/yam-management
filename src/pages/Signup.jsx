@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Building2, Loader2 } from 'lucide-react';
+import { KeyRound, Loader2 } from 'lucide-react';
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -65,13 +65,13 @@ export default function Signup() {
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center shadow-lg">
-              <Building2 className="w-8 h-8 text-white" />
+            <div className="w-16 h-16 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-2xl flex items-center justify-center shadow-lg">
+              <KeyRound className="w-8 h-8 text-white" />
             </div>
           </div>
           <CardTitle className="text-2xl font-bold">Créer un compte</CardTitle>
           <CardDescription>
-            Rejoignez Prestige Immo
+            Rejoignez Yam Management
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
