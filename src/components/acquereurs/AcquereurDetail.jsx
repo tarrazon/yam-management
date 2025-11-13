@@ -3,8 +3,10 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { X, Edit, Mail, Phone, MapPin, User, Euro, Building2, FileText, Download, Trash2 } from "lucide-react";
+import { X, Edit, Mail, Phone, MapPin, User, Euro, Building2, FileText, Download, Trash2, Users } from "lucide-react";
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
 
 const statusColors = {
   prospect: "bg-blue-100 text-blue-800 border-blue-200",
@@ -34,6 +36,13 @@ const documentsConfig = [
 
 export default function AcquereurDetail({ acquereur, onClose, onEdit, onDelete }) {
   const documents = acquereur.documents || {};
+
+  // Récupérer le partenaire associé
+  const { data: partenaire } = useQuery({
+    queryKey: ['partenaire', acquereur.partenaire_id],
+    queryFn: () => base44.entities.Partenaire.findOne(acquereur.partenaire_id),
+    enabled: !!acquereur.partenaire_id,
+  });
   
   const groupedDocuments = documentsConfig.reduce((acc, doc) => {
     if (!acc[doc.category]) acc[doc.category] = [];
@@ -106,6 +115,37 @@ export default function AcquereurDetail({ acquereur, onClose, onEdit, onDelete }
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* Partenaire apporteur */}
+          {partenaire && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Users className="w-5 h-5 text-[#F59E0B]" />
+                  Partenaire apporteur
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="font-semibold text-slate-700">{partenaire.nom || partenaire.nom_societe}</p>
+                {partenaire.email && (
+                  <div className="flex items-center gap-3 mt-2">
+                    <Mail className="w-4 h-4 text-slate-400" />
+                    <a href={`mailto:${partenaire.email}`} className="text-slate-700 hover:text-[#1E40AF]">
+                      {partenaire.email}
+                    </a>
+                  </div>
+                )}
+                {partenaire.telephone && (
+                  <div className="flex items-center gap-3 mt-2">
+                    <Phone className="w-4 h-4 text-slate-400" />
+                    <a href={`tel:${partenaire.telephone}`} className="text-slate-700 hover:text-[#1E40AF]">
+                      {partenaire.telephone}
+                    </a>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Informations de contact */}
           <Card>
             <CardHeader>

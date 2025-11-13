@@ -72,7 +72,7 @@ export default function ResidenceGestionDetail({ residence, lotsCount, onClose, 
     queryFn: () => base44.entities.ContactResidence.list(),
   });
 
-  const residenceContacts = contacts.filter(c => c.residence_id === residence.id);
+  const residenceContacts = contacts.filter(c => c.residence_gestion_id === residence.id);
 
   return (
     <motion.div

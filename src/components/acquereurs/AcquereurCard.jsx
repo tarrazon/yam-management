@@ -3,8 +3,10 @@ import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { User, Edit, Mail, Phone, Euro, TrendingUp, Eye, FileCheck, Trash2 } from "lucide-react";
+import { User, Edit, Mail, Phone, Euro, TrendingUp, Eye, FileCheck, Trash2, Users } from "lucide-react";
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
 
 const statusColors = {
   prospect: "bg-blue-100 text-blue-800 border-blue-200",
@@ -40,6 +42,13 @@ export default function AcquereurCard({ acquereur, onEdit, onView, onDelete }) {
   const documents = acquereur.documents || {};
   const documentsCount = Object.values(documents).filter(doc => doc && doc !== "").length;
   const totalDocuments = 5;
+
+  // Récupérer le partenaire associé
+  const { data: partenaire } = useQuery({
+    queryKey: ['partenaire', acquereur.partenaire_id],
+    queryFn: () => base44.entities.Partenaire.findOne(acquereur.partenaire_id),
+    enabled: !!acquereur.partenaire_id,
+  });
 
   return (
     <motion.div
@@ -138,6 +147,16 @@ export default function AcquereurCard({ acquereur, onEdit, onView, onDelete }) {
                   {acquereur.budget.toLocaleString('fr-FR')} €
                 </p>
               )}
+            </div>
+          )}
+
+          {partenaire && (
+            <div className="pt-3 border-t border-slate-100">
+              <div className="flex items-center gap-2 mb-2">
+                <Users className="w-4 h-4 text-[#F59E0B]" />
+                <span className="text-sm font-semibold text-slate-700">Partenaire</span>
+              </div>
+              <p className="text-sm text-slate-600">{partenaire.nom || partenaire.nom_societe}</p>
             </div>
           )}
 

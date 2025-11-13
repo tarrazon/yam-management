@@ -39,11 +39,11 @@ export default function MesAcquereurs() {
   });
 
   const handleSubmit = (data) => {
-    const partenaire = partenaires.find(p => p.id === data.partenaire_id);
+    const partenaire = partenaires.find(p => p.id === currentUser?.partenaire_id);
     const enrichedData = {
       ...data,
       partenaire_id: currentUser?.partenaire_id,
-      partenaire_nom: partenaire?.nom || "",
+      partenaire_nom: partenaire?.nom || partenaire?.nom_societe || "",
     };
     createMutation.mutate(enrichedData);
   };

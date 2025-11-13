@@ -96,7 +96,7 @@ export default function Acquereurs() {
     const partenaire = partenaires.find(p => p.id === data.partenaire_id);
     const enrichedData = {
       ...data,
-      partenaire_nom: partenaire?.nom || "",
+      partenaire_nom: partenaire?.nom || partenaire?.nom_societe || "",
     };
 
     if (editingAcquereur) {
