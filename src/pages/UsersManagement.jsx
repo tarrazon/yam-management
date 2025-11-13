@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,7 @@ import { Users, Shield, UserCheck, Search, Edit, Handshake, Save, X, Mail, Send,
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function UsersManagement() {
+  const { profile: currentUser } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [editingUser, setEditingUser] = useState(null);
   const [editFormData, setEditFormData] = useState(null);
@@ -32,10 +34,7 @@ export default function UsersManagement() {
   const [isSending, setIsSending] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: currentUser } = useQuery({
-    queryKey: ['current_user'],
-    queryFn: () => base44.auth.me(),
-  });
+  console.log('UsersManagement - currentUser from AuthContext:', currentUser);
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['users'],
