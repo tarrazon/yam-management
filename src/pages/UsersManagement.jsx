@@ -41,6 +41,8 @@ export default function UsersManagement() {
     queryFn: () => base44.entities.User.list('-created_at'),
   });
 
+  console.log('UsersManagement - loaded users:', users, 'isLoading:', isLoading);
+
   const { data: partenaires = [] } = useQuery({
     queryKey: ['partenaires_list'],
     queryFn: () => base44.entities.Partenaire.list(),
@@ -133,9 +135,10 @@ export default function UsersManagement() {
     }
   };
 
-  const filteredUsers = users.filter(u => 
-    !searchTerm || 
-    u.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredUsers = users.filter(u =>
+    !searchTerm ||
+    u.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    u.prenom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     u.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -297,7 +300,7 @@ export default function UsersManagement() {
                                 )}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="font-semibold text-slate-700 truncate">{user.full_name}</p>
+                                <p className="font-semibold text-slate-700 truncate">{user.prenom} {user.nom}</p>
                                 <p className="text-sm text-slate-500 truncate">{user.email}</p>
                                 {userRole === 'partenaire' && partenaireNom && (
                                   <p className="text-xs text-amber-600 truncate">→ {partenaireNom}</p>
@@ -626,7 +629,7 @@ export default function UsersManagement() {
             {deletingUser && (
               <div className="py-4">
                 <div className="p-4 bg-red-50 rounded-lg border border-red-200">
-                  <p className="font-semibold text-slate-700 mb-1">{deletingUser.full_name}</p>
+                  <p className="font-semibold text-slate-700 mb-1">{deletingUser.prenom} {deletingUser.nom}</p>
                   <p className="text-sm text-slate-600">{deletingUser.email}</p>
                   <p className="text-xs text-red-600 mt-3">
                     ⚠️ Cette action est irréversible. L'utilisateur perdra immédiatement l'accès à la plateforme.
