@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,9 +42,69 @@ export default function SuiviOptionsAdmin() {
     },
   });
 
+  const updateOptionMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.OptionLot.update(id, data),
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ['toutes_options_admin'] });
+      queryClient.refetchQueries({ queryKey: ['lots_suivi_admin'] });
+    },
+  });
+
   const handleChangeLotStatut = async (lotId, newStatut) => {
+    // Si le lot devient disponible, annuler l'option active associée
+    if (newStatut === 'disponible') {
+      const optionActive = toutesOptions.find(
+        o => o.lot_lmnp_id === lotId && o.statut === 'active'
+      );
+      if (optionActive) {
+        await updateOptionMutation.mutateAsync({
+          id: optionActive.id,
+          data: { statut: 'annulee' }
+        });
+      }
+    }
     await updateLotMutation.mutateAsync({ id: lotId, data: { statut: newStatut } });
   };
+
+  // Vérifier et marquer automatiquement les options expirées
+  useEffect(() => {
+    const checkExpiredOptions = async () => {
+      const now = new Date();
+
+      for (const option of toutesOptions) {
+        if (option.statut === 'active' && new Date(option.date_expiration) < now) {
+          try {
+            // Marquer l'option comme expirée
+            await updateOptionMutation.mutateAsync({
+              id: option.id,
+              data: { statut: 'expiree' }
+            });
+
+            // Remettre le lot en disponible
+            const lot = lots.find(l => l.id === option.lot_lmnp_id);
+            if (lot && lot.statut === 'sous_option') {
+              await updateLotMutation.mutateAsync({
+                id: lot.id,
+                data: {
+                  statut: 'disponible',
+                  partenaire_id: null,
+                  partenaire_nom: '',
+                  acquereur_id: null,
+                  acquereur_nom: ''
+                }
+              });
+            }
+          } catch (error) {
+            console.error('Erreur lors de la mise à jour de l\'option expirée:', error);
+          }
+        }
+      }
+    };
+
+    if (toutesOptions.length > 0 && lots.length > 0) {
+      checkExpiredOptions();
+    }
+  }, [toutesOptions, lots]);
 
   // Options actives : exclure les lots vendus
   const optionsActives = toutesOptions.filter(o => {

@@ -39,20 +39,60 @@ export default function PartenairesDashboard() {
     enabled: !!currentUser?.partenaire_id,
   });
 
+  const updateOptionMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.OptionLot.update(id, data),
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ['mes_options'] });
+      queryClient.refetchQueries({ queryKey: ['lots_partenaire'] });
+    },
+  });
+
+  const updateLotMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.LotLMNP.update(id, data),
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ['lots_partenaire'] });
+    },
+  });
+
   // Vérifier les options expirées et mettre à jour
   useEffect(() => {
-    if (mesOptions.length > 0) {
+    const checkExpiredOptions = async () => {
       const now = new Date();
-      mesOptions.forEach(option => {
+
+      for (const option of mesOptions) {
         if (option.statut === 'active' && new Date(option.date_expiration) < now) {
-          // Marquer l'option comme expirée
-          base44.entities.OptionLot.update(option.id, { statut: 'expiree' });
-          // Remettre le lot en disponible
-          base44.entities.LotLMNP.update(option.lot_lmnp_id, { statut: 'disponible' });
+          try {
+            // Marquer l'option comme expirée
+            await updateOptionMutation.mutateAsync({
+              id: option.id,
+              data: { statut: 'expiree' }
+            });
+
+            // Remettre le lot en disponible
+            const lot = lots.find(l => l.id === option.lot_lmnp_id);
+            if (lot && lot.statut === 'sous_option') {
+              await updateLotMutation.mutateAsync({
+                id: lot.id,
+                data: {
+                  statut: 'disponible',
+                  partenaire_id: null,
+                  partenaire_nom: '',
+                  acquereur_id: null,
+                  acquereur_nom: ''
+                }
+              });
+            }
+          } catch (error) {
+            console.error('Erreur lors de la mise à jour de l\'option expirée:', error);
+          }
         }
-      });
+      }
+    };
+
+    if (mesOptions.length > 0 && lots.length > 0) {
+      checkExpiredOptions();
     }
-  }, [mesOptions]);
+  }, [mesOptions, lots]);
 
   // Options actives avec lots sous_option uniquement
   const optionsActives = mesOptions.filter(o => {
