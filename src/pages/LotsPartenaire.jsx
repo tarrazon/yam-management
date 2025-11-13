@@ -106,14 +106,14 @@ export default function LotsPartenaire() {
     }
 
     const optionsActives = mesOptions.filter(o => o.statut === 'active').length;
-    const optionsMax = currentUser?.options_max || 3;
+    const optionsMax = partenaire?.options_max || 3;
 
     if (optionsActives >= optionsMax) {
       alert(`Vous avez atteint votre limite de ${optionsMax} options simultanées.`);
       return;
     }
 
-    const dureeJours = currentUser?.duree_option_jours || 5;
+    const dureeJours = partenaire?.duree_option_jours || 5;
     const dateDebut = new Date();
     const dateFin = new Date(dateDebut.getTime() + dureeJours * 24 * 60 * 60 * 1000);
 
@@ -122,7 +122,11 @@ export default function LotsPartenaire() {
     const optionData = {
       lot_lmnp_id: lot.id,
       partenaire_id: currentUser.partenaire_id,
+      partenaire_nom: partenaire?.nom || '',
       acquereur_id: acquereurId,
+      acquereur_nom: acquereur ? `${acquereur.prenom} ${acquereur.nom}` : '',
+      lot_reference: lot.reference || '',
+      residence_nom: lot.residence_nom || '',
       date_option: dateDebut.toISOString().split('T')[0],
       date_expiration: dateFin.toISOString().split('T')[0],
       statut: 'active',

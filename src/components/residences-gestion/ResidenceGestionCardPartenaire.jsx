@@ -44,9 +44,8 @@ export default function ResidenceGestionCardPartenaire({ residence, lots, onView
     lot.residence_id === residence.id && lot.statut === 'disponible'
   ).length;
 
-  // Compter les documents
+  // Compter les documents (sans les photos)
   const documentsCount = [
-    ...(residence.documents?.photos || []),
     residence.documents?.presentation,
     residence.documents?.fiche_synthetique,
     residence.documents?.attestation_immatriculation,

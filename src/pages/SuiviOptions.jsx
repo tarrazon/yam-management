@@ -57,10 +57,15 @@ export default function SuiviOptions() {
 
   const renderOptionCard = (option) => {
     const lot = filteredLots.find(l => l.id === option.lot_lmnp_id);
-    if (!lot) return null;
-    
+
     const isExpiringSoon = option.statut === 'active' && new Date(option.date_expiration) - new Date() < 24 * 60 * 60 * 1000;
     const isMyOption = option.user_email === currentUser?.email;
+
+    // Utiliser les informations de l'option (snapshot au moment de la création) ou du lot actuel
+    const lotReference = option.lot_reference || lot?.reference || 'N/A';
+    const residenceNom = option.residence_nom || lot?.residence_nom || 'N/A';
+    const acquereurNom = option.acquereur_nom || lot?.acquereur_nom || 'Non spécifié';
+    const lotStatut = lot?.statut || 'inconnu';
 
     const statusConfig = {
       active: { icon: Clock, color: "bg-green-100 text-green-800", label: "Active" },
@@ -97,14 +102,14 @@ export default function SuiviOptions() {
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <p className="font-semibold text-[#1E40AF] text-lg">
-                  Lot {lot.reference}
+                  Lot {lotReference}
                 </p>
               </div>
-              <p className="text-sm text-slate-600 mb-3">{lot?.residence_nom}</p>
-              
+              <p className="text-sm text-slate-600 mb-3">{residenceNom}</p>
+
               {/* Statut du lot en gros */}
-              <Badge className={`${lotStatusColors[lot.statut]} text-base px-3 py-1.5 font-semibold`}>
-                {lotStatusLabels[lot.statut]}
+              <Badge className={`${lotStatusColors[lotStatut]} text-base px-3 py-1.5 font-semibold`}>
+                {lotStatusLabels[lotStatut]}
               </Badge>
             </div>
             <Badge className={config.color}>
@@ -116,7 +121,7 @@ export default function SuiviOptions() {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-slate-500">Acquéreur:</span>
-              <span className="font-medium">{lot.acquereur_nom || "Non spécifié"}</span>
+              <span className="font-medium">{acquereurNom}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500">Date début:</span>

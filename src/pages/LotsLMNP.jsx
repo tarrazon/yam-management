@@ -172,7 +172,11 @@ export default function LotsLMNP() {
     const optionData = {
       lot_lmnp_id: lotForOption.id,
       partenaire_id: formData.partenaire_id,
+      partenaire_nom: partenaire?.nom || '',
       acquereur_id: formData.acquereur_id || null,
+      acquereur_nom: acquereur ? `${acquereur.prenom} ${acquereur.nom}` : '',
+      lot_reference: lotForOption.reference || '',
+      residence_nom: lotForOption.residence_nom || '',
       date_option: dateDebut.toISOString().split('T')[0],
       date_expiration: dateFin.toISOString().split('T')[0],
       statut: 'active',
