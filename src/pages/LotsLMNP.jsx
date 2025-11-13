@@ -93,7 +93,7 @@ export default function LotsLMNP() {
     mutationFn: async ({ id, data }) => {
       // Si le statut passe à "disponible", annuler toutes les options actives sur ce lot
       if (data.statut === 'disponible') {
-        const optionsActives = allOptions.filter(o => o.lot_id === id && o.statut === 'active');
+        const optionsActives = allOptions.filter(o => o.lot_lmnp_id === id && o.statut === 'active');
         for (const option of optionsActives) {
           await base44.entities.OptionLot.update(option.id, { statut: 'annulee' });
         }
@@ -117,11 +117,11 @@ export default function LotsLMNP() {
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
       // Annuler toutes les options actives sur ce lot
-      const optionsActives = allOptions.filter(o => o.lot_id === id && o.statut === 'active');
+      const optionsActives = allOptions.filter(o => o.lot_lmnp_id === id && o.statut === 'active');
       for (const option of optionsActives) {
         await base44.entities.OptionLot.update(option.id, { statut: 'annulee' });
       }
-      
+
       // Supprimer le lot
       return base44.entities.LotLMNP.delete(id);
     },
@@ -159,19 +159,12 @@ export default function LotsLMNP() {
     const dateFin = new Date(dateDebut.getTime() + formData.duree_jours * 24 * 60 * 60 * 1000);
 
     const optionData = {
-      lot_id: lotForOption.id,
-      lot_reference: lotForOption.reference,
+      lot_lmnp_id: lotForOption.id,
       partenaire_id: formData.partenaire_id,
-      partenaire_nom: partenaire?.nom || "",
-      user_email: currentUser?.email || "",
-      pose_par: "admin",
-      pose_par_nom: currentUser?.full_name || "Admin",
-      date_debut: dateDebut.toISOString(),
-      date_fin: dateFin.toISOString(),
-      duree_jours: formData.duree_jours,
-      statut: 'active',
       acquereur_id: formData.acquereur_id || null,
-      acquereur_nom: acquereur ? `${acquereur.prenom} ${acquereur.nom}` : "",
+      date_option: dateDebut.toISOString().split('T')[0],
+      date_expiration: dateFin.toISOString().split('T')[0],
+      statut: 'active',
     };
 
     try {
@@ -313,7 +306,7 @@ export default function LotsLMNP() {
   // Récupérer les villes uniques
   const villes = [...new Set(residences.map(r => r.ville).filter(Boolean))];
 
-  const optionsForDeletion = deletingLot ? allOptions.filter(o => o.lot_id === deletingLot.id && o.statut === 'active').length : 0;
+  const optionsForDeletion = deletingLot ? allOptions.filter(o => o.lot_lmnp_id === deletingLot.id && o.statut === 'active').length : 0;
 
   return (
     <div className="p-6 md:p-8 bg-[#F9FAFB] min-h-screen">

@@ -70,7 +70,7 @@ export default function SuiviOptionsAdmin() {
 
   const filterOptions = (options) => {
     return options.filter(option => {
-      const lot = lots.find(l => l.id === option.lot_id);
+      const lot = lots.find(l => l.id === option.lot_lmnp_id);
       if (!lot) return false;
 
       const searchMatch = !searchTerm || 

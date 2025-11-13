@@ -104,19 +104,12 @@ export default function LotsPartenaire() {
     const acquereur = mesAcquereurs.find(a => a.id === acquereurId);
 
     const optionData = {
-      lot_id: lot.id,
-      lot_reference: lot.reference,
+      lot_lmnp_id: lot.id,
       partenaire_id: currentUser.partenaire_id,
-      partenaire_nom: currentUser.full_name,
-      user_email: currentUser.email,
-      pose_par: "partenaire",
-      pose_par_nom: currentUser.full_name,
-      date_debut: dateDebut.toISOString(),
-      date_fin: dateFin.toISOString(),
-      duree_jours: dureeJours,
-      statut: 'active',
       acquereur_id: acquereurId,
-      acquereur_nom: acquereur ? `${acquereur.prenom} ${acquereur.nom}` : '',
+      date_option: dateDebut.toISOString().split('T')[0],
+      date_expiration: dateFin.toISOString().split('T')[0],
+      statut: 'active',
     };
 
     await createOptionMutation.mutateAsync(optionData);
@@ -137,7 +130,7 @@ export default function LotsPartenaire() {
 
   // Filtrage
   const filteredLots = lots
-    .filter(l => l.statut === 'disponible' || (l.statut === 'sous_option' && mesOptions.some(o => o.lot_id === l.id && o.statut === 'active')))
+    .filter(l => l.statut === 'disponible' || (l.statut === 'sous_option' && mesOptions.some(o => o.lot_lmnp_id === l.id && o.statut === 'active')))
     .filter(l => !searchTerm || l.reference?.toLowerCase().includes(searchTerm.toLowerCase()) || l.residence_nom?.toLowerCase().includes(searchTerm.toLowerCase()))
     .filter(l => filters.fiscalite === "all" || l.statut_fiscal === filters.fiscalite)
     .filter(l => {
@@ -368,7 +361,7 @@ export default function LotsPartenaire() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <AnimatePresence>
               {lotsWithCommission.map((lot) => {
-                const aMonOption = mesOptions.some(o => o.lot_id === lot.id && o.statut === 'active');
+                const aMonOption = mesOptions.some(o => o.lot_lmnp_id === lot.id && o.statut === 'active');
                 const canPoserOption = !aMonOption && lot.statut === 'disponible';
                 console.log(`Lot ${lot.reference}: statut=${lot.statut}, aMonOption=${aMonOption}, canPoserOption=${canPoserOption}`);
                 return (
@@ -393,7 +386,7 @@ export default function LotsPartenaire() {
           <div className="space-y-3">
             <AnimatePresence>
               {lotsWithCommission.map((lot) => {
-                const aMonOption = mesOptions.some(o => o.lot_id === lot.id && o.statut === 'active');
+                const aMonOption = mesOptions.some(o => o.lot_lmnp_id === lot.id && o.statut === 'active');
                 const canPoserOption = !aMonOption && lot.statut === 'disponible';
                 return (
                   <LotLMNPListItem

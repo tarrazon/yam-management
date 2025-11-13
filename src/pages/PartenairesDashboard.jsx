@@ -48,7 +48,7 @@ export default function PartenairesDashboard() {
           // Marquer l'option comme expirée
           base44.entities.OptionLot.update(option.id, { statut: 'expiree' });
           // Remettre le lot en disponible
-          base44.entities.LotLMNP.update(option.lot_id, { statut: 'disponible' });
+          base44.entities.LotLMNP.update(option.lot_lmnp_id, { statut: 'disponible' });
         }
       });
     }
@@ -60,7 +60,7 @@ export default function PartenairesDashboard() {
 
   const lotsDisponibles = lots.filter(l => l.statut === 'disponible').length;
   const lotsAvecOption = lots.filter(l => 
-    mesOptions.some(o => o.lot_id === l.id && o.statut === 'active')
+    mesOptions.some(o => o.lot_lmnp_id === l.id && o.statut === 'active')
   ).length;
 
   // Calcul du CA et commissions
@@ -261,7 +261,7 @@ export default function PartenairesDashboard() {
             ) : (
               <div className="space-y-3">
                 {optionsActives.map(option => {
-                  const lot = lots.find(l => l.id === option.lot_id);
+                  const lot = lots.find(l => l.id === option.lot_lmnp_id);
                   const timeRemaining = getTimeRemaining(option.date_fin);
                   const isExpiringSoon = new Date(option.date_fin) - new Date() < 24 * 60 * 60 * 1000;
                   const isMyOption = option.user_email === currentUser?.email;

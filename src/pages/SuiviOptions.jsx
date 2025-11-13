@@ -56,7 +56,7 @@ export default function SuiviOptions() {
   };
 
   const renderOptionCard = (option) => {
-    const lot = filteredLots.find(l => l.id === option.lot_id);
+    const lot = filteredLots.find(l => l.id === option.lot_lmnp_id);
     if (!lot) return null;
     
     const isExpiringSoon = option.statut === 'active' && new Date(option.date_fin) - new Date() < 24 * 60 * 60 * 1000;
