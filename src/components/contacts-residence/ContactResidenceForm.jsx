@@ -10,9 +10,10 @@ import { motion } from "framer-motion";
 
 export default function ContactResidenceForm({ contact, residences, onSubmit, onCancel, isLoading }) {
   const [formData, setFormData] = useState(contact || {
-    residence_id: "",
+    residence_gestion_id: "",
     type_contact: "gestionnaire_site",
     nom: "",
+    prenom: "",
     fonction: "",
     telephone: "",
     email: "",
@@ -84,10 +85,10 @@ export default function ContactResidenceForm({ contact, residences, onSubmit, on
           <CardContent className="p-6 space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="residence_id">Résidence *</Label>
+                <Label htmlFor="residence_gestion_id">Résidence *</Label>
                 <Select
-                  value={formData.residence_id}
-                  onValueChange={(value) => setFormData({ ...formData, residence_id: value })}
+                  value={formData.residence_gestion_id}
+                  onValueChange={(value) => setFormData({ ...formData, residence_gestion_id: value })}
                   required
                 >
                   <SelectTrigger>

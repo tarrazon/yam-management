@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import * as entities from './entities';
+import * as integrations from './integrations';
 
 export const base44 = {
   entities: {
@@ -19,6 +20,9 @@ export const base44 = {
     OptionLot: entities.OptionLot,
     Profile: entities.Profile,
     User: entities.User,
+  },
+  integrations: {
+    Core: integrations.Core,
   },
   auth: {
     me: async () => {
