@@ -54,6 +54,10 @@ import ResidencesPartenaire from "./ResidencesPartenaire";
 
 import OnboardingPartenaire from "./OnboardingPartenaire";
 
+import ForgotPassword from "./ForgotPassword";
+
+import ResetPassword from "./ResetPassword";
+
 import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -74,6 +78,10 @@ const PAGES = {
     Login: Login,
 
     Signup: Signup,
+
+    ForgotPassword: ForgotPassword,
+
+    ResetPassword: ResetPassword,
 
     Dashboard: Dashboard,
     
@@ -150,6 +158,8 @@ function PagesContent() {
             <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
 
                 <Route path="/" element={
                     <ProtectedRoute>
