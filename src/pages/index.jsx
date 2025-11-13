@@ -54,9 +54,20 @@ import ResidencesPartenaire from "./ResidencesPartenaire";
 
 import OnboardingPartenaire from "./OnboardingPartenaire";
 
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
+
+// Component to redirect based on user role
+function HomeRedirect() {
+    const { profile } = useAuth();
+
+    if (profile?.role_custom === 'partenaire') {
+        return <Navigate to="/partenairesdashboard" replace />;
+    }
+
+    return <Navigate to="/dashboardcrm" replace />;
+}
 
 const PAGES = {
 
@@ -142,7 +153,7 @@ function PagesContent() {
 
                 <Route path="/" element={
                     <ProtectedRoute>
-                        <DashboardCRM />
+                        <HomeRedirect />
                     </ProtectedRoute>
                 } />
 

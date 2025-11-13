@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Building2, Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -20,9 +21,23 @@ export default function Login() {
     setLoading(true);
 
     try {
-      await signIn(email, password);
+      const { user } = await signIn(email, password);
+
+      // Récupérer le profil pour connaître le rôle
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role_custom')
+        .eq('id', user.id)
+        .maybeSingle();
+
       toast.success('Connexion réussie!');
-      navigate('/');
+
+      // Rediriger selon le rôle
+      if (profile?.role_custom === 'partenaire') {
+        navigate('/partenairesdashboard');
+      } else {
+        navigate('/dashboardcrm');
+      }
     } catch (error) {
       toast.error(error.message || 'Erreur lors de la connexion');
     } finally {

@@ -20,7 +20,9 @@ export default function ProtectedRoute({ children, allowedRoles = [] }) {
   }
 
   if (allowedRoles.length > 0 && profile && !allowedRoles.includes(profile.role_custom)) {
-    return <Navigate to="/" replace />;
+    // Rediriger vers le dashboard approprié selon le rôle
+    const redirectTo = profile.role_custom === 'partenaire' ? '/partenairesdashboard' : '/dashboardcrm';
+    return <Navigate to={redirectTo} replace />;
   }
 
   return children;
