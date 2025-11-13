@@ -130,6 +130,8 @@ export default function LotsPartenaire() {
       date_option: dateDebut.toISOString().split('T')[0],
       date_expiration: dateFin.toISOString().split('T')[0],
       statut: 'active',
+      pose_par: 'partenaire',
+      user_email: currentUser?.email || '',
     };
 
     await createOptionMutation.mutateAsync(optionData);

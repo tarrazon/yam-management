@@ -180,6 +180,8 @@ export default function LotsLMNP() {
       date_option: dateDebut.toISOString().split('T')[0],
       date_expiration: dateFin.toISOString().split('T')[0],
       statut: 'active',
+      pose_par: 'admin',
+      user_email: currentUser?.email || '',
     };
 
     try {
