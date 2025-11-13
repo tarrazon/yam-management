@@ -268,8 +268,7 @@ export default function PartenairesDashboard() {
                   const lot = lots.find(l => l.id === option.lot_lmnp_id);
                   const timeRemaining = getTimeRemaining(option.date_expiration);
                   const isExpiringSoon = new Date(option.date_expiration) - new Date() < 24 * 60 * 60 * 1000;
-                  const isMyOption = option.user_email === currentUser?.email;
-                  
+
                   return (
                     <div key={option.id} className="p-4 bg-slate-50 rounded-lg border border-slate-200">
                       <div className="flex justify-between items-start">
@@ -278,11 +277,6 @@ export default function PartenairesDashboard() {
                             <p className="font-semibold text-[#1E40AF]">
                               Lot {option.lot_reference}
                             </p>
-                            {!isMyOption && (
-                              <Badge className="bg-blue-100 text-blue-800 text-xs">
-                                {option.pose_par === 'admin' ? 'Par admin' : 'Autre partenaire'}
-                              </Badge>
-                            )}
                           </div>
                           <p className="text-sm text-slate-600">
                             {lot?.residence_nom} - {lot?.typologie}
