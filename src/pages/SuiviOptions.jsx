@@ -59,7 +59,7 @@ export default function SuiviOptions() {
     const lot = filteredLots.find(l => l.id === option.lot_lmnp_id);
     if (!lot) return null;
     
-    const isExpiringSoon = option.statut === 'active' && new Date(option.date_fin) - new Date() < 24 * 60 * 60 * 1000;
+    const isExpiringSoon = option.statut === 'active' && new Date(option.date_expiration) - new Date() < 24 * 60 * 60 * 1000;
     const isMyOption = option.user_email === currentUser?.email;
 
     const statusConfig = {
@@ -97,13 +97,8 @@ export default function SuiviOptions() {
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <p className="font-semibold text-[#1E40AF] text-lg">
-                  Lot {option.lot_reference}
+                  Lot {lot.reference}
                 </p>
-                {!isMyOption && (
-                  <Badge className="bg-blue-100 text-blue-800 text-xs">
-                    {option.pose_par === 'admin' ? 'Par admin' : 'Autre'}
-                  </Badge>
-                )}
               </div>
               <p className="text-sm text-slate-600 mb-3">{lot?.residence_nom}</p>
               
@@ -121,24 +116,18 @@ export default function SuiviOptions() {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-slate-500">Acquéreur:</span>
-              <span className="font-medium">{option.acquereur_nom || "Non spécifié"}</span>
+              <span className="font-medium">{lot.acquereur_nom || "Non spécifié"}</span>
             </div>
-            {option.pose_par_nom && (
-              <div className="flex justify-between">
-                <span className="text-slate-500">Posée par:</span>
-                <span className="font-medium">{option.pose_par_nom}</span>
-              </div>
-            )}
             <div className="flex justify-between">
               <span className="text-slate-500">Date début:</span>
               <span className="font-medium">
-                {new Date(option.date_debut).toLocaleDateString('fr-FR')}
+                {new Date(option.date_option).toLocaleDateString('fr-FR')}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500">Date fin:</span>
               <span className="font-medium">
-                {new Date(option.date_fin).toLocaleDateString('fr-FR')}
+                {new Date(option.date_expiration).toLocaleDateString('fr-FR')}
               </span>
             </div>
             {option.statut === 'active' && (
@@ -146,15 +135,9 @@ export default function SuiviOptions() {
                 <div className="flex items-center gap-2">
                   <Clock className={`w-4 h-4 ${isExpiringSoon ? 'text-red-600' : 'text-blue-600'}`} />
                   <span className={`font-semibold ${isExpiringSoon ? 'text-red-800' : 'text-blue-800'}`}>
-                    {getTimeRemaining(option.date_fin)} restants
+                    {getTimeRemaining(option.date_expiration)} restants
                   </span>
                 </div>
-              </div>
-            )}
-            {option.notes && (
-              <div className="pt-2 border-t mt-3">
-                <p className="text-xs text-slate-500">Notes:</p>
-                <p className="text-sm text-slate-700">{option.notes}</p>
               </div>
             )}
           </div>
