@@ -1,6 +1,7 @@
 
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { supabase } from "@/lib/supabase";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,18 +21,17 @@ export default function UsersManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [editingUser, setEditingUser] = useState(null);
   const [editFormData, setEditFormData] = useState(null);
-  const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [deletingUser, setDeletingUser] = useState(null);
-  const [inviteFormData, setInviteFormData] = useState({
+  const [createFormData, setCreateFormData] = useState({
     email: "",
-    nom_entreprise: "",
-    contact_principal: "",
-    type_partenaire: "cgp",
-    message_personnalise: "",
+    password: "",
+    nom: "",
+    prenom: "",
+    role_custom: "commercial",
+    partenaire_id: "",
   });
-  const [invitationSuccess, setInvitationSuccess] = useState(null); // New state for success message
-  const [copied, setCopied] = useState(false); // New state for copy button
-  const [isSending, setIsSending] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const queryClient = useQueryClient();
 
   console.log('UsersManagement - currentUser from AuthContext:', currentUser);
@@ -44,11 +44,6 @@ export default function UsersManagement() {
   const { data: partenaires = [] } = useQuery({
     queryKey: ['partenaires_list'],
     queryFn: () => base44.entities.Partenaire.list(),
-  });
-
-  const { data: invitations = [] } = useQuery({
-    queryKey: ['invitations_partenaires'],
-    queryFn: () => base44.entities.InvitationPartenaire.list('-created_date'),
   });
 
   const updateUserMutation = useMutation({
@@ -68,10 +63,37 @@ export default function UsersManagement() {
     },
   });
 
-  const createInvitationMutation = useMutation({
-    mutationFn: (data) => base44.entities.InvitationPartenaire.create(data),
+  const createUserMutation = useMutation({
+    mutationFn: async (userData) => {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-user`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Erreur lors de la création de l\'utilisateur');
+      }
+
+      return await response.json();
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['invitations_partenaires'] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      setShowCreateDialog(false);
+      setCreateFormData({
+        email: "",
+        password: "",
+        nom: "",
+        prenom: "",
+        role_custom: "commercial",
+        partenaire_id: "",
+      });
     },
   });
 
@@ -98,79 +120,16 @@ export default function UsersManagement() {
     }
   };
 
-  const handleSendInvitation = async () => {
-    setIsSending(true);
+  const handleCreateUser = async () => {
+    setIsCreating(true);
     try {
-      // Créer l'invitation dans la base
-      const invitation = await createInvitationMutation.mutateAsync({
-        ...inviteFormData,
-        statut: 'en_attente',
-        date_invitation: new Date().toISOString(),
-        invite_par: currentUser.email,
-      });
-
-      const typeLabels = {
-        cgp: "Conseiller en Gestion de Patrimoine",
-        plateforme: "Plateforme",
-        courtier: "Courtier",
-        notaire: "Notaire",
-        diffuseur_web: "Diffuseur Web",
-        autre: "Partenaire"
-      };
-
-      // Lien d'inscription (pas de connexion)
-      const signupUrl = `${window.location.origin}?signup=true`;
-
-      // Générer le message d'invitation à copier
-      const invitationMessage = `Bonjour ${inviteFormData.contact_principal || inviteFormData.nom_entreprise},
-
-Vous êtes invité(e) à rejoindre notre plateforme Yam Management en tant que partenaire ${typeLabels[inviteFormData.type_partenaire]}.
-
-${inviteFormData.message_personnalise ? `\n${inviteFormData.message_personnalise}\n` : ''}
-🎯 En tant que partenaire, vous aurez accès à :
-• Notre portefeuille complet de lots LMNP disponibles
-• Un espace dédié pour gérer vos acquéreurs
-• Un système d'options exclusif pour réserver des biens
-• Un suivi en temps réel de vos commissions
-
-👉 Pour créer votre compte et accéder à votre espace partenaire :
-1. Créez votre compte sur : ${signupUrl}
-2. Utilisez impérativement l'adresse email : ${inviteFormData.email}
-3. Après votre inscription, vous serez guidé pour compléter votre profil
-
-📞 Besoin d'aide ? Contactez-nous à ${currentUser.email}
-
-Cordialement,
-L'équipe Yam Management`.trim();
-
-      // Montrer le message de succès avec le texte à copier
-      setInvitationSuccess({
-        email: inviteFormData.email,
-        message: invitationMessage,
-      });
-
-      // Réinitialiser le formulaire
-      setInviteFormData({
-        email: "",
-        nom_entreprise: "",
-        contact_principal: "",
-        type_partenaire: "cgp",
-        message_personnalise: "",
-      });
-      setShowInviteDialog(false);
+      await createUserMutation.mutateAsync(createFormData);
+      alert('✅ Utilisateur créé avec succès');
     } catch (error) {
-      console.error("Erreur lors de la création de l'invitation:", error);
-      alert('❌ Erreur lors de la création de l\'invitation');
+      console.error("Erreur lors de la création de l'utilisateur:", error);
+      alert(`❌ ${error.message}`);
     } finally {
-      setIsSending(false);
-    }
-  };
-
-  const copyInvitationMessage = () => {
-    if (invitationSuccess) {
-      navigator.clipboard.writeText(invitationSuccess.message);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setIsCreating(false);
     }
   };
 
@@ -185,7 +144,6 @@ L'équipe Yam Management`.trim();
     admins: users.filter(u => (u.role_custom || 'admin') === 'admin').length,
     commerciaux: users.filter(u => u.role_custom === 'commercial').length,
     partenaires: users.filter(u => u.role_custom === 'partenaire').length,
-    invitationsEnAttente: invitations.filter(i => i.statut === 'en_attente').length,
   };
 
   // Vérifier que l'utilisateur actuel est admin
@@ -218,28 +176,16 @@ L'équipe Yam Management`.trim();
               {stats.total} utilisateurs · {stats.admins} admins · {stats.commerciaux} commerciaux · {stats.partenaires} partenaires
             </p>
           </div>
-          <Button 
-            onClick={() => setShowInviteDialog(true)}
-            className="bg-[#F59E0B] hover:bg-[#D97706]"
+          <Button
+            onClick={() => setShowCreateDialog(true)}
+            className="bg-[#1E40AF] hover:bg-[#1E3A8A]"
           >
             <UserPlus className="w-4 h-4 mr-2" />
-            Inviter un partenaire
+            Créer un utilisateur
           </Button>
         </div>
 
-        <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="users">
-              <Users className="w-4 h-4 mr-2" />
-              Utilisateurs ({stats.total})
-            </TabsTrigger>
-            <TabsTrigger value="invitations">
-              <Mail className="w-4 h-4 mr-2" />
-              Invitations ({invitations.length})
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="users">
+        <div className="w-full">
             {/* Statistiques */}
             <div className="grid md:grid-cols-4 gap-6 mb-8">
               <Card>
@@ -431,8 +377,140 @@ L'équipe Yam Management`.trim();
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+        </div>
 
+        {/* Dialog de création d'utilisateur */}
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogContent className="sm:max-w-xl bg-white">
+            <DialogHeader>
+              <DialogTitle className="text-slate-900 flex items-center gap-2">
+                <UserPlus className="w-5 h-5 text-[#1E40AF]" />
+                Créer un nouvel utilisateur
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Prénom <span className="text-red-500">*</span></Label>
+                  <Input
+                    required
+                    placeholder="Jean"
+                    value={createFormData.prenom}
+                    onChange={(e) => setCreateFormData({...createFormData, prenom: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Nom <span className="text-red-500">*</span></Label>
+                  <Input
+                    required
+                    placeholder="Dupont"
+                    value={createFormData.nom}
+                    onChange={(e) => setCreateFormData({...createFormData, nom: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Email <span className="text-red-500">*</span></Label>
+                <Input
+                  type="email"
+                  required
+                  placeholder="jean.dupont@example.com"
+                  value={createFormData.email}
+                  onChange={(e) => setCreateFormData({...createFormData, email: e.target.value})}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Mot de passe <span className="text-red-500">*</span></Label>
+                <Input
+                  type="password"
+                  required
+                  placeholder="Minimum 6 caractères"
+                  value={createFormData.password}
+                  onChange={(e) => setCreateFormData({...createFormData, password: e.target.value})}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Rôle <span className="text-red-500">*</span></Label>
+                <Select
+                  value={createFormData.role_custom}
+                  onValueChange={(value) => setCreateFormData({...createFormData, role_custom: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    <SelectItem value="admin">
+                      <div className="flex items-center gap-2">
+                        <Shield className="w-4 h-4" />
+                        <span>Administrateur</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="commercial">
+                      <div className="flex items-center gap-2">
+                        <UserCheck className="w-4 h-4" />
+                        <span>Commercial</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="partenaire">
+                      <div className="flex items-center gap-2">
+                        <Handshake className="w-4 h-4" />
+                        <span>Partenaire</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {createFormData.role_custom === 'partenaire' && (
+                <div className="space-y-2">
+                  <Label>Partenaire associé</Label>
+                  <Select
+                    value={createFormData.partenaire_id}
+                    onValueChange={(value) => setCreateFormData({...createFormData, partenaire_id: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner un partenaire" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white">
+                      {partenaires.map(p => (
+                        <SelectItem key={p.id} value={p.id}>{p.nom}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateDialog(false)} disabled={isCreating}>
+                <X className="w-4 h-4 mr-2" />
+                Annuler
+              </Button>
+              <Button
+                onClick={handleCreateUser}
+                className="bg-[#1E40AF] hover:bg-[#1E3A8A]"
+                disabled={!createFormData.email || !createFormData.password || !createFormData.nom || !createFormData.prenom || isCreating}
+              >
+                {isCreating ? (
+                  <>
+                    <Clock className="w-4 h-4 mr-2 animate-spin" />
+                    Création...
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Créer l'utilisateur
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Suppression ancien TabsContent invitations */}
+        <div style={{display: 'none'}}>
           <TabsContent value="invitations">
             <Card>
               <CardHeader>
@@ -492,7 +570,7 @@ L'équipe Yam Management`.trim();
               </CardContent>
             </Card>
           </TabsContent>
-        </Tabs>
+        </div>
 
         {/* Dialog d'édition */}
         <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
