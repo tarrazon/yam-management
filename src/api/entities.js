@@ -30,3 +30,4 @@ export const ContactResidence = contactResidenceService;
 export const DossierVente = dossierVenteService;
 export const OptionLot = optionLotService;
 export const Profile = profileService;
+export const User = profileService;
