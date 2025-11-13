@@ -39,7 +39,7 @@ export default function ForgotPassword() {
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
             <img
-              src="/src/assets/logo.jpg"
+              src="/logo.jpg"
               alt="Yam Management"
               className="w-24 h-24 object-contain"
             />
