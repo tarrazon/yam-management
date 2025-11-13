@@ -273,10 +273,15 @@ export default function PartenairesDashboard() {
                     <div key={option.id} className="p-4 bg-slate-50 rounded-lg border border-slate-200">
                       <div className="flex justify-between items-start">
                         <div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 mb-2">
                             <p className="font-semibold text-[#1E40AF]">
                               Lot {option.lot_reference}
                             </p>
+                            {option.pose_par === 'admin' && (
+                              <Badge className="bg-indigo-100 text-indigo-800 text-xs">
+                                Posée par admin
+                              </Badge>
+                            )}
                           </div>
                           <p className="text-sm text-slate-600">
                             {lot?.residence_nom} - {lot?.typologie}
@@ -286,11 +291,6 @@ export default function PartenairesDashboard() {
                               Acquéreur: {option.acquereur_nom}
                             </p>
                           )}
-                          {option.pose_par_nom && (
-                            <p className="text-xs text-slate-400 mt-1">
-                              Posée par: {option.pose_par_nom}
-                            </p>
-                          )}
                         </div>
                         <div className="text-right">
                           <Badge className={isExpiringSoon ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800"}>
@@ -298,7 +298,7 @@ export default function PartenairesDashboard() {
                             {timeRemaining}
                           </Badge>
                           <p className="text-xs text-slate-500 mt-1">
-                            Expire le {new Date(option.date_fin).toLocaleDateString('fr-FR')}
+                            Expire le {new Date(option.date_expiration).toLocaleDateString('fr-FR')}
                           </p>
                         </div>
                       </div>

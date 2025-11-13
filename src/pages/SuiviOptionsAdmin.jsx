@@ -133,12 +133,21 @@ export default function SuiviOptionsAdmin() {
                 <p className="font-semibold text-[#1E40AF] text-lg">
                   Lot {lot.reference}
                 </p>
+                {option.pose_par === 'admin' ? (
+                  <Badge className="bg-indigo-100 text-indigo-800 text-xs">
+                    Posée par admin
+                  </Badge>
+                ) : (
+                  <Badge className="bg-teal-100 text-teal-800 text-xs">
+                    Posée par partenaire
+                  </Badge>
+                )}
               </div>
               <p className="text-sm text-slate-600 mb-3">{lot?.residence_nom}</p>
               <p className="text-xs text-slate-500 mb-3">
                 {lot?.typologie} · {lot?.ville}
               </p>
-              
+
               {/* Statut du lot en gros */}
               <Badge className={`${lotStatusColors[lot.statut]} text-base px-3 py-1.5 font-semibold`}>
                 {lotStatusLabels[lot.statut]}

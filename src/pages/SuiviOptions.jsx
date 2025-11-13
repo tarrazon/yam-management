@@ -108,6 +108,11 @@ export default function SuiviOptions() {
                 <p className="font-semibold text-[#1E40AF] text-lg">
                   Lot {lotReference}
                 </p>
+                {option.pose_par === 'admin' && (
+                  <Badge className="bg-indigo-100 text-indigo-800 text-xs">
+                    Posée par admin
+                  </Badge>
+                )}
               </div>
               <p className="text-sm text-slate-600 mb-3">{residenceNom}</p>
 
