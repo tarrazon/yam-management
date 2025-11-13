@@ -142,13 +142,13 @@ function PagesContent() {
 
                 <Route path="/" element={
                     <ProtectedRoute>
-                        <Dashboard />
+                        <DashboardCRM />
                     </ProtectedRoute>
                 } />
 
                 <Route path="/Dashboard" element={
                     <ProtectedRoute>
-                        <Dashboard />
+                        <DashboardCRM />
                     </ProtectedRoute>
                 } />
                 
