@@ -146,6 +146,31 @@ export default function LotsPartenaire() {
       }
     });
 
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      await fetch(`${supabaseUrl}/functions/v1/send-option-notification`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          partenaire_nom: partenaire?.nom || '',
+          partenaire_prenom: partenaire?.prenom || '',
+          lot_numero: lot.reference || '',
+          residence_nom: lot.residence_nom || '',
+          acquereur_nom: acquereur?.nom || '',
+          acquereur_prenom: acquereur?.prenom || '',
+          date_debut: dateDebut.toISOString(),
+          date_fin: dateFin.toISOString(),
+        }),
+      });
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi des notifications:', error);
+    }
+
     setLotForOption(null);
     alert('Option posée avec succès !');
   };

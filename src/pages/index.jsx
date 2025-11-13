@@ -54,6 +54,8 @@ import ResidencesPartenaire from "./ResidencesPartenaire";
 
 import OnboardingPartenaire from "./OnboardingPartenaire";
 
+import NotificationEmails from "./NotificationEmails";
+
 import ForgotPassword from "./ForgotPassword";
 
 import ResetPassword from "./ResetPassword";
@@ -235,6 +237,8 @@ function PagesContent() {
             <Route path="/ResidencesPartenaire" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['partenaire']}><ResidencesPartenaire /></ProtectedRoute></Layout>} />
 
             <Route path="/OnboardingPartenaire" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['partenaire']}><OnboardingPartenaire /></ProtectedRoute></Layout>} />
+
+            <Route path="/NotificationEmails" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['admin']}><NotificationEmails /></ProtectedRoute></Layout>} />
 
         </Routes>
     );
