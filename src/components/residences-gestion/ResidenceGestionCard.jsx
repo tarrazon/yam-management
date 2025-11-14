@@ -109,11 +109,11 @@ export default function ResidenceGestionCard({ residence, onEdit, onView, onDele
                 <span className="truncate">{residence.ville}</span>
                 {residence.adresse && (
                   <a
-                    href={`https://www.google.com/maps?q=${encodeURIComponent(residence.adresse + ', ' + residence.ville)}&layer=c&cbll=&cbp=`}
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(residence.adresse + ', ' + residence.ville)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="ml-1 text-blue-600 hover:text-blue-800 transition-colors"
-                    title="Voir sur Google Street View"
+                    title="Voir sur Google Maps / Street View"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <MapPinned className="w-4 h-4" />
