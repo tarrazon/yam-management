@@ -117,11 +117,8 @@ export default function LotsPartenaire() {
   const handlePoserOption = async (lot, acquereurId) => {
     try {
       // Ne pas vérifier côté client - la contrainte unique en base de données gérera les doublons
-      // Vérifier uniquement le nombre d'options du partenaire
-      const optionsActives = mesOptions.filter(o => {
-        const lotOption = lots.find(l => l.id === o.lot_lmnp_id);
-        return o.statut === 'active' && lotOption?.statut === 'sous_option';
-      }).length;
+      // Vérifier uniquement le nombre d'options actives du partenaire (pas le statut du lot)
+      const optionsActives = mesOptions.filter(o => o.statut === 'active').length;
       const optionsMax = partenaire?.options_max || 3;
 
       if (optionsActives >= optionsMax) {
@@ -504,10 +501,7 @@ export default function LotsPartenaire() {
           <PoserOptionPartenaireDialog
             lot={lotForOption}
             mesAcquereurs={mesAcquereurs}
-            optionsActives={mesOptions.filter(o => {
-              const lotOption = lots.find(l => l.id === o.lot_lmnp_id);
-              return o.statut === 'active' && lotOption?.statut === 'sous_option';
-            }).length}
+            optionsActives={mesOptions.filter(o => o.statut === 'active').length}
             optionsMax={partenaire?.options_max || 3}
             dureeJours={partenaire?.duree_option_jours || 5}
             onSubmit={handlePoserOption}
