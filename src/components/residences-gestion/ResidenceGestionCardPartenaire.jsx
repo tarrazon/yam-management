@@ -109,22 +109,24 @@ export default function ResidenceGestionCardPartenaire({ residence, lots, onView
                       href={`https://www.google.com/maps/@${residence.latitude},${residence.longitude},3a,75y,90h,90t/data=!3m4!1e1!3m2!1e1!2e0`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="ml-1 text-green-600 hover:text-green-800 transition-colors"
+                      className="ml-2 flex items-center gap-1 text-green-600 hover:text-green-800 transition-colors"
                       title="Voir sur Google Street View (vérifié)"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <MapPinned className="w-4 h-4" />
+                      <span className="text-xs font-medium">Street View disponible</span>
                     </a>
                   ) : (
                     <a
                       href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(residence.adresse + ', ' + residence.ville)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="ml-1 text-slate-400 hover:text-slate-600 transition-colors"
+                      className="ml-2 flex items-center gap-1 text-slate-400 hover:text-slate-600 transition-colors"
                       title="Voir sur Google Maps (Street View non vérifié)"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <MapPinned className="w-4 h-4" />
+                      <span className="text-xs">Maps</span>
                     </a>
                   )
                 )}
