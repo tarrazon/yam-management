@@ -140,6 +140,13 @@ export default function PartenaireCard({ partenaire, onEdit, onView, onDelete })
             </div>
           )}
 
+          {partenaire.created_by && (
+            <div className="pt-3 border-t border-slate-100">
+              <p className="text-xs text-slate-500">Créé par</p>
+              <p className="text-sm font-medium text-slate-700">{partenaire.created_by}</p>
+            </div>
+          )}
+
           {partenaire.taux_retrocession !== undefined && (
             <div className="pt-3 border-t border-slate-100">
               <div className="flex items-center gap-2 mb-1">

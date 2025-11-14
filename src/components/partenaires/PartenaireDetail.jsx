@@ -160,6 +160,12 @@ export default function PartenaireDetail({ partenaire, onClose, onEdit, onDelete
                   <p className="font-medium text-slate-700">{partenaire.specialite}</p>
                 </div>
               )}
+              {partenaire.created_by && (
+                <div className="pt-3 border-t">
+                  <p className="text-xs text-slate-500">Créé par</p>
+                  <p className="font-medium text-slate-700">{partenaire.created_by}</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 

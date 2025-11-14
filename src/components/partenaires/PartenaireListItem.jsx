@@ -36,7 +36,7 @@ export default function PartenaireListItem({ partenaire, onEdit, onView, onDelet
       className="bg-white rounded-lg shadow hover:shadow-lg transition-all p-4 border border-slate-100"
     >
       <div className="flex items-center gap-4">
-        <div className="flex-1 min-w-0 grid md:grid-cols-5 gap-4 items-center">
+        <div className="flex-1 min-w-0 grid md:grid-cols-6 gap-4 items-center">
           <div className="md:col-span-2 flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1E40AF] to-[#1E3A8A] flex items-center justify-center flex-shrink-0">
               <Handshake className="w-5 h-5 text-white" />
@@ -71,6 +71,13 @@ export default function PartenaireListItem({ partenaire, onEdit, onView, onDelet
               <a href={`tel:${partenaire.telephone}`} className="text-sm text-slate-600 hover:text-[#1E40AF]">
                 {partenaire.telephone}
               </a>
+            </div>
+          )}
+
+          {partenaire.created_by && (
+            <div className="flex flex-col">
+              <span className="text-xs text-slate-500">Créé par</span>
+              <span className="text-sm text-slate-700 truncate font-medium">{partenaire.created_by}</span>
             </div>
           )}
 
