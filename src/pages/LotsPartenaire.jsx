@@ -176,20 +176,19 @@ export default function LotsPartenaire() {
         console.error('Erreur lors de l\'envoi des notifications:', error);
       }
 
-      // Forcer un refetch immédiat de toutes les données
+      // Attendre un peu pour que le trigger DB se propage
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Invalider tous les caches et forcer un refetch
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['lots_disponibles'] }),
-        queryClient.invalidateQueries({ queryKey: ['mes_options_partenaire'] }),
-        queryClient.invalidateQueries({ queryKey: ['all_options_partenaire'] }),
-        queryClient.invalidateQueries({ queryKey: ['lots_lmnp'] }),
+        queryClient.invalidateQueries({ queryKey: ['lots_disponibles'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['mes_options_partenaire'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['all_options_partenaire'], refetchType: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['lots_lmnp'], refetchType: 'active' }),
       ]);
 
-      // Attendre un petit délai pour que le trigger DB se propage
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Refetch explicite
-      await refetchOptions();
-      await refetchLots();
+      // Attendre que les refetch soient terminés
+      await new Promise(resolve => setTimeout(resolve, 200));
 
       setLotForOption(null);
       alert('Option posée avec succès ! Le lot est maintenant sous option.');
