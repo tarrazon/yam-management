@@ -104,6 +104,7 @@ export default function SuiviOptionsAdmin() {
   const lotsSousOption = getLotsByStatut('sous_option');
   const lotsReserve = getLotsByStatut('reserve');
   const lotsAllotement = getLotsByStatut('allotement');
+  const lotsCompromis = getLotsByStatut('compromis');
   const lotsVendu = getLotsByStatut('vendu');
 
   const getTimeRemaining = (dateFin) => {
@@ -357,7 +358,7 @@ export default function SuiviOptionsAdmin() {
         </Card>
 
         {/* Statistiques */}
-        <div className="grid md:grid-cols-4 gap-6 mb-8">
+        <div className="grid md:grid-cols-5 gap-6 mb-8">
           <Card className="border-none shadow-md">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
@@ -403,6 +404,20 @@ export default function SuiviOptionsAdmin() {
           <Card className="border-none shadow-md">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
+                <div className="p-3 rounded-xl bg-orange-50">
+                  <CheckCircle className="w-6 h-6 text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500">Compromis</p>
+                  <p className="text-2xl font-bold text-[#1E40AF]">{lotsCompromis.length}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-md">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
                 <div className="p-3 rounded-xl bg-amber-50">
                   <ShoppingBag className="w-6 h-6 text-amber-600" />
                 </div>
@@ -417,10 +432,11 @@ export default function SuiviOptionsAdmin() {
 
         {/* Tabs par statut de lot */}
         <Tabs defaultValue="sous_option" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="sous_option">Sous option ({filterLots(lotsSousOption).length})</TabsTrigger>
             <TabsTrigger value="reserve">Réservé ({filterLots(lotsReserve).length})</TabsTrigger>
             <TabsTrigger value="allotement">Allotement ({filterLots(lotsAllotement).length})</TabsTrigger>
+            <TabsTrigger value="compromis">Compromis ({filterLots(lotsCompromis).length})</TabsTrigger>
             <TabsTrigger value="vendu">Vendu ({filterLots(lotsVendu).length})</TabsTrigger>
           </TabsList>
 
@@ -450,6 +466,16 @@ export default function SuiviOptionsAdmin() {
                 <p className="text-slate-400 col-span-full text-center py-12">Aucun lot en allotement</p>
               ) : (
                 filterLots(lotsAllotement).map(renderLotCard)
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="compromis" className="mt-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filterLots(lotsCompromis).length === 0 ? (
+                <p className="text-slate-400 col-span-full text-center py-12">Aucun lot en compromis</p>
+              ) : (
+                filterLots(lotsCompromis).map(renderLotCard)
               )}
             </div>
           </TabsContent>
