@@ -435,9 +435,8 @@ export default function LotsPartenaire() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <AnimatePresence>
               {lotsWithCommission.map((lot) => {
-                const aMonOption = mesOptions.some(o => o.lot_lmnp_id === lot.id && o.statut === 'active');
-                const canPoserOption = !aMonOption && lot.statut === 'disponible';
-                console.log(`Lot ${lot.reference}: statut=${lot.statut}, aMonOption=${aMonOption}, canPoserOption=${canPoserOption}`);
+                // Tous les lots disponibles peuvent avoir une option posée
+                const canPoserOption = lot.statut === 'disponible';
                 return (
                   <LotLMNPCard
                     key={lot.id}
@@ -445,7 +444,6 @@ export default function LotsPartenaire() {
                     onEdit={null}
                     onView={handleView}
                     onPoserOption={canPoserOption ? () => {
-                      console.log('Opening dialog for lot:', lot.reference);
                       setLotForOption(lot);
                     } : null}
                     showCommission={true}
@@ -460,8 +458,8 @@ export default function LotsPartenaire() {
           <div className="space-y-3">
             <AnimatePresence>
               {lotsWithCommission.map((lot) => {
-                const aMonOption = mesOptions.some(o => o.lot_lmnp_id === lot.id && o.statut === 'active');
-                const canPoserOption = !aMonOption && lot.statut === 'disponible';
+                // Tous les lots disponibles peuvent avoir une option posée
+                const canPoserOption = lot.statut === 'disponible';
                 return (
                   <LotLMNPListItem
                     key={lot.id}
@@ -469,7 +467,6 @@ export default function LotsPartenaire() {
                     onEdit={null}
                     onView={handleView}
                     onPoserOption={canPoserOption ? () => {
-                      console.log('Opening dialog for lot:', lot.reference);
                       setLotForOption(lot);
                     } : null}
                     showCommission={true}
