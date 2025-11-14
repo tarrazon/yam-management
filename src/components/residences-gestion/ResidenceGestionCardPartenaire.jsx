@@ -2,7 +2,7 @@ import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Building2, MapPin, Eye, Home, FileText } from "lucide-react";
+import { Building2, MapPin, Eye, Home, FileText, MapPinned } from "lucide-react";
 import { motion } from "framer-motion";
 import StorageImage from "@/components/common/StorageImage";
 
@@ -103,6 +103,18 @@ export default function ResidenceGestionCardPartenaire({ residence, lots, onView
               <div className="flex items-center gap-2 text-sm text-slate-500 mt-1">
                 <MapPin className="w-4 h-4" />
                 <span className="truncate">{residence.ville}</span>
+                {residence.adresse && (
+                  <a
+                    href={`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${encodeURIComponent(residence.adresse + ', ' + residence.ville)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ml-1 text-blue-600 hover:text-blue-800"
+                    title="Voir sur Google Street View"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <MapPinned className="w-4 h-4" />
+                  </a>
+                )}
               </div>
             </div>
             <div className="flex gap-1 flex-shrink-0 ml-2">

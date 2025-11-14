@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import ResidenceGestionDetail from "../components/residences-gestion/ResidenceGe
 import ResidencesMapView from "../components/residences-gestion/ResidencesMapView";
 import DeleteConfirmDialog from "../components/common/DeleteConfirmDialog";
 import { motion, AnimatePresence } from "framer-motion";
+import { viewsTracking } from "@/api/viewsTracking";
 
 export default function ResidencesGestion() {
   const [showForm, setShowForm] = useState(false);
@@ -39,6 +40,25 @@ export default function ResidencesGestion() {
     queryKey: ['contacts_residence'],
     queryFn: () => base44.entities.ContactResidence.list(),
   });
+
+  const { data: currentUser } = useQuery({
+    queryKey: ['current_user_residences'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  // Charger les stats de vues pour les résidences (admin uniquement)
+  const [residencesViewsStats, setResidencesViewsStats] = useState(new Map());
+
+  useEffect(() => {
+    const loadViewsStats = async () => {
+      if (currentUser?.role_custom === 'admin' && residences.length > 0) {
+        const residenceIds = residences.map(res => res.id);
+        const stats = await viewsTracking.getBulkViewsStats('residence', residenceIds);
+        setResidencesViewsStats(stats);
+      }
+    };
+    loadViewsStats();
+  }, [residences, currentUser]);
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.ResidenceGestion.create(data),
@@ -286,6 +306,7 @@ export default function ResidencesGestion() {
                   onEdit={handleEdit}
                   onView={handleView}
                   onDelete={handleDelete}
+                  viewsStats={currentUser?.role_custom === 'admin' ? residencesViewsStats.get(residence.id) : null}
                 />
               ))}
             </AnimatePresence>

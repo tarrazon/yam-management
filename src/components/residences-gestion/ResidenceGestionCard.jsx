@@ -3,7 +3,7 @@ import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Building2, Edit, MapPin, Users, TrendingUp, Calendar, Eye, Image, FileText, Trash2 } from "lucide-react";
+import { Building2, Edit, MapPin, Users, TrendingUp, Calendar, Eye, Image, FileText, Trash2, MapPinned } from "lucide-react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
@@ -39,7 +39,7 @@ const typeLabels = {
   senior: "Senior",
 };
 
-export default function ResidenceGestionCard({ residence, onEdit, onView, onDelete }) {
+export default function ResidenceGestionCard({ residence, onEdit, onView, onDelete, viewsStats = null }) {
   const firstPhoto = residence.documents?.photos?.[0];
 
   const { data: lots = [] } = useQuery({
@@ -107,6 +107,18 @@ export default function ResidenceGestionCard({ residence, onEdit, onView, onDele
               <div className="flex items-center gap-2 text-sm text-slate-500 mt-1">
                 <MapPin className="w-4 h-4" />
                 <span className="truncate">{residence.ville}</span>
+                {residence.adresse && (
+                  <a
+                    href={`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${encodeURIComponent(residence.adresse + ', ' + residence.ville)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ml-1 text-blue-600 hover:text-blue-800"
+                    title="Voir sur Google Street View"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <MapPinned className="w-4 h-4" />
+                  </a>
+                )}
               </div>
             </div>
             <div className="flex gap-1 flex-shrink-0 ml-2">
@@ -201,11 +213,20 @@ export default function ResidenceGestionCard({ residence, onEdit, onView, onDele
             )}
           </div>
 
-          <div className="pt-3 border-t border-slate-100">
+          <div className="pt-3 border-t border-slate-100 space-y-2">
             <div className="flex items-center gap-2 text-xs text-slate-500">
               <FileText className="w-3 h-3" />
               <span>Documents : <span className="font-semibold text-slate-700">{documentsCount}</span></span>
             </div>
+            {viewsStats && (
+              <div className="flex items-center gap-2 text-xs text-slate-500">
+                <Eye className="w-3 h-3" />
+                <span>
+                  Vues : <span className="font-semibold text-slate-700">{viewsStats.total || 0}</span>
+                  {viewsStats.unique > 0 && <span className="ml-1">({viewsStats.unique} partenaire{viewsStats.unique > 1 ? 's' : ''})</span>}
+                </span>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

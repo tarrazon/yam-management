@@ -13,6 +13,7 @@ import LotLMNPCard from "../components/lots-lmnp/LotLMNPCard";
 import LotLMNPListItem from "../components/lots-lmnp/LotLMNPListItem";
 import LotLMNPDetail from "../components/lots-lmnp/LotLMNPDetail";
 import PoserOptionPartenaireDialog from "../components/lots-lmnp/PoserOptionPartenaireDialog";
+import { viewsTracking } from "@/api/viewsTracking";
 
 export default function LotsPartenaire() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -271,8 +272,12 @@ export default function LotsPartenaire() {
     return residences.find(r => r.id === lotResidenceId);
   };
 
-  const handleView = (lot) => {
+  const handleView = async (lot) => {
     setViewingLot(lot);
+    // Tracker la vue du lot
+    if (currentUser) {
+      await viewsTracking.trackView('lot', lot.id, lot.reference, currentUser);
+    }
   };
 
   // Enrichir les lots avec la commission

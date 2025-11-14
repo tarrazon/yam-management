@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import LotLMNPDetail from "../components/lots-lmnp/LotLMNPDetail";
 import PoserOptionDialog from "../components/lots-lmnp/PoserOptionDialog";
 import DeleteConfirmDialog from "../components/common/DeleteConfirmDialog";
 import { motion, AnimatePresence } from "framer-motion";
+import { viewsTracking } from "@/api/viewsTracking";
 
 export default function LotsLMNP() {
   const [showForm, setShowForm] = useState(false);
@@ -78,6 +79,20 @@ export default function LotsLMNP() {
     staleTime: 0,
     cacheTime: 0,
   });
+
+  // Charger les stats de vues pour les lots (admin uniquement)
+  const [lotsViewsStats, setLotsViewsStats] = useState(new Map());
+
+  useEffect(() => {
+    const loadViewsStats = async () => {
+      if (currentUser?.role_custom === 'admin' && lots.length > 0) {
+        const lotIds = lots.map(lot => lot.id);
+        const stats = await viewsTracking.getBulkViewsStats('lot', lotIds);
+        setLotsViewsStats(stats);
+      }
+    };
+    loadViewsStats();
+  }, [lots, currentUser]);
 
   React.useEffect(() => {
     refetchLots();
@@ -561,6 +576,7 @@ export default function LotsLMNP() {
                   onView={handleView}
                   onDelete={handleDelete}
                   onPoserOption={lot.statut === 'disponible' ? () => setLotForOption(lot) : null}
+                  viewsStats={currentUser?.role_custom === 'admin' ? lotsViewsStats.get(lot.id) : null}
                 />
               ))}
             </AnimatePresence>

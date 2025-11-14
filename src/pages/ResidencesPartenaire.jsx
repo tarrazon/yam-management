@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
@@ -14,12 +14,22 @@ import ResidenceGestionCardPartenaire from "../components/residences-gestion/Res
 import ResidenceGestionListItemPartenaire from "../components/residences-gestion/ResidenceGestionListItemPartenaire";
 import ResidenceGestionDetail from "../components/residences-gestion/ResidenceGestionDetail";
 import ResidencesMapView from "../components/residences-gestion/ResidencesMapView";
+import { viewsTracking } from "@/api/viewsTracking";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ResidencesPartenaire() {
   const [filter, setFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState("grid");
   const [viewingResidence, setViewingResidence] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      base44.entities.Profile.get(user.id).then(setCurrentUser).catch(console.error);
+    }
+  }, [user]);
 
   const { data: residences = [], isLoading } = useQuery({
     queryKey: ['residences_gestion'],
@@ -55,8 +65,12 @@ export default function ResidencesPartenaire() {
 
   const navigate = useNavigate();
 
-  const handleView = (residence) => {
+  const handleView = async (residence) => {
     setViewingResidence(residence);
+    // Tracker la vue de la résidence
+    if (currentUser) {
+      await viewsTracking.trackView('residence', residence.id, residence.nom, currentUser);
+    }
   };
 
   const handleNavigateToLots = (residenceId) => {

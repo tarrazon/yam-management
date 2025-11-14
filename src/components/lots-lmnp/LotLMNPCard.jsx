@@ -43,7 +43,7 @@ const typeLabels = {
   affaires: "Affaires",
 };
 
-export default function LotLMNPCard({ lot, onEdit, onView, onDelete, onPoserOption, showCommission = false, commission = 0, hidePartenaireAcquereur = false }) {
+export default function LotLMNPCard({ lot, onEdit, onView, onDelete, onPoserOption, showCommission = false, commission = 0, hidePartenaireAcquereur = false, viewsStats = null }) {
   const firstPhoto = lot.photos?.[0];
 
   const { data: residences = [] } = useQuery({
@@ -245,6 +245,18 @@ export default function LotLMNPCard({ lot, onEdit, onView, onDelete, onPoserOpti
               </div>
             )}
           </div>
+
+          {viewsStats && (
+            <div className="pt-3 border-t border-slate-100">
+              <div className="flex items-center gap-2 text-xs text-slate-500">
+                <Eye className="w-3 h-3" />
+                <span>
+                  Vues : <span className="font-semibold text-slate-700">{viewsStats.total || 0}</span>
+                  {viewsStats.unique > 0 && <span className="ml-1">({viewsStats.unique} partenaire{viewsStats.unique > 1 ? 's' : ''})</span>}
+                </span>
+              </div>
+            </div>
+          )}
 
           <div className="pt-3 border-t border-slate-100 space-y-2">
             {lot.prix_net_vendeur != null && (

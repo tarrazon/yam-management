@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { TrendingUp, Euro, Users, Building2, Calendar, Download, Home, Target, Award, Percent } from "lucide-react";
+import { TrendingUp, Euro, Users, Building2, Calendar, Download, Home, Target, Award, Percent, Eye } from "lucide-react";
+import { viewsTracking } from "@/api/viewsTracking";
 
 const COLORS = ['#1E40AF', '#F59E0B', '#10B981', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316'];
 
@@ -36,6 +37,20 @@ export default function Statistiques() {
     queryKey: ['acquereurs'],
     queryFn: () => base44.entities.Acquereur.list(),
   });
+
+  // Charger les stats de vues
+  const [topViewedLots, setTopViewedLots] = useState([]);
+  const [topViewedResidences, setTopViewedResidences] = useState([]);
+
+  useEffect(() => {
+    const loadViewsStats = async () => {
+      const lots = await viewsTracking.getTopViewedLots(10);
+      const residences = await viewsTracking.getTopViewedResidences(10);
+      setTopViewedLots(lots);
+      setTopViewedResidences(residences);
+    };
+    loadViewsStats();
+  }, []);
 
   // Filtrer les lots
   const filteredLots = useMemo(() => {
@@ -613,6 +628,79 @@ export default function Statistiques() {
             </ResponsiveContainer>
           </CardContent>
         </Card>
+
+        {/* Statistiques de vues */}
+        <div className="grid md:grid-cols-2 gap-6 mt-6">
+          {/* Lots les plus vus */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Eye className="w-5 h-5 text-blue-600" />
+                Lots les Plus Vus
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {topViewedLots.length > 0 ? (
+                  topViewedLots.map((lot, index) => (
+                    <div key={lot.entity_id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold text-sm">
+                          {index + 1}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-700">{lot.entity_name}</p>
+                          <p className="text-xs text-slate-500">{lot.unique} partenaire{lot.unique > 1 ? 's' : ''}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-blue-600">{lot.total}</p>
+                        <p className="text-xs text-slate-500">vues</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-slate-500 text-center py-4">Aucune vue enregistrée</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Résidences les plus vues */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Eye className="w-5 h-5 text-green-600" />
+                Résidences les Plus Vues
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {topViewedResidences.length > 0 ? (
+                  topViewedResidences.map((residence, index) => (
+                    <div key={residence.entity_id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-600 font-bold text-sm">
+                          {index + 1}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-700">{residence.entity_name}</p>
+                          <p className="text-xs text-slate-500">{residence.unique} partenaire{residence.unique > 1 ? 's' : ''}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-green-600">{residence.total}</p>
+                        <p className="text-xs text-slate-500">vues</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-slate-500 text-center py-4">Aucune vue enregistrée</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
