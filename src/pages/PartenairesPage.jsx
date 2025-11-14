@@ -113,7 +113,12 @@ export default function PartenairesPage() {
     if (editingPartenaire) {
       updateMutation.mutate({ id: editingPartenaire.id, data });
     } else {
-      createMutation.mutate(data);
+      // Ajouter l'email de l'utilisateur qui crée le partenaire
+      const dataWithCreator = {
+        ...data,
+        created_by: userEmail
+      };
+      createMutation.mutate(dataWithCreator);
     }
   };
 
