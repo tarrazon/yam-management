@@ -248,15 +248,17 @@ export default function SuiviOptionsAdmin() {
               <div className="pt-2 border-t mt-3">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-xs text-slate-500">Statut actuel du lot:</p>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setEditingOptionId(isEditing ? null : option.id)}
-                    className="h-6 w-6"
-                    title={isEditing ? "Annuler" : "Modifier le statut du lot"}
-                  >
-                    <Edit2 className="w-3 h-3 text-slate-500" />
-                  </Button>
+                  {option && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setEditingOptionId(isEditing ? null : option.id)}
+                      className="h-6 w-6"
+                      title={isEditing ? "Annuler" : "Modifier le statut du lot"}
+                    >
+                      <Edit2 className="w-3 h-3 text-slate-500" />
+                    </Button>
+                  )}
                 </div>
                 {isEditing ? (
                   <Select 
@@ -280,7 +282,7 @@ export default function SuiviOptionsAdmin() {
                 )}
               </div>
             )}
-            {option.notes && (
+            {option && option.notes && (
               <div className="pt-2 border-t mt-3">
                 <p className="text-xs text-slate-500">Notes:</p>
                 <p className="text-sm text-slate-700">{option.notes}</p>
