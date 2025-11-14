@@ -44,7 +44,7 @@ export default function WordPressPluginGuide() {
 /**
  * Plugin Name: CRM LMNP Sync
  * Plugin URI: https://votre-site.com
- * Description: Synchronise automatiquement les lots LMNP depuis votre CRM Base44
+ * Description: Synchronise automatiquement les lots LMNP depuis votre CRM Yam Management
  * Version: 1.0.0
  * Author: Votre Nom
  * Author URI: https://votre-site.com
@@ -179,7 +179,7 @@ add_action('admin_notices', 'crm_lmnp_admin_notices');`;
   // Classe API
   const apiClassFile = `<?php
 /**
- * Classe pour gérer les appels API vers Base44
+ * Classe pour gérer les appels API vers Yam Management
  */
 
 if (!defined('ABSPATH')) {
@@ -686,7 +686,7 @@ function crm_lmnp_render_settings_page() {
         <h1>⚙️ Paramètres CRM LMNP Sync</h1>
         
         <div class="card" style="max-width: 800px; margin-top: 20px;">
-            <h2>Configuration de l'API Base44</h2>
+            <h2>Configuration de l'API Yam Management</h2>
             
             <form method="post" action="">
                 <?php wp_nonce_field('crm_lmnp_settings'); ?>
@@ -694,7 +694,7 @@ function crm_lmnp_render_settings_page() {
                 <table class="form-table">
                     <tr>
                         <th scope="row">
-                            <label for="crm_lmnp_api_token">Token API Base44</label>
+                            <label for="crm_lmnp_api_token">Token API Yam Management</label>
                         </th>
                         <td>
                             <input type="text" 
@@ -702,9 +702,9 @@ function crm_lmnp_render_settings_page() {
                                    name="crm_lmnp_api_token" 
                                    value="<?php echo esc_attr($api_token); ?>" 
                                    class="regular-text"
-                                   placeholder="Votre token API Base44">
+                                   placeholder="Votre token API Yam Management">
                             <p class="description">
-                                Obtenez votre token API depuis votre dashboard Base44
+                                Obtenez votre token API depuis votre dashboard Yam Management
                             </p>
                         </td>
                     </tr>
@@ -743,7 +743,7 @@ function crm_lmnp_render_settings_page() {
         <div class="card" style="max-width: 800px; margin-top: 20px; background: #E8F5E9;">
             <h2>✅ Comment utiliser ce plugin ?</h2>
             <ol>
-                <li>Configurez votre <strong>Token API Base44</strong> ci-dessus</li>
+                <li>Configurez votre <strong>Token API Yam Management</strong> ci-dessus</li>
                 <li>Le plugin se synchronise <strong>automatiquement toutes les 2 heures</strong></li>
                 <li>Vous pouvez aussi synchroniser manuellement via le bouton <strong>"🔄 Sync CRM LMNP"</strong> dans la barre d'admin</li>
                 <li>Les lots apparaîtront dans <strong>Lots LMNP</strong></li>
@@ -961,7 +961,7 @@ function crm_lmnp_render_settings_page() {
               <h3 className="font-semibold mb-2">3️⃣ Configuration</h3>
               <ol className="list-decimal list-inside space-y-1 ml-4">
                 <li>Allez dans <strong>Lots LMNP</strong> → <strong>Paramètres</strong></li>
-                <li>Entrez votre <strong>Token API Base44</strong></li>
+                <li>Entrez votre <strong>Token API Yam Management</strong></li>
                 <li>Cliquez sur <strong>"Sauvegarder"</strong></li>
                 <li>Cliquez sur <strong>"🔄 Sync CRM LMNP"</strong> dans la barre d'admin pour tester</li>
               </ol>
@@ -986,7 +986,7 @@ function crm_lmnp_render_settings_page() {
               private static $api_url = 'https://api.base44.com';
             </div>
             <p>
-              Par l'URL réelle de votre API Base44 (vous la trouverez dans votre dashboard Base44).
+              Par l'URL réelle de votre API Yam Management (vous la trouverez dans votre dashboard Yam Management).
             </p>
           </CardContent>
         </Card>

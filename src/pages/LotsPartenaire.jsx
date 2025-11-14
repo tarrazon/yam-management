@@ -215,7 +215,7 @@ export default function LotsPartenaire() {
     .filter(l => {
       if (filters.region === "all") return true;
       const residence = residences.find(r => r.id === l.residence_id);
-      return residence?.ville?.toLowerCase().includes(filters.region.toLowerCase());
+      return residence?.region?.toLowerCase() === filters.region.toLowerCase();
     })
     .filter(l => {
       if (filters.ville === "all") return true;
@@ -267,6 +267,7 @@ export default function LotsPartenaire() {
 
   // Récupérer les villes uniques
   const villes = [...new Set(residences.map(r => r.ville).filter(Boolean))];
+  const regions = [...new Set(residences.map(r => r.region).filter(Boolean))].sort();
 
   const getResidenceForLot = (lotResidenceId) => {
     return residences.find(r => r.id === lotResidenceId);
@@ -379,6 +380,21 @@ export default function LotsPartenaire() {
                 </div>
 
                 <div className="space-y-2">
+                  <Label>Région</Label>
+                  <Select value={filters.region} onValueChange={(v) => setFilters({...filters, region: v})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Toutes les régions</SelectItem>
+                      {regions.map(r => (
+                        <SelectItem key={r} value={r}>{r}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
                   <Label>Ville</Label>
                   <Select value={filters.ville} onValueChange={(v) => setFilters({...filters, ville: v})}>
                     <SelectTrigger>
@@ -394,23 +410,40 @@ export default function LotsPartenaire() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Prix maximum: {filters.prixMax.toLocaleString('fr-FR')} €</Label>
+                  <Label>Prix: {filters.prixMin.toLocaleString('fr-FR')} € - {filters.prixMax.toLocaleString('fr-FR')} €</Label>
                   <Slider
-                    value={[filters.prixMax]}
-                    onValueChange={([v]) => setFilters({...filters, prixMax: v})}
+                    value={[filters.prixMin, filters.prixMax]}
+                    onValueChange={([min, max]) => setFilters({...filters, prixMin: min, prixMax: max})}
+                    min={0}
                     max={1000000}
                     step={10000}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Rentabilité minimum: {filters.rentabiliteMin}%</Label>
+                  <Label>Rentabilité minimum: {filters.rentabiliteMin.toFixed(1)}%</Label>
                   <Slider
                     value={[filters.rentabiliteMin]}
                     onValueChange={([v]) => setFilters({...filters, rentabiliteMin: v})}
+                    min={0}
                     max={15}
                     step={0.5}
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Statut fiscal</Label>
+                  <Select value={filters.fiscalite} onValueChange={(v) => setFilters({...filters, fiscalite: v})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tous</SelectItem>
+                      <SelectItem value="lmnp">LMNP</SelectItem>
+                      <SelectItem value="lmp">LMP</SelectItem>
+                      <SelectItem value="sci">SCI</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="md:col-span-3 flex justify-end">

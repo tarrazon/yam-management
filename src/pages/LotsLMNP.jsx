@@ -509,23 +509,40 @@ export default function LotsLMNP() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Prix maximum: {filters.prixMax.toLocaleString('fr-FR')} €</Label>
+                  <Label>Prix: {filters.prixMin.toLocaleString('fr-FR')} € - {filters.prixMax.toLocaleString('fr-FR')} €</Label>
                   <Slider
-                    value={[filters.prixMax]}
-                    onValueChange={([v]) => setFilters({...filters, prixMax: v})}
+                    value={[filters.prixMin, filters.prixMax]}
+                    onValueChange={([min, max]) => setFilters({...filters, prixMin: min, prixMax: max})}
+                    min={0}
                     max={1000000}
                     step={10000}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Rentabilité minimum: {filters.rentabiliteMin}%</Label>
+                  <Label>Rentabilité minimum: {filters.rentabiliteMin.toFixed(1)}%</Label>
                   <Slider
                     value={[filters.rentabiliteMin]}
                     onValueChange={([v]) => setFilters({...filters, rentabiliteMin: v})}
+                    min={0}
                     max={15}
                     step={0.5}
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Statut fiscal</Label>
+                  <Select value={filters.fiscalite} onValueChange={(v) => setFilters({...filters, fiscalite: v})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tous</SelectItem>
+                      <SelectItem value="lmnp">LMNP</SelectItem>
+                      <SelectItem value="lmp">LMP</SelectItem>
+                      <SelectItem value="sci">SCI</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="md:col-span-3 flex justify-end gap-2">
