@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Grid3x3, List, Map, X } from "lucide-react"; // Added X icon
+import { Plus, Search, Grid3x3, List, Map as MapIcon, X } from "lucide-react"; // Added X icon
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ResidenceGestionCard from "../components/residences-gestion/ResidenceGestionCard";
 import ResidenceGestionListItem from "../components/residences-gestion/ResidenceGestionListItem";
@@ -249,7 +249,7 @@ export default function ResidencesGestion() {
               className={viewMode === "map" ? "bg-[#1E40AF]" : ""}
               title="Vue carte"
             >
-              <Map className="w-4 h-4" />
+              <MapIcon className="w-4 h-4" />
             </Button>
           </div>
           <Tabs value={filter} onValueChange={setFilter}>

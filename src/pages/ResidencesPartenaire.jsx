@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
-import { Search, Grid3x3, List, Map } from "lucide-react";
+import { Search, Grid3x3, List, Map as MapIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -122,7 +122,7 @@ export default function ResidencesPartenaire() {
                   className={viewMode === "map" ? "bg-[#1E40AF]" : ""}
                   title="Vue carte"
                 >
-                  <Map className="w-4 h-4" />
+                  <MapIcon className="w-4 h-4" />
                 </Button>
               </div>
             </div>
