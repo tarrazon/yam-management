@@ -108,16 +108,29 @@ export default function ResidenceGestionCard({ residence, onEdit, onView, onDele
                 <MapPin className="w-4 h-4" />
                 <span className="truncate">{residence.ville}</span>
                 {residence.adresse && (
-                  <a
-                    href={`https://www.google.com/maps/place/${encodeURIComponent(residence.adresse + ', ' + residence.ville)}/@0,0,3a,75y,90h,90t/data=!3m4!1e1!3m2!1e1!2e0`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="ml-1 text-blue-600 hover:text-blue-800 transition-colors"
-                    title="Voir sur Google Street View"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <MapPinned className="w-4 h-4" />
-                  </a>
+                  residence.street_view_available && residence.latitude && residence.longitude ? (
+                    <a
+                      href={`https://www.google.com/maps/@${residence.latitude},${residence.longitude},3a,75y,90h,90t/data=!3m4!1e1!3m2!1e1!2e0`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-1 text-green-600 hover:text-green-800 transition-colors"
+                      title="Voir sur Google Street View (vérifié)"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <MapPinned className="w-4 h-4" />
+                    </a>
+                  ) : (
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(residence.adresse + ', ' + residence.ville)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-1 text-slate-400 hover:text-slate-600 transition-colors"
+                      title="Voir sur Google Maps (Street View non vérifié)"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <MapPinned className="w-4 h-4" />
+                    </a>
+                  )
                 )}
               </div>
             </div>

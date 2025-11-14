@@ -7,11 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { X, Save, Upload, CheckCircle2, Loader2, Image as ImageIcon, Trash2 } from "lucide-react";
+import { X, Save, Upload, CheckCircle2, Loader2, Image as ImageIcon, Trash2, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { uploadFile } from "@/api/uploadService";
 import StorageImage from "@/components/common/StorageImage";
+import { verifyAddressAndGetCoordinates } from "@/api/geocodingService";
+import { toast } from "sonner";
 
 export default function ResidenceGestionForm({ residence, onSubmit, onCancel, isLoading }) {
   const [formData, setFormData] = useState(residence || {
@@ -52,6 +54,7 @@ export default function ResidenceGestionForm({ residence, onSubmit, onCancel, is
 
   const [uploading, setUploading] = useState({});
   const [uploadError, setUploadError] = useState("");
+  const [verifyingAddress, setVerifyingAddress] = useState(false);
 
   const handleFileUpload = async (file, docKey, isMultiple = false) => {
     if (!file) return;
@@ -109,9 +112,44 @@ export default function ResidenceGestionForm({ residence, onSubmit, onCancel, is
     }
   };
 
+  const handleVerifyAddress = async () => {
+    if (!formData.adresse || !formData.ville) {
+      toast.error("Veuillez renseigner l'adresse et la ville");
+      return;
+    }
+
+    setVerifyingAddress(true);
+    try {
+      const result = await verifyAddressAndGetCoordinates(formData.adresse, formData.ville);
+
+      if (result.success) {
+        setFormData({
+          ...formData,
+          latitude: result.latitude,
+          longitude: result.longitude,
+          street_view_available: result.street_view_available,
+          address_verified_at: new Date().toISOString()
+        });
+
+        if (result.street_view_available) {
+          toast.success("Adresse vérifiée ! Street View disponible");
+        } else {
+          toast.warning("Adresse vérifiée mais Street View non disponible à cet emplacement");
+        }
+      } else {
+        toast.error(result.error || "Impossible de vérifier l'adresse");
+      }
+    } catch (error) {
+      console.error("Error verifying address:", error);
+      toast.error("Erreur lors de la vérification de l'adresse");
+    } finally {
+      setVerifyingAddress(false);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Nettoyer les données : convertir les strings vides en null pour les champs numériques
     const cleanedData = {
       ...formData,
@@ -120,8 +158,12 @@ export default function ResidenceGestionForm({ residence, onSubmit, onCancel, is
       nombre_lots_portefeuille: formData.nombre_lots_portefeuille ? Number(formData.nombre_lots_portefeuille) : null,
       rentabilite_moyenne: formData.rentabilite_moyenne ? Number(formData.rentabilite_moyenne) : null,
       taux_occupation: formData.taux_occupation ? Number(formData.taux_occupation) : null,
+      latitude: formData.latitude || null,
+      longitude: formData.longitude || null,
+      street_view_available: formData.street_view_available || false,
+      address_verified_at: formData.address_verified_at || null,
     };
-    
+
     onSubmit(cleanedData);
   };
 
@@ -251,6 +293,41 @@ export default function ResidenceGestionForm({ residence, onSubmit, onCancel, is
                       placeholder="Ex: Paris"
                       required
                     />
+                  </div>
+
+                  <div className="space-y-2 md:col-span-2">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Label>Vérification de l'adresse</Label>
+                      {formData.latitude && formData.longitude && (
+                        <span className="text-xs text-green-600 flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3" />
+                          Adresse vérifiée
+                          {formData.street_view_available && " - Street View disponible"}
+                        </span>
+                      )}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleVerifyAddress}
+                      disabled={verifyingAddress || !formData.adresse || !formData.ville}
+                      className="w-full sm:w-auto"
+                    >
+                      {verifyingAddress ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Vérification en cours...
+                        </>
+                      ) : (
+                        <>
+                          <MapPin className="w-4 h-4 mr-2" />
+                          Vérifier l'adresse et Street View
+                        </>
+                      )}
+                    </Button>
+                    <p className="text-xs text-slate-500 mt-1">
+                      La vérification permet d'obtenir les coordonnées GPS précises et de vérifier la disponibilité de Street View
+                    </p>
                   </div>
 
                   <div className="space-y-2">
