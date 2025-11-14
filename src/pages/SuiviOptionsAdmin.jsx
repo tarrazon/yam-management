@@ -83,26 +83,28 @@ export default function SuiviOptionsAdmin() {
     await updateLotMutation.mutateAsync({ id: lotId, data: { statut: newStatut } });
   };
 
-  // Regrouper les options par statut de lot
-  const optionsSousOption = toutesOptions.filter(o => {
-    const lot = lots.find(l => l.id === o.lot_lmnp_id);
-    return lot?.statut === 'sous_option';
-  });
+  // Regrouper les LOTS par statut (pas les options)
+  // Pour chaque lot, on récupère l'option la plus récente
+  const getLotsByStatut = (statut) => {
+    return lots
+      .filter(l => l.statut === statut)
+      .map(lot => {
+        // Trouver l'option la plus récente pour ce lot
+        const optionsForLot = toutesOptions
+          .filter(o => o.lot_lmnp_id === lot.id)
+          .sort((a, b) => new Date(b.created_at || b.date_option) - new Date(a.created_at || a.date_option));
 
-  const optionsReserve = toutesOptions.filter(o => {
-    const lot = lots.find(l => l.id === o.lot_lmnp_id);
-    return lot?.statut === 'reserve';
-  });
+        return {
+          ...lot,
+          option: optionsForLot[0] || null
+        };
+      });
+  };
 
-  const optionsAllotement = toutesOptions.filter(o => {
-    const lot = lots.find(l => l.id === o.lot_lmnp_id);
-    return lot?.statut === 'allotement';
-  });
-
-  const optionsVendu = toutesOptions.filter(o => {
-    const lot = lots.find(l => l.id === o.lot_lmnp_id);
-    return lot?.statut === 'vendu';
-  });
+  const lotsSousOption = getLotsByStatut('sous_option');
+  const lotsReserve = getLotsByStatut('reserve');
+  const lotsAllotement = getLotsByStatut('allotement');
+  const lotsVendu = getLotsByStatut('vendu');
 
   const getTimeRemaining = (dateFin) => {
     const now = new Date();
@@ -118,29 +120,26 @@ export default function SuiviOptionsAdmin() {
     return `${hours}h`;
   };
 
-  const filterOptions = (options) => {
-    return options.filter(option => {
-      const lot = lots.find(l => l.id === option.lot_lmnp_id);
-      if (!lot) return false;
-
+  const filterLots = (lotsWithOptions) => {
+    return lotsWithOptions.filter(lot => {
       const searchMatch = !searchTerm ||
         lot.reference?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         lot.residence_nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         lot.acquereur_nom?.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const partenaireMatch = partenaireFilter === "all" || option.partenaire_id === partenaireFilter;
+      const partenaireMatch = partenaireFilter === "all" || lot.partenaire_id === partenaireFilter;
       const statutLotMatch = statutLotFilter === "all" || lot.statut === statutLotFilter;
 
       return searchMatch && partenaireMatch && statutLotMatch;
     });
   };
 
-  const renderOptionCard = (option) => {
-    const lot = lots.find(l => l.id === option.lot_lmnp_id);
-    if (!lot) return null;
+  const renderLotCard = (lotWithOption) => {
+    const lot = lotWithOption;
+    const option = lotWithOption.option;
 
-    const isExpiringSoon = option.statut === 'active' && new Date(option.date_expiration) - new Date() < 24 * 60 * 60 * 1000;
-    const isEditing = editingOptionId === option.id;
+    const isExpiringSoon = option && option.statut === 'active' && new Date(option.date_expiration) - new Date() < 24 * 60 * 60 * 1000;
+    const isEditing = option && editingOptionId === option.id;
 
     const statusConfig = {
       active: { icon: Clock, color: "bg-green-100 text-green-800", label: "Active" },
@@ -167,11 +166,11 @@ export default function SuiviOptionsAdmin() {
       vendu: "Vendu",
     };
 
-    const config = statusConfig[option.statut];
-    const Icon = config.icon;
+    const config = option ? statusConfig[option.statut] : null;
+    const Icon = config ? config.icon : null;
 
     return (
-      <Card key={option.id} className="border-none shadow-md">
+      <Card key={lot.id} className="border-none shadow-md">
         <CardContent className="p-6">
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
@@ -179,15 +178,15 @@ export default function SuiviOptionsAdmin() {
                 <p className="font-semibold text-[#1E40AF] text-lg">
                   Lot {lot.reference}
                 </p>
-                {option.pose_par === 'admin' ? (
+                {option && option.pose_par === 'admin' ? (
                   <Badge className="bg-indigo-100 text-indigo-800 text-xs">
                     Posée par admin
                   </Badge>
-                ) : (
+                ) : option && option.pose_par === 'partenaire' ? (
                   <Badge className="bg-teal-100 text-teal-800 text-xs">
                     Posée par partenaire
                   </Badge>
-                )}
+                ) : null}
               </div>
               <p className="text-sm text-slate-600 mb-3">{lot?.residence_nom}</p>
               <p className="text-xs text-slate-500 mb-3">
@@ -199,12 +198,14 @@ export default function SuiviOptionsAdmin() {
                 {lotStatusLabels[lot.statut]}
               </Badge>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge className={config.color}>
-                <Icon className="w-3 h-3 mr-1" />
-                {config.label}
-              </Badge>
-            </div>
+            {option && config && (
+              <div className="flex items-center gap-2">
+                <Badge className={config.color}>
+                  <Icon className="w-3 h-3 mr-1" />
+                  {config.label}
+                </Badge>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2 text-sm">
@@ -216,19 +217,23 @@ export default function SuiviOptionsAdmin() {
               <span className="text-slate-500">Acquéreur:</span>
               <span className="font-medium">{lot.acquereur_nom || "Non spécifié"}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-slate-500">Date début:</span>
-              <span className="font-medium">
-                {new Date(option.date_option).toLocaleDateString('fr-FR')}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-500">Date fin:</span>
-              <span className="font-medium">
-                {new Date(option.date_expiration).toLocaleDateString('fr-FR')}
-              </span>
-            </div>
-            {option.statut === 'active' && (
+            {option && option.date_option && (
+              <div className="flex justify-between">
+                <span className="text-slate-500">Date début:</span>
+                <span className="font-medium">
+                  {new Date(option.date_option).toLocaleDateString('fr-FR')}
+                </span>
+              </div>
+            )}
+            {option && option.date_expiration && (
+              <div className="flex justify-between">
+                <span className="text-slate-500">Date fin:</span>
+                <span className="font-medium">
+                  {new Date(option.date_expiration).toLocaleDateString('fr-FR')}
+                </span>
+              </div>
+            )}
+            {option && option.statut === 'active' && isExpiringSoon !== null && (
               <div className={`p-3 rounded-lg border mt-3 ${isExpiringSoon ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-200'}`}>
                 <div className="flex items-center gap-2">
                   <Clock className={`w-4 h-4 ${isExpiringSoon ? 'text-red-600' : 'text-blue-600'}`} />
@@ -361,7 +366,7 @@ export default function SuiviOptionsAdmin() {
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Sous option</p>
-                  <p className="text-2xl font-bold text-[#1E40AF]">{optionsSousOption.length}</p>
+                  <p className="text-2xl font-bold text-[#1E40AF]">{lotsSousOption.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -375,7 +380,7 @@ export default function SuiviOptionsAdmin() {
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Réservé</p>
-                  <p className="text-2xl font-bold text-[#1E40AF]">{optionsReserve.length}</p>
+                  <p className="text-2xl font-bold text-[#1E40AF]">{lotsReserve.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -389,7 +394,7 @@ export default function SuiviOptionsAdmin() {
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Allotement</p>
-                  <p className="text-2xl font-bold text-[#1E40AF]">{optionsAllotement.length}</p>
+                  <p className="text-2xl font-bold text-[#1E40AF]">{lotsAllotement.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -403,7 +408,7 @@ export default function SuiviOptionsAdmin() {
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Vendu</p>
-                  <p className="text-2xl font-bold text-[#1E40AF]">{optionsVendu.length}</p>
+                  <p className="text-2xl font-bold text-[#1E40AF]">{lotsVendu.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -413,48 +418,48 @@ export default function SuiviOptionsAdmin() {
         {/* Tabs par statut de lot */}
         <Tabs defaultValue="sous_option" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="sous_option">Sous option ({filterOptions(optionsSousOption).length})</TabsTrigger>
-            <TabsTrigger value="reserve">Réservé ({filterOptions(optionsReserve).length})</TabsTrigger>
-            <TabsTrigger value="allotement">Allotement ({filterOptions(optionsAllotement).length})</TabsTrigger>
-            <TabsTrigger value="vendu">Vendu ({filterOptions(optionsVendu).length})</TabsTrigger>
+            <TabsTrigger value="sous_option">Sous option ({filterLots(lotsSousOption).length})</TabsTrigger>
+            <TabsTrigger value="reserve">Réservé ({filterLots(lotsReserve).length})</TabsTrigger>
+            <TabsTrigger value="allotement">Allotement ({filterLots(lotsAllotement).length})</TabsTrigger>
+            <TabsTrigger value="vendu">Vendu ({filterLots(lotsVendu).length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="sous_option" className="mt-6">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filterOptions(optionsSousOption).length === 0 ? (
+              {filterLots(lotsSousOption).length === 0 ? (
                 <p className="text-slate-400 col-span-full text-center py-12">Aucun lot sous option</p>
               ) : (
-                filterOptions(optionsSousOption).map(renderOptionCard)
+                filterLots(lotsSousOption).map(renderLotCard)
               )}
             </div>
           </TabsContent>
 
           <TabsContent value="reserve" className="mt-6">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filterOptions(optionsReserve).length === 0 ? (
+              {filterLots(lotsReserve).length === 0 ? (
                 <p className="text-slate-400 col-span-full text-center py-12">Aucun lot réservé</p>
               ) : (
-                filterOptions(optionsReserve).map(renderOptionCard)
+                filterLots(lotsReserve).map(renderLotCard)
               )}
             </div>
           </TabsContent>
 
           <TabsContent value="allotement" className="mt-6">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filterOptions(optionsAllotement).length === 0 ? (
+              {filterLots(lotsAllotement).length === 0 ? (
                 <p className="text-slate-400 col-span-full text-center py-12">Aucun lot en allotement</p>
               ) : (
-                filterOptions(optionsAllotement).map(renderOptionCard)
+                filterLots(lotsAllotement).map(renderLotCard)
               )}
             </div>
           </TabsContent>
 
           <TabsContent value="vendu" className="mt-6">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filterOptions(optionsVendu).length === 0 ? (
+              {filterLots(lotsVendu).length === 0 ? (
                 <p className="text-slate-400 col-span-full text-center py-12">Aucun lot vendu</p>
               ) : (
-                filterOptions(optionsVendu).map(renderOptionCard)
+                filterLots(lotsVendu).map(renderLotCard)
               )}
             </div>
           </TabsContent>

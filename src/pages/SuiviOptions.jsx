@@ -42,26 +42,28 @@ export default function SuiviOptions() {
     ? lots 
     : lots.filter(l => l.statut === filter);
 
-  // Regrouper les options par statut de lot
-  const optionsSousOption = toutesOptions.filter(o => {
-    const lot = lots.find(l => l.id === o.lot_lmnp_id);
-    return lot?.statut === 'sous_option' && lot?.partenaire_id === currentUser?.partenaire_id;
-  });
+  // Regrouper les LOTS par statut (pas les options)
+  // Pour chaque lot du partenaire, on récupère l'option la plus récente
+  const getLotsByStatut = (statut) => {
+    return lots
+      .filter(l => l.statut === statut && l.partenaire_id === currentUser?.partenaire_id)
+      .map(lot => {
+        // Trouver l'option la plus récente pour ce lot
+        const optionsForLot = toutesOptions
+          .filter(o => o.lot_lmnp_id === lot.id)
+          .sort((a, b) => new Date(b.created_at || b.date_option) - new Date(a.created_at || a.date_option));
 
-  const optionsReserve = toutesOptions.filter(o => {
-    const lot = lots.find(l => l.id === o.lot_lmnp_id);
-    return lot?.statut === 'reserve' && lot?.partenaire_id === currentUser?.partenaire_id;
-  });
+        return {
+          ...lot,
+          option: optionsForLot[0] || null
+        };
+      });
+  };
 
-  const optionsAllotement = toutesOptions.filter(o => {
-    const lot = lots.find(l => l.id === o.lot_lmnp_id);
-    return lot?.statut === 'allotement' && lot?.partenaire_id === currentUser?.partenaire_id;
-  });
-
-  const optionsVendu = toutesOptions.filter(o => {
-    const lot = lots.find(l => l.id === o.lot_lmnp_id);
-    return lot?.statut === 'vendu' && lot?.partenaire_id === currentUser?.partenaire_id;
-  });
+  const lotsSousOption = getLotsByStatut('sous_option');
+  const lotsReserve = getLotsByStatut('reserve');
+  const lotsAllotement = getLotsByStatut('allotement');
+  const lotsVendu = getLotsByStatut('vendu');
 
   const getTimeRemaining = (dateFin) => {
     const now = new Date();
@@ -77,17 +79,18 @@ export default function SuiviOptions() {
     return `${hours}h`;
   };
 
-  const renderOptionCard = (option) => {
-    const lot = filteredLots.find(l => l.id === option.lot_lmnp_id);
+  const renderLotCard = (lotWithOption) => {
+    const lot = lotWithOption;
+    const option = lotWithOption.option;
 
-    const isExpiringSoon = option.statut === 'active' && new Date(option.date_expiration) - new Date() < 24 * 60 * 60 * 1000;
-    const isMyOption = option.user_email === currentUser?.email;
+    const isExpiringSoon = option && option.statut === 'active' && new Date(option.date_expiration) - new Date() < 24 * 60 * 60 * 1000;
+    const isMyOption = option && option.user_email === currentUser?.email;
 
-    // Utiliser les informations de l'option (snapshot au moment de la création) ou du lot actuel
-    const lotReference = option.lot_reference || lot?.reference || 'N/A';
-    const residenceNom = option.residence_nom || lot?.residence_nom || 'N/A';
-    const acquereurNom = option.acquereur_nom || lot?.acquereur_nom || 'Non spécifié';
-    const lotStatut = lot?.statut || 'inconnu';
+    // Utiliser les informations du lot
+    const lotReference = lot.reference || 'N/A';
+    const residenceNom = lot.residence_nom || 'N/A';
+    const acquereurNom = lot.acquereur_nom || 'Non spécifié';
+    const lotStatut = lot.statut || 'inconnu';
 
     const statusConfig = {
       active: { icon: Clock, color: "bg-green-100 text-green-800", label: "Active" },
@@ -118,7 +121,7 @@ export default function SuiviOptions() {
     const Icon = config.icon;
 
     return (
-      <Card key={option.id} className="border-none shadow-md">
+      <Card key={lot.id} className="border-none shadow-md">
         <CardContent className="p-6">
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
@@ -153,16 +156,16 @@ export default function SuiviOptions() {
             <div className="flex justify-between">
               <span className="text-slate-500">Date début:</span>
               <span className="font-medium">
-                {new Date(option.date_option).toLocaleDateString('fr-FR')}
+                {option && option.date_option ? new Date(option.date_option).toLocaleDateString('fr-FR') : 'N/A'}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500">Date fin:</span>
               <span className="font-medium">
-                {new Date(option.date_expiration).toLocaleDateString('fr-FR')}
+                {option && option.date_expiration ? new Date(option.date_expiration).toLocaleDateString('fr-FR') : 'N/A'}
               </span>
             </div>
-            {option.statut === 'active' && (
+            {option && option.statut === 'active' && (
               <div className={`p-3 rounded-lg border mt-3 ${isExpiringSoon ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-200'}`}>
                 <div className="flex items-center gap-2">
                   <Clock className={`w-4 h-4 ${isExpiringSoon ? 'text-red-600' : 'text-blue-600'}`} />
@@ -221,7 +224,7 @@ export default function SuiviOptions() {
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Sous option</p>
-                  <p className="text-2xl font-bold text-[#1E40AF]">{optionsSousOption.length}</p>
+                  <p className="text-2xl font-bold text-[#1E40AF]">{lotsSousOption.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -235,7 +238,7 @@ export default function SuiviOptions() {
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Réservé</p>
-                  <p className="text-2xl font-bold text-[#1E40AF]">{optionsReserve.length}</p>
+                  <p className="text-2xl font-bold text-[#1E40AF]">{lotsReserve.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -249,7 +252,7 @@ export default function SuiviOptions() {
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Allotement</p>
-                  <p className="text-2xl font-bold text-[#1E40AF]">{optionsAllotement.length}</p>
+                  <p className="text-2xl font-bold text-[#1E40AF]">{lotsAllotement.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -263,7 +266,7 @@ export default function SuiviOptions() {
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Vendu</p>
-                  <p className="text-2xl font-bold text-[#1E40AF]">{optionsVendu.length}</p>
+                  <p className="text-2xl font-bold text-[#1E40AF]">{lotsVendu.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -273,48 +276,48 @@ export default function SuiviOptions() {
         {/* Tabs par statut de lot */}
         <Tabs defaultValue="sous_option" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="sous_option">Sous option ({optionsSousOption.length})</TabsTrigger>
-            <TabsTrigger value="reserve">Réservé ({optionsReserve.length})</TabsTrigger>
-            <TabsTrigger value="allotement">Allotement ({optionsAllotement.length})</TabsTrigger>
-            <TabsTrigger value="vendu">Vendu ({optionsVendu.length})</TabsTrigger>
+            <TabsTrigger value="sous_option">Sous option ({lotsSousOption.length})</TabsTrigger>
+            <TabsTrigger value="reserve">Réservé ({lotsReserve.length})</TabsTrigger>
+            <TabsTrigger value="allotement">Allotement ({lotsAllotement.length})</TabsTrigger>
+            <TabsTrigger value="vendu">Vendu ({lotsVendu.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="sous_option" className="mt-6">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {optionsSousOption.length === 0 ? (
+              {lotsSousOption.length === 0 ? (
                 <p className="text-slate-400 col-span-full text-center py-12">Aucun lot sous option</p>
               ) : (
-                optionsSousOption.map(renderOptionCard)
+                lotsSousOption.map(renderLotCard)
               )}
             </div>
           </TabsContent>
 
           <TabsContent value="reserve" className="mt-6">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {optionsReserve.length === 0 ? (
+              {lotsReserve.length === 0 ? (
                 <p className="text-slate-400 col-span-full text-center py-12">Aucun lot réservé</p>
               ) : (
-                optionsReserve.map(renderOptionCard)
+                lotsReserve.map(renderLotCard)
               )}
             </div>
           </TabsContent>
 
           <TabsContent value="allotement" className="mt-6">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {optionsAllotement.length === 0 ? (
+              {lotsAllotement.length === 0 ? (
                 <p className="text-slate-400 col-span-full text-center py-12">Aucun lot en allotement</p>
               ) : (
-                optionsAllotement.map(renderOptionCard)
+                lotsAllotement.map(renderLotCard)
               )}
             </div>
           </TabsContent>
 
           <TabsContent value="vendu" className="mt-6">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {optionsVendu.length === 0 ? (
+              {lotsVendu.length === 0 ? (
                 <p className="text-slate-400 col-span-full text-center py-12">Aucun lot vendu</p>
               ) : (
-                optionsVendu.map(renderOptionCard)
+                lotsVendu.map(renderLotCard)
               )}
             </div>
           </TabsContent>
