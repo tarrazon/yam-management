@@ -18,20 +18,29 @@ export default function SuiviOptionsAdmin() {
 
   const queryClient = useQueryClient();
 
-  const { data: toutesOptions = [] } = useQuery({
+  const { data: toutesOptions = [], refetch: refetchOptions } = useQuery({
     queryKey: ['toutes_options_admin'],
     queryFn: () => base44.entities.OptionLot.list('-created_at'),
+    staleTime: 0,
+    cacheTime: 0,
   });
 
-  const { data: lots = [] } = useQuery({
+  const { data: lots = [], refetch: refetchLots } = useQuery({
     queryKey: ['lots_suivi_admin'],
     queryFn: () => base44.entities.LotLMNP.list(),
+    staleTime: 0,
+    cacheTime: 0,
   });
 
   const { data: partenaires = [] } = useQuery({
     queryKey: ['partenaires_options'],
     queryFn: () => base44.entities.Partenaire.list(),
   });
+
+  useEffect(() => {
+    refetchOptions();
+    refetchLots();
+  }, []);
 
   const updateLotMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.LotLMNP.update(id, data),

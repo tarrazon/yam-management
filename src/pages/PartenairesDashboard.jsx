@@ -16,16 +16,27 @@ export default function PartenairesDashboard() {
     base44.auth.me().then(setCurrentUser);
   }, []);
 
-  const { data: lots = [] } = useQuery({
+  const { data: lots = [], refetch: refetchLots } = useQuery({
     queryKey: ['lots_partenaire'],
     queryFn: () => base44.entities.LotLMNP.list(),
+    staleTime: 0,
+    cacheTime: 0,
   });
 
-  const { data: mesOptions = [] } = useQuery({
+  const { data: mesOptions = [], refetch: refetchOptions } = useQuery({
     queryKey: ['mes_options'],
     queryFn: () => base44.entities.OptionLot.filter({ partenaire_id: currentUser?.partenaire_id }),
     enabled: !!currentUser?.partenaire_id,
+    staleTime: 0,
+    cacheTime: 0,
   });
+
+  useEffect(() => {
+    if (currentUser?.partenaire_id) {
+      refetchOptions();
+      refetchLots();
+    }
+  }, [currentUser?.partenaire_id]);
 
   const { data: mesAcquereurs = [] } = useQuery({
     queryKey: ['mes_acquereurs'],
@@ -46,53 +57,6 @@ export default function PartenairesDashboard() {
       queryClient.refetchQueries({ queryKey: ['lots_partenaire'] });
     },
   });
-
-  const updateLotMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.LotLMNP.update(id, data),
-    onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ['lots_partenaire'] });
-    },
-  });
-
-  // Vérifier les options expirées et mettre à jour
-  useEffect(() => {
-    const checkExpiredOptions = async () => {
-      const now = new Date();
-
-      for (const option of mesOptions) {
-        if (option.statut === 'active' && new Date(option.date_expiration) < now) {
-          try {
-            // Marquer l'option comme expirée
-            await updateOptionMutation.mutateAsync({
-              id: option.id,
-              data: { statut: 'expiree' }
-            });
-
-            // Remettre le lot en disponible
-            const lot = lots.find(l => l.id === option.lot_lmnp_id);
-            if (lot && lot.statut === 'sous_option') {
-              await updateLotMutation.mutateAsync({
-                id: lot.id,
-                data: {
-                  statut: 'disponible',
-                  partenaire_id: null,
-                  partenaire_nom: '',
-                  acquereur_id: null,
-                  acquereur_nom: ''
-                }
-              });
-            }
-          } catch (error) {
-            console.error('Erreur lors de la mise à jour de l\'option expirée:', error);
-          }
-        }
-      }
-    };
-
-    if (mesOptions.length > 0 && lots.length > 0) {
-      checkExpiredOptions();
-    }
-  }, [mesOptions, lots]);
 
   // Options actives avec lots sous_option uniquement
   const optionsActives = mesOptions.filter(o => {

@@ -15,16 +15,27 @@ export default function SuiviOptions() {
     base44.auth.me().then(setCurrentUser);
   }, []);
 
-  const { data: toutesOptions = [] } = useQuery({
+  const { data: toutesOptions = [], refetch: refetchOptions } = useQuery({
     queryKey: ['toutes_mes_options'],
     queryFn: () => base44.entities.OptionLot.filter({ partenaire_id: currentUser?.partenaire_id }),
     enabled: !!currentUser?.partenaire_id,
+    staleTime: 0,
+    cacheTime: 0,
   });
 
-  const { data: lots = [] } = useQuery({
+  const { data: lots = [], refetch: refetchLots } = useQuery({
     queryKey: ['lots_suivi'],
     queryFn: () => base44.entities.LotLMNP.list(),
+    staleTime: 0,
+    cacheTime: 0,
   });
+
+  useEffect(() => {
+    if (currentUser?.partenaire_id) {
+      refetchOptions();
+      refetchLots();
+    }
+  }, [currentUser?.partenaire_id]);
 
   // Filtrer les lots par statut
   const filteredLots = filter === "all" 
