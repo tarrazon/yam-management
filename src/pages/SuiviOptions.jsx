@@ -31,10 +31,10 @@ export default function SuiviOptions() {
     ? lots 
     : lots.filter(l => l.statut === filter);
 
-  // Options actives : exclure les lots vendus
+  // Options actives : uniquement les lots sous_option
   const optionsActives = toutesOptions.filter(o => {
     const lot = lots.find(l => l.id === o.lot_lmnp_id);
-    return o.statut === 'active' && lot?.statut !== 'vendu';
+    return o.statut === 'active' && lot?.statut === 'sous_option';
   });
   const optionsExpirees = toutesOptions.filter(o => o.statut === 'expiree');
   const optionsConverties = toutesOptions.filter(o => o.statut === 'convertie');

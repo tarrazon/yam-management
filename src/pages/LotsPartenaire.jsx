@@ -63,7 +63,7 @@ export default function LotsPartenaire() {
 
   const { data: mesOptions = [] } = useQuery({
     queryKey: ['mes_options_partenaire'],
-    queryFn: () => base44.entities.OptionLot.filter({ partenaire_id: currentUser?.partenaire_id, statut: 'active' }),
+    queryFn: () => base44.entities.OptionLot.filter({ partenaire_id: currentUser?.partenaire_id }),
     enabled: !!currentUser?.partenaire_id,
   });
 
@@ -94,85 +94,99 @@ export default function LotsPartenaire() {
   });
 
   const handlePoserOption = async (lot, acquereurId) => {
-    // Vérifier s'il existe déjà une option active sur ce lot
-    const optionActiveExistante = allOptions.find(
-      o => o.lot_lmnp_id === lot.id && o.statut === 'active'
-    );
+    try {
+      // Vérifier s'il existe déjà une option active sur ce lot
+      const optionActiveExistante = allOptions.find(
+        o => o.lot_lmnp_id === lot.id && o.statut === 'active'
+      );
 
-    if (optionActiveExistante) {
-      alert('Une option est déjà active sur ce lot.');
-      setLotForOption(null);
-      return;
-    }
+      if (optionActiveExistante) {
+        alert('Une option est déjà active sur ce lot.');
+        setLotForOption(null);
+        return;
+      }
 
-    const optionsActives = mesOptions.filter(o => o.statut === 'active').length;
-    const optionsMax = partenaire?.options_max || 3;
+      const optionsActives = mesOptions.filter(o => {
+        const lotOption = lots.find(l => l.id === o.lot_lmnp_id);
+        return o.statut === 'active' && lotOption?.statut === 'sous_option';
+      }).length;
+      const optionsMax = partenaire?.options_max || 3;
 
-    if (optionsActives >= optionsMax) {
-      alert(`Vous avez atteint votre limite de ${optionsMax} options simultanées.`);
-      return;
-    }
+      if (optionsActives >= optionsMax) {
+        alert(`Vous avez atteint votre limite de ${optionsMax} options simultanées.`);
+        setLotForOption(null);
+        return;
+      }
 
-    const dureeJours = partenaire?.duree_option_jours || 5;
-    const dateDebut = new Date();
-    const dateFin = new Date(dateDebut.getTime() + dureeJours * 24 * 60 * 60 * 1000);
+      const dureeJours = partenaire?.duree_option_jours || 5;
+      const dateDebut = new Date();
+      const dateFin = new Date(dateDebut.getTime() + dureeJours * 24 * 60 * 60 * 1000);
 
-    const acquereur = mesAcquereurs.find(a => a.id === acquereurId);
+      const acquereur = mesAcquereurs.find(a => a.id === acquereurId);
 
-    const optionData = {
-      lot_lmnp_id: lot.id,
-      partenaire_id: currentUser.partenaire_id,
-      partenaire_nom: partenaire?.nom || '',
-      acquereur_id: acquereurId,
-      acquereur_nom: acquereur ? `${acquereur.prenom} ${acquereur.nom}` : '',
-      lot_reference: lot.reference || '',
-      residence_nom: lot.residence_nom || '',
-      date_option: dateDebut.toISOString().split('T')[0],
-      date_expiration: dateFin.toISOString().split('T')[0],
-      statut: 'active',
-      pose_par: 'partenaire',
-      user_email: currentUser?.email || '',
-    };
-
-    await createOptionMutation.mutateAsync(optionData);
-    await updateLotMutation.mutateAsync({
-      id: lot.id,
-      data: {
-        statut: 'sous_option',
-        date_prise_option: dateDebut.toISOString().split('T')[0],
+      const optionData = {
+        lot_lmnp_id: lot.id,
         partenaire_id: currentUser.partenaire_id,
+        partenaire_nom: partenaire?.nom || '',
         acquereur_id: acquereurId,
         acquereur_nom: acquereur ? `${acquereur.prenom} ${acquereur.nom}` : '',
-      }
-    });
+        lot_reference: lot.reference || '',
+        residence_nom: lot.residence_nom || '',
+        date_option: dateDebut.toISOString().split('T')[0],
+        date_expiration: dateFin.toISOString().split('T')[0],
+        statut: 'active',
+        pose_par: 'partenaire',
+        user_email: currentUser?.email || '',
+      };
 
-    try {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-      await fetch(`${supabaseUrl}/functions/v1/send-option-notification`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${supabaseAnonKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          partenaire_nom: partenaire?.nom || '',
-          partenaire_prenom: partenaire?.prenom || '',
-          lot_numero: lot.reference || '',
-          residence_nom: lot.residence_nom || '',
-          acquereur_nom: acquereur?.nom || '',
-          acquereur_prenom: acquereur?.prenom || '',
-          date_debut: dateDebut.toISOString(),
-          date_fin: dateFin.toISOString(),
-        }),
+      await createOptionMutation.mutateAsync(optionData);
+      await updateLotMutation.mutateAsync({
+        id: lot.id,
+        data: {
+          statut: 'sous_option',
+          date_prise_option: dateDebut.toISOString().split('T')[0],
+          partenaire_id: currentUser.partenaire_id,
+          acquereur_id: acquereurId,
+          acquereur_nom: acquereur ? `${acquereur.prenom} ${acquereur.nom}` : '',
+        }
       });
-    } catch (error) {
-      console.error('Erreur lors de l\'envoi des notifications:', error);
-    }
 
-    setLotForOption(null);
-    alert('Option posée avec succès !');
+      try {
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+        await fetch(`${supabaseUrl}/functions/v1/send-option-notification`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${supabaseAnonKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            partenaire_nom: partenaire?.nom || '',
+            partenaire_prenom: partenaire?.prenom || '',
+            lot_numero: lot.reference || '',
+            residence_nom: lot.residence_nom || '',
+            acquereur_nom: acquereur?.nom || '',
+            acquereur_prenom: acquereur?.prenom || '',
+            date_debut: dateDebut.toISOString(),
+            date_fin: dateFin.toISOString(),
+          }),
+        });
+      } catch (error) {
+        console.error('Erreur lors de l\'envoi des notifications:', error);
+      }
+
+      await queryClient.refetchQueries({ queryKey: ['lots_disponibles'] });
+      await queryClient.refetchQueries({ queryKey: ['mes_options_partenaire'] });
+      await queryClient.refetchQueries({ queryKey: ['all_options_partenaire'] });
+
+      setLotForOption(null);
+      alert('Option posée avec succès ! Le lot est maintenant sous option.');
+    } catch (error) {
+      console.error('Erreur lors de la prise d\'option:', error);
+      alert('Erreur lors de la prise d\'option. Veuillez réessayer.');
+      setLotForOption(null);
+    }
   };
 
   // Filtrage
@@ -472,12 +486,14 @@ export default function LotsPartenaire() {
           <PoserOptionPartenaireDialog
             lot={lotForOption}
             mesAcquereurs={mesAcquereurs}
-            optionsActives={mesOptions.filter(o => o.statut === 'active').length}
-            optionsMax={currentUser?.options_max || 3}
-            dureeJours={currentUser?.duree_option_jours || 5}
+            optionsActives={mesOptions.filter(o => {
+              const lotOption = lots.find(l => l.id === o.lot_lmnp_id);
+              return o.statut === 'active' && lotOption?.statut === 'sous_option';
+            }).length}
+            optionsMax={partenaire?.options_max || 3}
+            dureeJours={partenaire?.duree_option_jours || 5}
             onSubmit={handlePoserOption}
             onCancel={() => {
-              console.log('Closing dialog');
               setLotForOption(null);
             }}
           />
