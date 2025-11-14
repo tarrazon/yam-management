@@ -169,17 +169,7 @@ export default function LotsLMNP() {
   });
 
   const handlePoserOption = async (formData) => {
-    // Vérifier s'il existe déjà une option active sur ce lot
-    const optionActiveExistante = allOptions.find(
-      o => o.lot_lmnp_id === lotForOption.id && o.statut === 'active'
-    );
-
-    if (optionActiveExistante) {
-      alert('Une option est déjà active sur ce lot. Veuillez d\'abord l\'annuler.');
-      setLotForOption(null);
-      return;
-    }
-
+    // Ne pas vérifier côté client - la contrainte unique en base de données gérera les doublons
     const partenaire = partenaires.find(p => p.id === formData.partenaire_id);
     const acquereur = acquereurs.find(a => a.id === formData.acquereur_id);
 
@@ -218,7 +208,13 @@ export default function LotsLMNP() {
       setError(null);
     } catch (e) {
       console.error("Error in handlePoserOption:", e);
-      setError(e.message || "Une erreur est survenue lors de la pose de l'option ou la mise à jour du lot.");
+      const errorMsg = e.message || e.toString();
+      if (errorMsg.includes('unique') || errorMsg.includes('duplicate')) {
+        alert('Une option est déjà active sur ce lot. Veuillez rafraîchir la page.');
+      } else {
+        alert(`Erreur lors de la pose de l'option: ${errorMsg}`);
+      }
+      setError(errorMsg);
     }
   };
 

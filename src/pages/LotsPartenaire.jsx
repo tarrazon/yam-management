@@ -116,17 +116,8 @@ export default function LotsPartenaire() {
 
   const handlePoserOption = async (lot, acquereurId) => {
     try {
-      // Vérifier s'il existe déjà une option active sur ce lot
-      const optionActiveExistante = allOptions.find(
-        o => o.lot_lmnp_id === lot.id && o.statut === 'active'
-      );
-
-      if (optionActiveExistante) {
-        alert('Une option est déjà active sur ce lot.');
-        setLotForOption(null);
-        return;
-      }
-
+      // Ne pas vérifier côté client - la contrainte unique en base de données gérera les doublons
+      // Vérifier uniquement le nombre d'options du partenaire
       const optionsActives = mesOptions.filter(o => {
         const lotOption = lots.find(l => l.id === o.lot_lmnp_id);
         return o.statut === 'active' && lotOption?.statut === 'sous_option';
@@ -208,7 +199,11 @@ export default function LotsPartenaire() {
     } catch (error) {
       console.error('Erreur lors de la prise d\'option:', error);
       const errorMessage = error?.message || error?.toString() || 'Erreur inconnue';
-      alert(`Erreur lors de la prise d'option: ${errorMessage}. Veuillez réessayer.`);
+      if (errorMessage.includes('unique') || errorMessage.includes('duplicate')) {
+        alert('Une option est déjà active sur ce lot. Veuillez rafraîchir la page.');
+      } else {
+        alert(`Erreur lors de la prise d'option: ${errorMessage}. Veuillez réessayer.`);
+      }
       setLotForOption(null);
     }
   };
