@@ -43,10 +43,17 @@ export default function SuiviOptions() {
     : lots.filter(l => l.statut === filter);
 
   // Regrouper les LOTS par statut (pas les options)
-  // Pour chaque lot du partenaire, on récupère l'option la plus récente
+  // Pour chaque option du partenaire, on récupère le lot correspondant
   const getLotsByStatut = (statut) => {
-    return lots
-      .filter(l => l.statut === statut && l.partenaire_id === currentUser?.partenaire_id)
+    // D'abord, on obtient tous les lots avec ce statut
+    const lotsAvecStatut = lots.filter(l => l.statut === statut);
+
+    // Ensuite, on garde seulement ceux qui ont au moins une option du partenaire
+    const lotsPartenaire = lotsAvecStatut
+      .filter(lot => {
+        // Vérifier si ce lot a au moins une option du partenaire
+        return toutesOptions.some(opt => opt.lot_lmnp_id === lot.id);
+      })
       .map(lot => {
         // Trouver l'option la plus récente pour ce lot
         const optionsForLot = toutesOptions
@@ -58,6 +65,8 @@ export default function SuiviOptions() {
           option: optionsForLot[0] || null
         };
       });
+
+    return lotsPartenaire;
   };
 
   const lotsSousOption = getLotsByStatut('sous_option');

@@ -201,13 +201,10 @@ export default function LotsPartenaire() {
   };
 
   // Filtrage
+  // On se base uniquement sur le statut du lot, pas sur les options
+  // Le trigger de la base de données synchronise automatiquement le statut
   const filteredLots = lots
     .filter(l => l.statut === 'disponible')
-    .filter(l => {
-      // Exclure les lots qui ont une option active
-      const hasActiveOption = allOptions.some(opt => opt.lot_lmnp_id === l.id && opt.statut === 'active');
-      return !hasActiveOption;
-    })
     .filter(l => !searchTerm || l.reference?.toLowerCase().includes(searchTerm.toLowerCase()) || l.residence_nom?.toLowerCase().includes(searchTerm.toLowerCase()))
     .filter(l => filters.fiscalite === "all" || l.statut_fiscal === filters.fiscalite)
     .filter(l => {
