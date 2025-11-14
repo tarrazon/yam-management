@@ -42,19 +42,26 @@ export default function SuiviOptions() {
     ? lots 
     : lots.filter(l => l.statut === filter);
 
-  // Options actives : uniquement les lots sous_option
-  const optionsActives = toutesOptions.filter(o => {
+  // Regrouper les options par statut de lot
+  const optionsSousOption = toutesOptions.filter(o => {
     const lot = lots.find(l => l.id === o.lot_lmnp_id);
-    return o.statut === 'active' && lot?.statut === 'sous_option';
+    return lot?.statut === 'sous_option' && lot?.partenaire_id === currentUser?.partenaire_id;
   });
-  const optionsExpirees = toutesOptions.filter(o => o.statut === 'expiree');
-  const optionsConverties = toutesOptions.filter(o => o.statut === 'convertie');
-  const optionsAnnulees = toutesOptions.filter(o => o.statut === 'annulee');
-  
-  // Lots vendus du partenaire
-  const lotsVendus = lots.filter(l => 
-    l.statut === 'vendu' && l.partenaire_id === currentUser?.partenaire_id
-  );
+
+  const optionsReserve = toutesOptions.filter(o => {
+    const lot = lots.find(l => l.id === o.lot_lmnp_id);
+    return lot?.statut === 'reserve' && lot?.partenaire_id === currentUser?.partenaire_id;
+  });
+
+  const optionsAllotement = toutesOptions.filter(o => {
+    const lot = lots.find(l => l.id === o.lot_lmnp_id);
+    return lot?.statut === 'allotement' && lot?.partenaire_id === currentUser?.partenaire_id;
+  });
+
+  const optionsVendu = toutesOptions.filter(o => {
+    const lot = lots.find(l => l.id === o.lot_lmnp_id);
+    return lot?.statut === 'vendu' && lot?.partenaire_id === currentUser?.partenaire_id;
+  });
 
   const getTimeRemaining = (dateFin) => {
     const now = new Date();
@@ -205,7 +212,7 @@ export default function SuiviOptions() {
         </Card>
 
         {/* Statistiques */}
-        <div className="grid md:grid-cols-5 gap-6 mb-8">
+        <div className="grid md:grid-cols-4 gap-6 mb-8">
           <Card className="border-none shadow-md">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
@@ -213,8 +220,8 @@ export default function SuiviOptions() {
                   <Clock className="w-6 h-6 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Actives</p>
-                  <p className="text-2xl font-bold text-[#1E40AF]">{optionsActives.length}</p>
+                  <p className="text-sm text-slate-500">Sous option</p>
+                  <p className="text-2xl font-bold text-[#1E40AF]">{optionsSousOption.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -227,8 +234,8 @@ export default function SuiviOptions() {
                   <CheckCircle className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Converties</p>
-                  <p className="text-2xl font-bold text-[#1E40AF]">{optionsConverties.length}</p>
+                  <p className="text-sm text-slate-500">Réservé</p>
+                  <p className="text-2xl font-bold text-[#1E40AF]">{optionsReserve.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -238,11 +245,11 @@ export default function SuiviOptions() {
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
                 <div className="p-3 rounded-xl bg-purple-50">
-                  <ShoppingBag className="w-6 h-6 text-purple-600" />
+                  <AlertCircle className="w-6 h-6 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Vendus</p>
-                  <p className="text-2xl font-bold text-[#1E40AF]">{lotsVendus.length}</p>
+                  <p className="text-sm text-slate-500">Allotement</p>
+                  <p className="text-2xl font-bold text-[#1E40AF]">{optionsAllotement.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -251,134 +258,63 @@ export default function SuiviOptions() {
           <Card className="border-none shadow-md">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-red-50">
-                  <AlertCircle className="w-6 h-6 text-red-600" />
+                <div className="p-3 rounded-xl bg-amber-50">
+                  <ShoppingBag className="w-6 h-6 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Expirées</p>
-                  <p className="text-2xl font-bold text-[#1E40AF]">{optionsExpirees.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-none shadow-md">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-slate-50">
-                  <XCircle className="w-6 h-6 text-slate-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500">Annulées</p>
-                  <p className="text-2xl font-bold text-[#1E40AF]">{optionsAnnulees.length}</p>
+                  <p className="text-sm text-slate-500">Vendu</p>
+                  <p className="text-2xl font-bold text-[#1E40AF]">{optionsVendu.length}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Tabs par statut */}
-        <Tabs defaultValue="active" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="active">Actives ({optionsActives.length})</TabsTrigger>
-            <TabsTrigger value="convertie">Converties ({optionsConverties.length})</TabsTrigger>
-            <TabsTrigger value="vendus">Vendus ({lotsVendus.length})</TabsTrigger>
-            <TabsTrigger value="expiree">Expirées ({optionsExpirees.length})</TabsTrigger>
-            <TabsTrigger value="annulee">Annulées ({optionsAnnulees.length})</TabsTrigger>
+        {/* Tabs par statut de lot */}
+        <Tabs defaultValue="sous_option" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="sous_option">Sous option ({optionsSousOption.length})</TabsTrigger>
+            <TabsTrigger value="reserve">Réservé ({optionsReserve.length})</TabsTrigger>
+            <TabsTrigger value="allotement">Allotement ({optionsAllotement.length})</TabsTrigger>
+            <TabsTrigger value="vendu">Vendu ({optionsVendu.length})</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="active" className="mt-6">
+          <TabsContent value="sous_option" className="mt-6">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {optionsActives.length === 0 ? (
-                <p className="text-slate-400 col-span-full text-center py-12">Aucune option active</p>
+              {optionsSousOption.length === 0 ? (
+                <p className="text-slate-400 col-span-full text-center py-12">Aucun lot sous option</p>
               ) : (
-                optionsActives.map(renderOptionCard)
+                optionsSousOption.map(renderOptionCard)
               )}
             </div>
           </TabsContent>
 
-          <TabsContent value="convertie" className="mt-6">
+          <TabsContent value="reserve" className="mt-6">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {optionsConverties.length === 0 ? (
-                <p className="text-slate-400 col-span-full text-center py-12">Aucune option convertie</p>
+              {optionsReserve.length === 0 ? (
+                <p className="text-slate-400 col-span-full text-center py-12">Aucun lot réservé</p>
               ) : (
-                optionsConverties.map(renderOptionCard)
+                optionsReserve.map(renderOptionCard)
               )}
             </div>
           </TabsContent>
 
-          <TabsContent value="vendus" className="mt-6">
+          <TabsContent value="allotement" className="mt-6">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {lotsVendus.length === 0 ? (
+              {optionsAllotement.length === 0 ? (
+                <p className="text-slate-400 col-span-full text-center py-12">Aucun lot en allotement</p>
+              ) : (
+                optionsAllotement.map(renderOptionCard)
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="vendu" className="mt-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {optionsVendu.length === 0 ? (
                 <p className="text-slate-400 col-span-full text-center py-12">Aucun lot vendu</p>
               ) : (
-                lotsVendus.map((lot) => (
-                  <Card key={lot.id} className="border-none shadow-md">
-                    <CardContent className="p-6">
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="flex-1">
-                          <p className="font-semibold text-[#1E40AF] text-lg mb-2">
-                            Lot {lot.reference}
-                          </p>
-                          <p className="text-sm text-slate-600 mb-3">{lot.residence_nom}</p>
-                          
-                          <Badge className="bg-purple-100 text-purple-800 text-base px-3 py-1.5 font-semibold">
-                            Vendu
-                          </Badge>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2 text-sm">
-                        {lot.acquereur_nom && (
-                          <div className="flex justify-between">
-                            <span className="text-slate-500">Acquéreur:</span>
-                            <span className="font-medium">{lot.acquereur_nom}</span>
-                          </div>
-                        )}
-                        {lot.typologie && (
-                          <div className="flex justify-between">
-                            <span className="text-slate-500">Typologie:</span>
-                            <span className="font-medium">{lot.typologie}</span>
-                          </div>
-                        )}
-                        {lot.prix_fai && (
-                          <div className="flex justify-between">
-                            <span className="text-slate-500">Prix FAI:</span>
-                            <span className="font-semibold text-green-600">{lot.prix_fai.toLocaleString('fr-FR')} €</span>
-                          </div>
-                        )}
-                        {lot.date_signature_acte && (
-                          <div className="flex justify-between">
-                            <span className="text-slate-500">Date signature:</span>
-                            <span className="font-medium">
-                              {new Date(lot.date_signature_acte).toLocaleDateString('fr-FR')}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="expiree" className="mt-6">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {optionsExpirees.length === 0 ? (
-                <p className="text-slate-400 col-span-full text-center py-12">Aucune option expirée</p>
-              ) : (
-                optionsExpirees.map(renderOptionCard)
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="annulee" className="mt-6">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {optionsAnnulees.length === 0 ? (
-                <p className="text-slate-400 col-span-full text-center py-12">Aucune option annulée</p>
-              ) : (
-                optionsAnnulees.map(renderOptionCard)
+                optionsVendu.map(renderOptionCard)
               )}
             </div>
           </TabsContent>

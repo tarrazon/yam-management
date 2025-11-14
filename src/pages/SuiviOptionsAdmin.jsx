@@ -83,57 +83,26 @@ export default function SuiviOptionsAdmin() {
     await updateLotMutation.mutateAsync({ id: lotId, data: { statut: newStatut } });
   };
 
-  // Vérifier et marquer automatiquement les options expirées
-  useEffect(() => {
-    const checkExpiredOptions = async () => {
-      const now = new Date();
-
-      for (const option of toutesOptions) {
-        if (option.statut === 'active' && new Date(option.date_expiration) < now) {
-          try {
-            // Marquer l'option comme expirée
-            await updateOptionMutation.mutateAsync({
-              id: option.id,
-              data: { statut: 'expiree' }
-            });
-
-            // Remettre le lot en disponible
-            const lot = lots.find(l => l.id === option.lot_lmnp_id);
-            if (lot && lot.statut === 'sous_option') {
-              await updateLotMutation.mutateAsync({
-                id: lot.id,
-                data: {
-                  statut: 'disponible',
-                  partenaire_id: null,
-                  partenaire_nom: '',
-                  acquereur_id: null,
-                  acquereur_nom: ''
-                }
-              });
-            }
-          } catch (error) {
-            console.error('Erreur lors de la mise à jour de l\'option expirée:', error);
-          }
-        }
-      }
-    };
-
-    if (toutesOptions.length > 0 && lots.length > 0) {
-      checkExpiredOptions();
-    }
-  }, [toutesOptions, lots]);
-
-  // Options actives : exclure les lots vendus
-  const optionsActives = toutesOptions.filter(o => {
+  // Regrouper les options par statut de lot
+  const optionsSousOption = toutesOptions.filter(o => {
     const lot = lots.find(l => l.id === o.lot_lmnp_id);
-    return o.statut === 'active' && lot?.statut !== 'vendu';
+    return lot?.statut === 'sous_option';
   });
-  const optionsExpirees = toutesOptions.filter(o => o.statut === 'expiree');
-  const optionsConverties = toutesOptions.filter(o => o.statut === 'convertie');
-  const optionsAnnulees = toutesOptions.filter(o => o.statut === 'annulee');
-  
-  // Tous les lots vendus
-  const lotsVendus = lots.filter(l => l.statut === 'vendu');
+
+  const optionsReserve = toutesOptions.filter(o => {
+    const lot = lots.find(l => l.id === o.lot_lmnp_id);
+    return lot?.statut === 'reserve';
+  });
+
+  const optionsAllotement = toutesOptions.filter(o => {
+    const lot = lots.find(l => l.id === o.lot_lmnp_id);
+    return lot?.statut === 'allotement';
+  });
+
+  const optionsVendu = toutesOptions.filter(o => {
+    const lot = lots.find(l => l.id === o.lot_lmnp_id);
+    return lot?.statut === 'vendu';
+  });
 
   const getTimeRemaining = (dateFin) => {
     const now = new Date();
@@ -383,7 +352,7 @@ export default function SuiviOptionsAdmin() {
         </Card>
 
         {/* Statistiques */}
-        <div className="grid md:grid-cols-5 gap-6 mb-8">
+        <div className="grid md:grid-cols-4 gap-6 mb-8">
           <Card className="border-none shadow-md">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
@@ -391,8 +360,8 @@ export default function SuiviOptionsAdmin() {
                   <Clock className="w-6 h-6 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Actives</p>
-                  <p className="text-2xl font-bold text-[#1E40AF]">{optionsActives.length}</p>
+                  <p className="text-sm text-slate-500">Sous option</p>
+                  <p className="text-2xl font-bold text-[#1E40AF]">{optionsSousOption.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -405,8 +374,8 @@ export default function SuiviOptionsAdmin() {
                   <CheckCircle className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Converties</p>
-                  <p className="text-2xl font-bold text-[#1E40AF]">{optionsConverties.length}</p>
+                  <p className="text-sm text-slate-500">Réservé</p>
+                  <p className="text-2xl font-bold text-[#1E40AF]">{optionsReserve.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -416,11 +385,11 @@ export default function SuiviOptionsAdmin() {
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
                 <div className="p-3 rounded-xl bg-purple-50">
-                  <ShoppingBag className="w-6 h-6 text-purple-600" />
+                  <AlertCircle className="w-6 h-6 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Vendus</p>
-                  <p className="text-2xl font-bold text-[#1E40AF]">{lotsVendus.length}</p>
+                  <p className="text-sm text-slate-500">Allotement</p>
+                  <p className="text-2xl font-bold text-[#1E40AF]">{optionsAllotement.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -429,137 +398,63 @@ export default function SuiviOptionsAdmin() {
           <Card className="border-none shadow-md">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-red-50">
-                  <AlertCircle className="w-6 h-6 text-red-600" />
+                <div className="p-3 rounded-xl bg-amber-50">
+                  <ShoppingBag className="w-6 h-6 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Expirées</p>
-                  <p className="text-2xl font-bold text-[#1E40AF]">{optionsExpirees.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-none shadow-md">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl bg-slate-50">
-                  <XCircle className="w-6 h-6 text-slate-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500">Annulées</p>
-                  <p className="text-2xl font-bold text-[#1E40AF]">{optionsAnnulees.length}</p>
+                  <p className="text-sm text-slate-500">Vendu</p>
+                  <p className="text-2xl font-bold text-[#1E40AF]">{optionsVendu.length}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Tabs par statut */}
-        <Tabs defaultValue="active" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="active">Actives ({filterOptions(optionsActives).length})</TabsTrigger>
-            <TabsTrigger value="convertie">Converties ({filterOptions(optionsConverties).length})</TabsTrigger>
-            <TabsTrigger value="vendus">Vendus ({lotsVendus.length})</TabsTrigger>
-            <TabsTrigger value="expiree">Expirées ({filterOptions(optionsExpirees).length})</TabsTrigger>
-            <TabsTrigger value="annulee">Annulées ({filterOptions(optionsAnnulees).length})</TabsTrigger>
+        {/* Tabs par statut de lot */}
+        <Tabs defaultValue="sous_option" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="sous_option">Sous option ({filterOptions(optionsSousOption).length})</TabsTrigger>
+            <TabsTrigger value="reserve">Réservé ({filterOptions(optionsReserve).length})</TabsTrigger>
+            <TabsTrigger value="allotement">Allotement ({filterOptions(optionsAllotement).length})</TabsTrigger>
+            <TabsTrigger value="vendu">Vendu ({filterOptions(optionsVendu).length})</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="active" className="mt-6">
+          <TabsContent value="sous_option" className="mt-6">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filterOptions(optionsActives).length === 0 ? (
-                <p className="text-slate-400 col-span-full text-center py-12">Aucune option active</p>
+              {filterOptions(optionsSousOption).length === 0 ? (
+                <p className="text-slate-400 col-span-full text-center py-12">Aucun lot sous option</p>
               ) : (
-                filterOptions(optionsActives).map(renderOptionCard)
+                filterOptions(optionsSousOption).map(renderOptionCard)
               )}
             </div>
           </TabsContent>
 
-          <TabsContent value="convertie" className="mt-6">
+          <TabsContent value="reserve" className="mt-6">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filterOptions(optionsConverties).length === 0 ? (
-                <p className="text-slate-400 col-span-full text-center py-12">Aucune option convertie</p>
+              {filterOptions(optionsReserve).length === 0 ? (
+                <p className="text-slate-400 col-span-full text-center py-12">Aucun lot réservé</p>
               ) : (
-                filterOptions(optionsConverties).map(renderOptionCard)
+                filterOptions(optionsReserve).map(renderOptionCard)
               )}
             </div>
           </TabsContent>
 
-          <TabsContent value="vendus" className="mt-6">
+          <TabsContent value="allotement" className="mt-6">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {lotsVendus.length === 0 ? (
+              {filterOptions(optionsAllotement).length === 0 ? (
+                <p className="text-slate-400 col-span-full text-center py-12">Aucun lot en allotement</p>
+              ) : (
+                filterOptions(optionsAllotement).map(renderOptionCard)
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="vendu" className="mt-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filterOptions(optionsVendu).length === 0 ? (
                 <p className="text-slate-400 col-span-full text-center py-12">Aucun lot vendu</p>
               ) : (
-                lotsVendus.map((lot) => (
-                  <Card key={lot.id} className="border-none shadow-md">
-                    <CardContent className="p-6">
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="flex-1">
-                          <p className="font-semibold text-[#1E40AF] text-lg mb-2">
-                            Lot {lot.reference}
-                          </p>
-                          <p className="text-sm text-slate-600 mb-3">{lot.residence_nom}</p>
-                          <p className="text-xs text-slate-500 mb-3">
-                            {lot.typologie} · {lot.ville}
-                          </p>
-                          
-                          <Badge className="bg-purple-100 text-purple-800 text-base px-3 py-1.5 font-semibold">
-                            Vendu
-                          </Badge>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2 text-sm">
-                        {lot.partenaire_nom && (
-                          <div className="flex justify-between">
-                            <span className="text-slate-500">Partenaire:</span>
-                            <span className="font-medium">{lot.partenaire_nom}</span>
-                          </div>
-                        )}
-                        {lot.acquereur_nom && (
-                          <div className="flex justify-between">
-                            <span className="text-slate-500">Acquéreur:</span>
-                            <span className="font-medium">{lot.acquereur_nom}</span>
-                          </div>
-                        )}
-                        {lot.prix_fai && (
-                          <div className="flex justify-between">
-                            <span className="text-slate-500">Prix FAI:</span>
-                            <span className="font-semibold text-green-600">{lot.prix_fai.toLocaleString('fr-FR')} €</span>
-                          </div>
-                        )}
-                        {lot.date_signature_acte && (
-                          <div className="flex justify-between">
-                            <span className="text-slate-500">Date signature:</span>
-                            <span className="font-medium">
-                              {new Date(lot.date_signature_acte).toLocaleDateString('fr-FR')}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="expiree" className="mt-6">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filterOptions(optionsExpirees).length === 0 ? (
-                <p className="text-slate-400 col-span-full text-center py-12">Aucune option expirée</p>
-              ) : (
-                filterOptions(optionsExpirees).map(renderOptionCard)
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="annulee" className="mt-6">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filterOptions(optionsAnnulees).length === 0 ? (
-                <p className="text-slate-400 col-span-full text-center py-12">Aucune option annulée</p>
-              ) : (
-                filterOptions(optionsAnnulees).map(renderOptionCard)
+                filterOptions(optionsVendu).map(renderOptionCard)
               )}
             </div>
           </TabsContent>

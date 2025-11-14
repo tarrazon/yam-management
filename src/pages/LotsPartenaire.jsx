@@ -158,17 +158,8 @@ export default function LotsPartenaire() {
         user_email: currentUser?.email || '',
       };
 
+      // Créer l'option - le trigger sync_lot_statut_on_option_change gérera automatiquement le statut du lot
       await createOptionMutation.mutateAsync(optionData);
-      await updateLotMutation.mutateAsync({
-        id: lot.id,
-        data: {
-          statut: 'sous_option',
-          date_prise_option: dateDebut.toISOString().split('T')[0],
-          partenaire_id: currentUser.partenaire_id,
-          acquereur_id: acquereurId,
-          acquereur_nom: acquereur ? `${acquereur.prenom} ${acquereur.nom}` : '',
-        }
-      });
 
       try {
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -203,7 +194,8 @@ export default function LotsPartenaire() {
       alert('Option posée avec succès ! Le lot est maintenant sous option.');
     } catch (error) {
       console.error('Erreur lors de la prise d\'option:', error);
-      alert('Erreur lors de la prise d\'option. Veuillez réessayer.');
+      const errorMessage = error?.message || error?.toString() || 'Erreur inconnue';
+      alert(`Erreur lors de la prise d'option: ${errorMessage}. Veuillez réessayer.`);
       setLotForOption(null);
     }
   };
