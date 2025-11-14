@@ -87,7 +87,9 @@ export default function LotsLMNP() {
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.LotLMNP.create(data),
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ['lots_lmnp'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_lmnp'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_disponibles'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_suivi'] });
       setShowForm(false);
       setEditingLot(null);
       setError(null);
@@ -110,8 +112,12 @@ export default function LotsLMNP() {
       return base44.entities.LotLMNP.update(id, data);
     },
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ['lots_lmnp'] });
-      queryClient.refetchQueries({ queryKey: ['all_options'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_lmnp'] });
+      queryClient.invalidateQueries({ queryKey: ['all_options'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_disponibles'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_suivi'] });
+      queryClient.invalidateQueries({ queryKey: ['toutes_mes_options'] });
+      queryClient.invalidateQueries({ queryKey: ['all_options_partenaire'] });
       setShowForm(false);
       setEditingLot(null);
       setViewingLot(null);
@@ -135,8 +141,10 @@ export default function LotsLMNP() {
       return base44.entities.LotLMNP.delete(id);
     },
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ['lots_lmnp'] });
-      queryClient.refetchQueries({ queryKey: ['all_options'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_lmnp'] });
+      queryClient.invalidateQueries({ queryKey: ['all_options'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_disponibles'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_suivi'] });
       setDeletingLot(null);
       setViewingLot(null); // Close detail view if lot was deleted from there
       setError(null);

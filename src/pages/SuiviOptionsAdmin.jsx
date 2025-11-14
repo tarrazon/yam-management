@@ -45,8 +45,11 @@ export default function SuiviOptionsAdmin() {
   const updateLotMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.LotLMNP.update(id, data),
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ['lots_suivi_admin'] });
-      queryClient.refetchQueries({ queryKey: ['toutes_options_admin'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_suivi_admin'] });
+      queryClient.invalidateQueries({ queryKey: ['toutes_options_admin'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_lmnp'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_disponibles'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_suivi'] });
       setEditingOptionId(null);
     },
   });
@@ -54,8 +57,13 @@ export default function SuiviOptionsAdmin() {
   const updateOptionMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.OptionLot.update(id, data),
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ['toutes_options_admin'] });
-      queryClient.refetchQueries({ queryKey: ['lots_suivi_admin'] });
+      queryClient.invalidateQueries({ queryKey: ['toutes_options_admin'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_suivi_admin'] });
+      queryClient.invalidateQueries({ queryKey: ['all_options'] });
+      queryClient.invalidateQueries({ queryKey: ['toutes_mes_options'] });
+      queryClient.invalidateQueries({ queryKey: ['all_options_partenaire'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_lmnp'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_disponibles'] });
     },
   });
 

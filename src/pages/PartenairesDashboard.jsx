@@ -53,8 +53,13 @@ export default function PartenairesDashboard() {
   const updateOptionMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.OptionLot.update(id, data),
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ['mes_options'] });
-      queryClient.refetchQueries({ queryKey: ['lots_partenaire'] });
+      queryClient.invalidateQueries({ queryKey: ['mes_options'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_partenaire'] });
+      queryClient.invalidateQueries({ queryKey: ['toutes_mes_options'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_disponibles'] });
+      queryClient.invalidateQueries({ queryKey: ['all_options_partenaire'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_lmnp'] });
+      queryClient.invalidateQueries({ queryKey: ['all_options'] });
     },
   });
 

@@ -8,7 +8,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 0, // Données toujours considérées comme périmées pour rafraîchissement instantané
-      cacheTime: 300000, // Cache pendant 5 minutes
+      gcTime: 0, // Pas de cache (anciennement cacheTime)
       refetchOnWindowFocus: true, // Refetch automatiquement au retour sur la fenêtre
       refetchOnMount: true, // Refetch au montage
       retry: 1, // Réessayer 1 fois en cas d'erreur

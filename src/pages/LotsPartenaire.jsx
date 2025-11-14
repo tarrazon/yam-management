@@ -92,15 +92,23 @@ export default function LotsPartenaire() {
   const createOptionMutation = useMutation({
     mutationFn: (data) => base44.entities.OptionLot.create(data),
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ['mes_options_partenaire'] });
-      queryClient.refetchQueries({ queryKey: ['lots_disponibles'] });
+      // Invalider TOUS les caches liés aux options et lots
+      queryClient.invalidateQueries({ queryKey: ['mes_options_partenaire'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_disponibles'] });
+      queryClient.invalidateQueries({ queryKey: ['all_options_partenaire'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_lmnp'] });
+      queryClient.invalidateQueries({ queryKey: ['all_options'] });
+      queryClient.invalidateQueries({ queryKey: ['toutes_mes_options'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_suivi'] });
     },
   });
 
   const updateLotMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.LotLMNP.update(id, data),
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ['lots_disponibles'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_disponibles'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_lmnp'] });
+      queryClient.invalidateQueries({ queryKey: ['lots_suivi'] });
     },
   });
 
