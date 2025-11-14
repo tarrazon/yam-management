@@ -45,9 +45,11 @@ export default function LotsLMNP() {
     queryFn: () => base44.auth.me(),
   });
 
-  const { data: lots = [], isLoading } = useQuery({
+  const { data: lots = [], isLoading, refetch: refetchLots } = useQuery({
     queryKey: ['lots_lmnp'],
     queryFn: () => base44.entities.LotLMNP.list('-created_at'),
+    staleTime: 0,
+    cacheTime: 0,
   });
 
   const { data: residences = [] } = useQuery({
@@ -70,10 +72,17 @@ export default function LotsLMNP() {
     queryFn: () => base44.entities.Acquereur.list(),
   });
 
-  const { data: allOptions = [] } = useQuery({
+  const { data: allOptions = [], refetch: refetchOptions } = useQuery({
     queryKey: ['all_options'],
     queryFn: () => base44.entities.OptionLot.list(),
+    staleTime: 0,
+    cacheTime: 0,
   });
+
+  React.useEffect(() => {
+    refetchLots();
+    refetchOptions();
+  }, []);
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.LotLMNP.create(data),

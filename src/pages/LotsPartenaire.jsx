@@ -34,20 +34,11 @@ export default function LotsPartenaire() {
 
   const queryClient = useQueryClient();
 
-  useEffect(() => {
-    base44.auth.me().then(setCurrentUser);
-    
-    // Vérifier s'il y a un filtre de résidence dans l'URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const residenceId = urlParams.get('residence_id');
-    if (residenceId) {
-      setFilters(prev => ({ ...prev, residence_id: residenceId }));
-    }
-  }, []);
-
-  const { data: lots = [] } = useQuery({
+  const { data: lots = [], refetch: refetchLots } = useQuery({
     queryKey: ['lots_disponibles'],
     queryFn: () => base44.entities.LotLMNP.list(),
+    staleTime: 0,
+    cacheTime: 0,
   });
 
   const { data: residences = [] } = useQuery({
@@ -67,9 +58,11 @@ export default function LotsPartenaire() {
     enabled: !!currentUser?.partenaire_id,
   });
 
-  const { data: allOptions = [] } = useQuery({
+  const { data: allOptions = [], refetch: refetchAllOptions } = useQuery({
     queryKey: ['all_options_partenaire'],
     queryFn: () => base44.entities.OptionLot.list(),
+    staleTime: 0,
+    cacheTime: 0,
   });
 
   const { data: mesAcquereurs = [] } = useQuery({
@@ -77,6 +70,24 @@ export default function LotsPartenaire() {
     queryFn: () => base44.entities.Acquereur.filter({ partenaire_id: currentUser?.partenaire_id }),
     enabled: !!currentUser?.partenaire_id,
   });
+
+  useEffect(() => {
+    base44.auth.me().then(setCurrentUser);
+
+    // Vérifier s'il y a un filtre de résidence dans l'URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const residenceId = urlParams.get('residence_id');
+    if (residenceId) {
+      setFilters(prev => ({ ...prev, residence_id: residenceId }));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (refetchLots && refetchAllOptions) {
+      refetchLots();
+      refetchAllOptions();
+    }
+  }, [currentUser]);
 
   const createOptionMutation = useMutation({
     mutationFn: (data) => base44.entities.OptionLot.create(data),
