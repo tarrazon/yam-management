@@ -283,7 +283,7 @@ export default function LotsLMNP() {
     .filter(l => {
       if (filters.region === "all") return true;
       const residence = residences.find(r => r.id === l.residence_id);
-      return residence?.ville?.toLowerCase().includes(filters.region.toLowerCase());
+      return residence?.region?.toLowerCase() === filters.region.toLowerCase();
     })
     .filter(l => {
       if (filters.ville === "all") return true;
@@ -348,8 +348,9 @@ export default function LotsLMNP() {
     document.body.removeChild(link);
   };
 
-  // Récupérer les villes uniques
+  // Récupérer les villes et régions uniques
   const villes = [...new Set(residences.map(r => r.ville).filter(Boolean))];
+  const regions = [...new Set(residences.map(r => r.region).filter(Boolean))].sort();
 
   const optionsForDeletion = deletingLot ? allOptions.filter(o => o.lot_lmnp_id === deletingLot.id && o.statut === 'active').length : 0;
 
@@ -473,6 +474,21 @@ export default function LotsLMNP() {
                       <SelectItem value="ehpad">EHPAD</SelectItem>
                       <SelectItem value="tourisme">Tourisme</SelectItem>
                       <SelectItem value="affaires">Affaires</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Région</Label>
+                  <Select value={filters.region} onValueChange={(v) => setFilters({...filters, region: v})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Toutes les régions</SelectItem>
+                      {regions.map(r => (
+                        <SelectItem key={r} value={r}>{r}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

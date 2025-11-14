@@ -21,6 +21,7 @@ export default function ResidenceGestionForm({ residence, onSubmit, onCancel, is
     adresse: "",
     ville: "",
     code_postal: "",
+    region: "",
     type_residence: "etudiante",
     annee_construction: "",
     nombre_lots_total: "",
@@ -288,6 +289,16 @@ export default function ResidenceGestionForm({ residence, onSubmit, onCancel, is
                       onChange={(e) => setFormData({ ...formData, ville: e.target.value })}
                       placeholder="Ex: Paris"
                       required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="region">Région</Label>
+                    <Input
+                      id="region"
+                      value={formData.region}
+                      onChange={(e) => setFormData({ ...formData, region: e.target.value })}
+                      placeholder="Ex: Île-de-France"
                     />
                   </div>
 
