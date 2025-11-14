@@ -3,7 +3,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { LayoutDashboard, Users, Home, FileCheck, Handshake, Building2, Contact, Settings, LogOut, BarChart3, Shield, FileCode, Clock, Mail } from "lucide-react";
+import { LayoutDashboard, Users, Home, FileCheck, Handshake, Building2, Contact, Settings, LogOut, BarChart3, Shield, FileCode, Clock, Mail, Briefcase } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -33,6 +33,12 @@ const getNavigationItems = (userRole) => {
       title: "Résidences",
       url: createPageUrl("ResidencesGestion"),
       icon: Building2,
+      roles: ['admin'],
+    },
+    {
+      title: "Gestionnaires",
+      url: createPageUrl("GestionnairesPage"),
+      icon: Briefcase,
       roles: ['admin'],
     },
     {

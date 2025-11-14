@@ -22,9 +22,6 @@ export default function ResidenceGestionForm({ residence, onSubmit, onCancel, is
     ville: "",
     code_postal: "",
     type_residence: "etudiante",
-    gestionnaire: "",
-    gestionnaire_email: "",
-    gestionnaire_telephone: "",
     annee_construction: "",
     nombre_lots_total: "",
     nombre_lots_portefeuille: "",
@@ -208,9 +205,8 @@ export default function ResidenceGestionForm({ residence, onSubmit, onCancel, is
             )}
             
             <Tabs defaultValue="general" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="general">Général</TabsTrigger>
-                <TabsTrigger value="gestionnaire">Gestionnaire</TabsTrigger>
                 <TabsTrigger value="performances">Performances</TabsTrigger>
                 <TabsTrigger value="documents">Documents</TabsTrigger>
               </TabsList>
@@ -360,36 +356,8 @@ export default function ResidenceGestionForm({ residence, onSubmit, onCancel, is
                 </div>
               </TabsContent>
 
-              <TabsContent value="gestionnaire" className="space-y-6 mt-6">
+              <TabsContent value="performances" className="space-y-6 mt-6">
                 <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="gestionnaire">Nom du gestionnaire</Label>
-                    <Input
-                      id="gestionnaire"
-                      value={formData.gestionnaire}
-                      onChange={(e) => setFormData({ ...formData, gestionnaire: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="gestionnaire_email">Email du gestionnaire</Label>
-                    <Input
-                      id="gestionnaire_email"
-                      type="email"
-                      value={formData.gestionnaire_email}
-                      onChange={(e) => setFormData({ ...formData, gestionnaire_email: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="gestionnaire_telephone">Téléphone du gestionnaire</Label>
-                    <Input
-                      id="gestionnaire_telephone"
-                      value={formData.gestionnaire_telephone}
-                      onChange={(e) => setFormData({ ...formData, gestionnaire_telephone: e.target.value })}
-                    />
-                  </div>
-
                   <div className="space-y-2">
                     <Label htmlFor="classement_qualite">Classement qualité</Label>
                     <Select
@@ -418,11 +386,7 @@ export default function ResidenceGestionForm({ residence, onSubmit, onCancel, is
                       rows={3}
                     />
                   </div>
-                </div>
-              </TabsContent>
 
-              <TabsContent value="performances" className="space-y-6 mt-6">
-                <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="taux_occupation">Taux d'occupation (%)</Label>
                     <Input

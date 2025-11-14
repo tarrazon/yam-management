@@ -39,7 +39,7 @@ const typeLabels = {
   senior: "Senior",
 };
 
-export default function ResidenceGestionCard({ residence, onEdit, onView, onDelete, viewsStats = null }) {
+export default function ResidenceGestionCard({ residence, onEdit, onView, onDelete, viewsStats = null, gestionnaires = [] }) {
   const firstPhoto = residence.documents?.photos?.[0];
 
   const { data: lots = [] } = useQuery({
@@ -173,10 +173,21 @@ export default function ResidenceGestionCard({ residence, onEdit, onView, onDele
         </CardHeader>
 
         <CardContent className="p-6 space-y-4">
-          {residence.gestionnaire && (
+          {gestionnaires && gestionnaires.length > 0 && (
             <div className="pb-3 border-b border-slate-100">
-              <p className="text-xs text-slate-500 mb-1">Gestionnaire</p>
-              <p className="font-semibold text-slate-700 truncate">{residence.gestionnaire}</p>
+              <p className="text-xs text-slate-500 mb-1">
+                {gestionnaires.length > 1 ? "Gestionnaires" : "Gestionnaire"}
+              </p>
+              <div className="space-y-1">
+                {gestionnaires.map((gest) => (
+                  <div key={gest.id}>
+                    <p className="font-semibold text-slate-700 truncate">{gest.nom_societe}</p>
+                    {gest.contact_principal && (
+                      <p className="text-xs text-slate-500 truncate">{gest.contact_principal}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

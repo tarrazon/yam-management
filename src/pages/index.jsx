@@ -26,6 +26,8 @@ import PartenairesPage from "./PartenairesPage";
 
 import ResidencesGestion from "./ResidencesGestion";
 
+import GestionnairesPage from "./GestionnairesPage";
+
 import NotairesPage from "./NotairesPage";
 
 import ContactsPage from "./ContactsPage";
@@ -106,7 +108,9 @@ const PAGES = {
     PartenairesPage: PartenairesPage,
     
     ResidencesGestion: ResidencesGestion,
-    
+
+    GestionnairesPage: GestionnairesPage,
+
     NotairesPage: NotairesPage,
     
     ContactsPage: ContactsPage,
@@ -209,6 +213,8 @@ function PagesContent() {
             <Route path="/PartenairesPage" element={<Layout currentPageName={currentPage}><ProtectedRoute><PartenairesPage /></ProtectedRoute></Layout>} />
 
             <Route path="/ResidencesGestion" element={<Layout currentPageName={currentPage}><ProtectedRoute><ResidencesGestion /></ProtectedRoute></Layout>} />
+
+            <Route path="/GestionnairesPage" element={<Layout currentPageName={currentPage}><ProtectedRoute><GestionnairesPage /></ProtectedRoute></Layout>} />
 
             <Route path="/NotairesPage" element={<Layout currentPageName={currentPage}><ProtectedRoute><NotairesPage /></ProtectedRoute></Layout>} />
 

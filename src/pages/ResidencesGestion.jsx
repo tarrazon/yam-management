@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Search, Grid3x3, List, Map as MapIcon, X } from "lucide-react"; // Added X icon
@@ -48,6 +49,7 @@ export default function ResidencesGestion() {
 
   // Charger les stats de vues pour les résidences (admin uniquement)
   const [residencesViewsStats, setResidencesViewsStats] = useState(new Map());
+  const [residencesGestionnaires, setResidencesGestionnaires] = useState({});
 
   useEffect(() => {
     const loadViewsStats = async () => {
@@ -59,6 +61,45 @@ export default function ResidencesGestion() {
     };
     loadViewsStats();
   }, [residences, currentUser]);
+
+  useEffect(() => {
+    const loadGestionnaires = async () => {
+      if (residences.length === 0) return;
+
+      try {
+        const { data, error } = await supabase
+          .from("gestionnaires_residences")
+          .select(`
+            residence_id,
+            gestionnaires (
+              id,
+              nom_societe,
+              contact_principal,
+              email,
+              telephone
+            )
+          `);
+
+        if (error) throw error;
+
+        const gestionnairesByResidence = {};
+        data.forEach(relation => {
+          if (!gestionnairesByResidence[relation.residence_id]) {
+            gestionnairesByResidence[relation.residence_id] = [];
+          }
+          if (relation.gestionnaires) {
+            gestionnairesByResidence[relation.residence_id].push(relation.gestionnaires);
+          }
+        });
+
+        setResidencesGestionnaires(gestionnairesByResidence);
+      } catch (error) {
+        console.error("Error loading gestionnaires:", error);
+      }
+    };
+
+    loadGestionnaires();
+  }, [residences]);
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.ResidenceGestion.create(data),
@@ -307,6 +348,7 @@ export default function ResidencesGestion() {
                   onView={handleView}
                   onDelete={handleDelete}
                   viewsStats={currentUser?.role_custom === 'admin' ? residencesViewsStats.get(residence.id) : null}
+                  gestionnaires={residencesGestionnaires[residence.id] || []}
                 />
               ))}
             </AnimatePresence>
