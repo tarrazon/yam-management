@@ -52,10 +52,12 @@ export default function LotsPartenaire() {
     enabled: !!currentUser?.partenaire_id,
   });
 
-  const { data: mesOptions = [] } = useQuery({
+  const { data: mesOptions = [], refetch: refetchOptions } = useQuery({
     queryKey: ['mes_options_partenaire'],
     queryFn: () => base44.entities.OptionLot.filter({ partenaire_id: currentUser?.partenaire_id }),
     enabled: !!currentUser?.partenaire_id,
+    staleTime: 0,
+    cacheTime: 0,
   });
 
   const { data: allOptions = [], refetch: refetchAllOptions } = useQuery({
@@ -186,9 +188,20 @@ export default function LotsPartenaire() {
         console.error('Erreur lors de l\'envoi des notifications:', error);
       }
 
-      await queryClient.refetchQueries({ queryKey: ['lots_disponibles'] });
-      await queryClient.refetchQueries({ queryKey: ['mes_options_partenaire'] });
-      await queryClient.refetchQueries({ queryKey: ['all_options_partenaire'] });
+      // Forcer un refetch immédiat de toutes les données
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['lots_disponibles'] }),
+        queryClient.invalidateQueries({ queryKey: ['mes_options_partenaire'] }),
+        queryClient.invalidateQueries({ queryKey: ['all_options_partenaire'] }),
+        queryClient.invalidateQueries({ queryKey: ['lots_lmnp'] }),
+      ]);
+
+      // Attendre un petit délai pour que le trigger DB se propage
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Refetch explicite
+      await refetchOptions();
+      await refetchLots();
 
       setLotForOption(null);
       alert('Option posée avec succès ! Le lot est maintenant sous option.');
