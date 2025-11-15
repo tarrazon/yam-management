@@ -56,6 +56,13 @@ export default function MesAcquereurs() {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (id) => base44.entities.Acquereur.delete(id),
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ['mes_acquereurs_full'] });
+    },
+  });
+
   const handleSubmit = (data) => {
     const partenaire = partenaires.find(p => p.id === currentUser?.partenaire_id);
     const enrichedData = {
@@ -83,6 +90,12 @@ export default function MesAcquereurs() {
 
   const getLotForAcquereur = (acquereurId) => {
     return lots.find(lot => lot.acquereur_id === acquereurId);
+  };
+
+  const handleDelete = (acquereur) => {
+    if (window.confirm(`Êtes-vous sûr de vouloir supprimer l'acquéreur ${acquereur.prenom} ${acquereur.nom} ?`)) {
+      deleteMutation.mutate(acquereur.id);
+    }
   };
 
   const statusColors = {
@@ -190,6 +203,7 @@ export default function MesAcquereurs() {
                 lot={getLotForAcquereur(acquereur.id)}
                 onView={handleView}
                 onEdit={handleEdit}
+                onDelete={handleDelete}
               />
             ))
           )}

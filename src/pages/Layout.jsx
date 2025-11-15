@@ -135,6 +135,12 @@ const getNavigationItems = (userRole) => {
       roles: ['partenaire'],
     },
     {
+      title: "Suivi de dossier",
+      url: createPageUrl("SuiviDossierPartenaire"),
+      icon: FileCheck,
+      roles: ['partenaire'],
+    },
+    {
       title: "Suivi des options",
       url: createPageUrl("SuiviOptions"),
       icon: Clock,

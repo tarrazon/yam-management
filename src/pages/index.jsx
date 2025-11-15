@@ -62,6 +62,8 @@ import ForgotPassword from "./ForgotPassword";
 
 import ResetPassword from "./ResetPassword";
 
+import SuiviDossierPartenaire from "./SuiviDossierPartenaire";
+
 import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -136,9 +138,11 @@ const PAGES = {
     SuiviOptionsAdmin: SuiviOptionsAdmin,
     
     ResidencesPartenaire: ResidencesPartenaire,
-    
+
     OnboardingPartenaire: OnboardingPartenaire,
-    
+
+    SuiviDossierPartenaire: SuiviDossierPartenaire,
+
 }
 
 function _getCurrentPage(url) {
@@ -237,6 +241,8 @@ function PagesContent() {
             <Route path="/SuiviOptions" element={<Layout currentPageName={currentPage}><ProtectedRoute><SuiviOptions /></ProtectedRoute></Layout>} />
 
             <Route path="/MesAcquereurs" element={<Layout currentPageName={currentPage}><ProtectedRoute><MesAcquereurs /></ProtectedRoute></Layout>} />
+
+            <Route path="/SuiviDossierPartenaire" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['partenaire']}><SuiviDossierPartenaire /></ProtectedRoute></Layout>} />
 
             <Route path="/SuiviOptionsAdmin" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['admin']}><SuiviOptionsAdmin /></ProtectedRoute></Layout>} />
 

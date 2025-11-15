@@ -2,7 +2,7 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Mail, Phone, User, Euro, Eye, Edit, AlertCircle, Users } from "lucide-react";
+import { Mail, Phone, User, Euro, Eye, Edit, AlertCircle, Users, Trash2 } from "lucide-react";
 import { useDocumentsManquants } from "@/hooks/useDocumentsManquants";
 
 const statusColors = {
@@ -23,7 +23,7 @@ const statusLabels = {
   perdu: "Perdu",
 };
 
-export default function AcquereurCardPartenaire({ acquereur, lot, onView, onEdit }) {
+export default function AcquereurCardPartenaire({ acquereur, lot, onView, onEdit, onDelete }) {
   const { documentsManquantsAcquereur } = useDocumentsManquants(lot || {});
 
   return (
@@ -89,9 +89,6 @@ export default function AcquereurCardPartenaire({ acquereur, lot, onView, onEdit
                 <Users className="w-4 h-4" />
                 {documentsManquantsAcquereur.length} document{documentsManquantsAcquereur.length > 1 ? 's' : ''} manquant{documentsManquantsAcquereur.length > 1 ? 's' : ''}
               </p>
-              <p className="text-xs text-blue-600 mt-1">
-                Cliquez pour voir le détail
-              </p>
             </div>
           </div>
         )}
@@ -114,6 +111,14 @@ export default function AcquereurCardPartenaire({ acquereur, lot, onView, onEdit
           >
             <Edit className="w-4 h-4" />
             Modifier
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+            onClick={() => onDelete(acquereur)}
+          >
+            <Trash2 className="w-4 h-4" />
           </Button>
         </div>
       </CardContent>
