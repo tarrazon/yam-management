@@ -116,7 +116,7 @@ Deno.serve(async (req: Request) => {
                 .container { max-width: 600px; margin: 0 auto; padding: 20px; }
                 .header { background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
                 .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
-                .button { display: inline-block; padding: 12px 30px; background: #2563eb; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 20px 0; }
+                .button { display: inline-block; padding: 12px 30px; background: white; color: #2563eb; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 20px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
                 .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
               </style>
             </head>

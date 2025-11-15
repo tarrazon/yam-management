@@ -52,6 +52,12 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+
+    if (!resendApiKey) {
+      throw new Error("RESEND_API_KEY not configured");
+    }
+
     const acquereurInfo = payload.acquereur_nom && payload.acquereur_prenom
       ? `${payload.acquereur_nom} ${payload.acquereur_prenom}`
       : "Non renseigné";
@@ -113,27 +119,27 @@ Deno.serve(async (req: Request) => {
           </div>
           <div class="content">
             <p>Une nouvelle option a été posée par un partenaire.</p>
-            
+
             <div class="info-box">
               <div class="label">Partenaire</div>
               <div class="value">${payload.partenaire_prenom} ${payload.partenaire_nom}</div>
             </div>
-            
+
             <div class="info-box">
               <div class="label">Résidence</div>
               <div class="value">${payload.residence_nom}</div>
             </div>
-            
+
             <div class="info-box">
               <div class="label">Lot n°</div>
               <div class="value">${payload.lot_numero}</div>
             </div>
-            
+
             <div class="info-box">
               <div class="label">Acquéreur</div>
               <div class="value">${acquereurInfo}</div>
             </div>
-            
+
             <div class="info-box">
               <div class="label">Période d'option</div>
               <div class="value">
@@ -169,7 +175,7 @@ Yam Management - Gestion LMNP
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
+          "Authorization": `Bearer ${resendApiKey}`,
         },
         body: JSON.stringify({
           from: "Yam Management <onboarding@resend.dev>",
@@ -182,7 +188,7 @@ Yam Management - Gestion LMNP
     );
 
     const results = await Promise.allSettled(emailPromises);
-    
+
     const successful = results.filter(r => r.status === "fulfilled").length;
     const failed = results.filter(r => r.status === "rejected").length;
 
