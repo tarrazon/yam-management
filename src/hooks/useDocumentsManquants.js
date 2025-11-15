@@ -6,7 +6,7 @@ export function useDocumentsManquants(lot) {
     queryKey: ['acquereur', lot.acquereur_id],
     queryFn: async () => {
       if (!lot.acquereur_id) return null;
-      const result = await base44.entities.Acquereur.findOne({ id: lot.acquereur_id });
+      const result = await base44.entities.Acquereur.findOne(lot.acquereur_id);
       return result;
     },
     enabled: !!lot.acquereur_id,
@@ -16,7 +16,7 @@ export function useDocumentsManquants(lot) {
     queryKey: ['vendeur', lot.vendeur_id],
     queryFn: async () => {
       if (!lot.vendeur_id) return null;
-      const result = await base44.entities.Vendeur.findOne({ id: lot.vendeur_id });
+      const result = await base44.entities.Vendeur.findOne(lot.vendeur_id);
       return result;
     },
     enabled: !!lot.vendeur_id,
