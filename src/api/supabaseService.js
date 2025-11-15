@@ -65,6 +65,10 @@ export class SupabaseService {
     return data;
   }
 
+  async get(id) {
+    return this.findOne(id);
+  }
+
   async create(data) {
     const { data: result, error } = await supabase
       .from(this.tableName)
