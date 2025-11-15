@@ -56,7 +56,7 @@ export default function DashboardCRM() {
     .reduce((sum, lot) => sum + (Number(lot.honoraires) || 0), 0);
 
   const honorairesAPercevoir = lots
-    .filter(l => ['reserve', 'compromis', 'sous_option'].includes(l.statut))
+    .filter(l => ['reserve', 'compromis'].includes(l.statut))
     .reduce((sum, lot) => sum + (Number(lot.honoraires) || 0), 0);
 
   const retrocessionActee = lots
@@ -69,7 +69,7 @@ export default function DashboardCRM() {
     }, 0);
 
   const retrocessionAVenir = lots
-    .filter(l => ['reserve', 'compromis', 'sous_option'].includes(l.statut) && l.partenaire_id)
+    .filter(l => ['reserve', 'compromis'].includes(l.statut) && l.partenaire_id)
     .reduce((sum, lot) => {
       const partenaire = partenaires.find(p => p.id === lot.partenaire_id);
       const tauxRetro = Number(partenaire?.taux_retrocession) || 0;

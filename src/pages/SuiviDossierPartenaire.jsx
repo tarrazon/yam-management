@@ -76,7 +76,7 @@ export default function SuiviDossierPartenaire() {
   };
 
   const retrocessionAVenir = lotsPartenaire
-    .filter(l => ['reserve', 'compromis', 'sous_option'].includes(l.statut))
+    .filter(l => ['reserve', 'compromis'].includes(l.statut))
     .reduce((total, lot) => total + calculateRetrocession(lot), 0);
 
   const retrocessionActee = lotsPartenaire
