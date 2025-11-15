@@ -36,8 +36,8 @@ export default function SuiviDossier() {
     },
   });
 
-  // Filtrer uniquement les lots non disponibles
-  const lotsEnCours = lots.filter(l => l.statut !== 'disponible');
+  // Filtrer uniquement les lots non disponibles et non en allotement
+  const lotsEnCours = lots.filter(l => l.statut !== 'disponible' && l.statut !== 'allotement');
 
   const filteredLots = lotsEnCours
     .filter(l => filter === "all" || l.statut === filter)
@@ -60,7 +60,6 @@ export default function SuiviDossier() {
 
   const stats = {
     sous_option: lotsEnCours.filter(l => l.statut === 'sous_option').length,
-    allotement: lotsEnCours.filter(l => l.statut === 'allotement').length,
     reserve: lotsEnCours.filter(l => l.statut === 'reserve').length,
     compromis: lotsEnCours.filter(l => l.statut === 'compromis').length,
     vendu: lotsEnCours.filter(l => l.statut === 'vendu').length,
@@ -123,7 +122,6 @@ export default function SuiviDossier() {
               <TabsList className="bg-white shadow-sm">
                 <TabsTrigger value="all">Tous ({lotsEnCours.length})</TabsTrigger>
                 <TabsTrigger value="sous_option">Sous option ({stats.sous_option})</TabsTrigger>
-                <TabsTrigger value="allotement">Allotement ({stats.allotement})</TabsTrigger>
                 <TabsTrigger value="reserve">Réservés ({stats.reserve})</TabsTrigger>
                 <TabsTrigger value="compromis">Compromis ({stats.compromis})</TabsTrigger>
                 <TabsTrigger value="vendu">Vendus ({stats.vendu})</TabsTrigger>

@@ -19,17 +19,22 @@ export function useDocumentsManquants(lot) {
     const manquants = [];
 
     if (type === 'acquereur') {
-      if (!entity.justificatif_identite) manquants.push("Justificatif d'identité");
-      if (!entity.justificatif_domicile) manquants.push("Justificatif de domicile");
-      if (!entity.derniers_avis_imposition) manquants.push("Derniers avis d'imposition");
-      if (!entity.justificatifs_revenus) manquants.push("Justificatifs de revenus");
-      if (!entity.attestation_assurance) manquants.push("Attestation d'assurance");
+      const docs = entity.documents || {};
+      if (!docs.carte_identite && !docs.passeport) manquants.push("Justificatif d'identité");
+      if (!docs.justificatif_domicile) manquants.push("Justificatif de domicile");
+      if (!docs.avis_imposition) manquants.push("Avis d'imposition");
+      if (!docs.justificatifs_revenus) manquants.push("Justificatifs de revenus");
+      if (!docs.attestation_assurance) manquants.push("Attestation d'assurance");
     } else if (type === 'vendeur') {
-      if (!entity.documents_entreprise && entity.type_vendeur === 'entreprise') {
-        manquants.push("Documents d'entreprise");
-      }
-      if (!entity.justificatif_identite && entity.type_vendeur === 'particulier') {
-        manquants.push("Justificatif d'identité");
+      if (entity.type_vendeur === 'entreprise') {
+        const docsEntreprise = entity.documents_entreprise || {};
+        if (!docsEntreprise.kbis) manquants.push("KBIS");
+        if (!docsEntreprise.statuts) manquants.push("Statuts");
+      } else if (entity.type_vendeur === 'particulier') {
+        const docsParticulier = entity.documents_particulier || {};
+        if (!docsParticulier.carte_identite && !docsParticulier.passeport) {
+          manquants.push("Justificatif d'identité");
+        }
       }
     }
 
