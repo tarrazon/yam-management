@@ -23,7 +23,7 @@ export default function NotificationEmails() {
   const [loading, setLoading] = useState(true);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
+    emails: '',
     description: '',
     active: true,
   });
@@ -55,8 +55,8 @@ export default function NotificationEmails() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.email) {
-      toast.error('L\'email est requis');
+    if (!formData.emails) {
+      toast.error('Au moins un email est requis');
       return;
     }
 
@@ -64,24 +64,36 @@ export default function NotificationEmails() {
       setSubmitting(true);
       const { data: { user } } = await supabase.auth.getUser();
 
+      const emailList = formData.emails
+        .split(/[,;\n]/)
+        .map(e => e.trim())
+        .filter(e => e && e.includes('@'));
+
+      if (emailList.length === 0) {
+        toast.error('Aucun email valide trouvé');
+        return;
+      }
+
+      const emailsToInsert = emailList.map(email => ({
+        email,
+        description: formData.description,
+        active: formData.active,
+        created_by: user.id,
+      }));
+
       const { error } = await supabase
         .from('notification_emails')
-        .insert({
-          email: formData.email,
-          description: formData.description,
-          active: formData.active,
-          created_by: user.id,
-        });
+        .insert(emailsToInsert);
 
       if (error) throw error;
 
-      toast.success('Email ajouté avec succès');
+      toast.success(`${emailList.length} email(s) ajouté(s) avec succès`);
       setShowAddDialog(false);
-      setFormData({ email: '', description: '', active: true });
+      setFormData({ emails: '', description: '', active: true });
       loadEmails();
     } catch (error) {
       console.error('Error adding email:', error);
-      toast.error(error.message || 'Erreur lors de l\'ajout de l\'email');
+      toast.error(error.message || 'Erreur lors de l\'ajout des emails');
     } finally {
       setSubmitting(false);
     }
@@ -181,14 +193,15 @@ export default function NotificationEmails() {
                     )}
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2">
-                      <Label htmlFor={`active-${email.id}`} className="text-sm">
+                    <div className="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-lg">
+                      <Label htmlFor={`active-${email.id}`} className="text-sm font-medium">
                         {email.active ? 'Actif' : 'Inactif'}
                       </Label>
                       <Switch
                         id={`active-${email.id}`}
                         checked={email.active}
                         onCheckedChange={() => handleToggleActive(email.id, email.active)}
+                        className="data-[state=checked]:bg-green-600 data-[state=unchecked]:bg-gray-300"
                       />
                     </div>
                     <Button
@@ -212,21 +225,25 @@ export default function NotificationEmails() {
           <DialogHeader>
             <DialogTitle>Ajouter un email de notification</DialogTitle>
             <DialogDescription>
-              Cet email recevra une notification à chaque prise d'option par un partenaire
+              Ces emails recevront une notification à chaque prise d'option par un partenaire.
+              Vous pouvez ajouter plusieurs emails en les séparant par des virgules, points-virgules ou sauts de ligne.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="exemple@email.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                <Label htmlFor="emails">Emails *</Label>
+                <Textarea
+                  id="emails"
+                  placeholder="exemple1@email.com, exemple2@email.com&#10;exemple3@email.com"
+                  value={formData.emails}
+                  onChange={(e) => setFormData({ ...formData, emails: e.target.value })}
                   required
+                  rows={4}
                 />
+                <p className="text-xs text-gray-500">
+                  Séparez les emails par des virgules, points-virgules ou sauts de ligne
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
