@@ -76,21 +76,36 @@ export default function PartenairesDashboard() {
     mesOptions.some(o => o.lot_lmnp_id === l.id && o.statut === 'active')
   ).length;
 
-  // Calcul du CA et commissions
-  const mesLotsVendus = lots.filter(l => 
-    l.statut === 'vendu' && l.partenaire_id === currentUser?.partenaire_id
-  );
-  
+  const commissionTaux = Number(partenaire?.commission_taux) || 0;
+  const tauxRetrocession = Number(partenaire?.taux_retrocession) || 0;
+
+  const mesLotsAvecAcquereur = lots.filter(l => {
+    const hasMyAcquereur = mesAcquereurs.some(acq => acq.id === l.acquereur_id);
+    return hasMyAcquereur && l.statut !== 'disponible' && l.statut !== 'allotement';
+  });
+
+  const mesLotsVendus = mesLotsAvecAcquereur.filter(l => l.statut === 'vendu');
+  const mesLotsAPayer = mesLotsAvecAcquereur.filter(l => ['reserve', 'compromis'].includes(l.statut));
+
+  const calculateCommission = (lot) => {
+    const prixBase = lot.prix_ttc || lot.prix_ht || lot.prix_fai || 0;
+    return (prixBase * commissionTaux) / 100;
+  };
+
+  const calculateRetrocession = (lot) => {
+    const prixBase = lot.prix_ttc || lot.prix_ht || lot.prix_fai || 0;
+    return (prixBase * tauxRetrocession) / 100;
+  };
+
   const chiffreAffaires = mesLotsVendus.reduce((total, lot) => {
-    return total + (lot.prix_fai || 0);
+    return total + (lot.prix_ttc || lot.prix_ht || lot.prix_fai || 0);
   }, 0);
 
-  const tauxRetrocession = partenaire?.taux_retrocession || 0;
-  
-  const commissionsTotal = mesLotsVendus.reduce((total, lot) => {
-    const commission = lot.commission_partenaire || (lot.honoraires ? (lot.honoraires * tauxRetrocession / 100) : 0);
-    return total + commission;
-  }, 0);
+  const honorairesPercus = mesLotsVendus.reduce((total, lot) => total + calculateCommission(lot), 0);
+  const honorairesAPercevoir = mesLotsAPayer.reduce((total, lot) => total + calculateCommission(lot), 0);
+
+  const retrocessionActee = mesLotsVendus.reduce((total, lot) => total + calculateRetrocession(lot), 0);
+  const retrocessionAVenir = mesLotsAPayer.reduce((total, lot) => total + calculateRetrocession(lot), 0);
 
   const getTimeRemaining = (dateFin) => {
     const now = new Date();
@@ -205,10 +220,10 @@ export default function PartenairesDashboard() {
         </div>
 
         {/* Statistiques financières */}
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 gap-6">
           <Card className="border-none shadow-lg bg-gradient-to-br from-green-50 to-emerald-50">
             <CardContent className="p-6">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 mb-4">
                 <div className="p-3 rounded-xl bg-white/80 shadow-sm">
                   <FileCheck className="w-6 h-6 text-green-600" />
                 </div>
@@ -217,34 +232,71 @@ export default function PartenairesDashboard() {
                   <p className="text-3xl font-bold text-green-800">{mesLotsVendus.length}</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-none shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50">
-            <CardContent className="p-6">
-              <div>
-                <p className="text-sm text-blue-700 font-medium mb-2">Chiffre d'affaires généré</p>
-                <p className="text-2xl font-bold text-blue-800">
+              <div className="pt-4 border-t border-green-200">
+                <p className="text-sm text-green-700 font-medium mb-2">Chiffre d'affaires généré</p>
+                <p className="text-2xl font-bold text-green-800">
                   {chiffreAffaires.toLocaleString('fr-FR')} €
                 </p>
-                <p className="text-xs text-blue-600 mt-1">Total des ventes réalisées</p>
+                <p className="text-xs text-green-600 mt-1">Total des ventes réalisées</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-lg bg-gradient-to-br from-amber-50 to-orange-50">
-            <CardContent className="p-6">
-              <div>
-                <p className="text-sm text-amber-700 font-medium mb-2">Mes commissions</p>
-                <p className="text-2xl font-bold text-amber-800">
-                  {commissionsTotal.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €
-                </p>
-                <p className="text-xs text-amber-600 mt-1">
-                  Taux de rétrocession: {tauxRetrocession}%
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="space-y-6">
+            <Card className="border-none shadow-lg bg-gradient-to-br from-blue-50 to-blue-100">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-blue-900">Honoraires</h3>
+                  <span className="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded-full font-medium">
+                    Taux: {commissionTaux}%
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-blue-700 mb-1">Perçus</p>
+                    <p className="text-xl font-bold text-blue-600">
+                      {honorairesPercus.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+                    </p>
+                    <p className="text-xs text-blue-500 mt-1">Vendus</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-blue-700 mb-1">À percevoir</p>
+                    <p className="text-xl font-bold text-blue-600">
+                      {honorairesAPercevoir.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+                    </p>
+                    <p className="text-xs text-blue-500 mt-1">En cours</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-none shadow-lg bg-gradient-to-br from-amber-50 to-orange-100">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-amber-900">Rétrocession</h3>
+                  <span className="text-xs bg-amber-200 text-amber-800 px-2 py-1 rounded-full font-medium">
+                    Taux: {tauxRetrocession}%
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-amber-700 mb-1">Actée</p>
+                    <p className="text-xl font-bold text-amber-600">
+                      {retrocessionActee.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+                    </p>
+                    <p className="text-xs text-amber-500 mt-1">Vendus</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-amber-700 mb-1">À venir</p>
+                    <p className="text-xl font-bold text-amber-600">
+                      {retrocessionAVenir.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+                    </p>
+                    <p className="text-xs text-amber-500 mt-1">En cours</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* Alerte si limite d'options atteinte */}

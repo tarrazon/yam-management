@@ -69,22 +69,33 @@ export default function SuiviDossierPartenaire() {
     });
 
   const commissionTaux = Number(partenaireData?.commission_taux) || 0;
-
-  console.log('DEBUG Partenaire:', {
-    partenaireData,
-    commission_taux_raw: partenaireData?.commission_taux,
-    commission_taux_number: commissionTaux,
-    partenaire_id: currentUser?.partenaire_id
-  });
+  const tauxRetrocession = Number(partenaireData?.taux_retrocession) || 0;
 
   const calculateCommission = (lot) => {
     const prixBase = lot.prix_ttc || lot.prix_ht || lot.prix_fai || 0;
     return (prixBase * commissionTaux) / 100;
   };
 
-  const commissionsAVenir = lotsPartenaire
+  const calculateRetrocession = (lot) => {
+    const prixBase = lot.prix_ttc || lot.prix_ht || lot.prix_fai || 0;
+    return (prixBase * tauxRetrocession) / 100;
+  };
+
+  const honorairesAPercevoir = lotsPartenaire
     .filter(l => ['reserve', 'compromis'].includes(l.statut))
     .reduce((total, lot) => total + calculateCommission(lot), 0);
+
+  const honorairesPercus = lotsPartenaire
+    .filter(l => l.statut === 'vendu')
+    .reduce((total, lot) => total + calculateCommission(lot), 0);
+
+  const retrocessionAVenir = lotsPartenaire
+    .filter(l => ['reserve', 'compromis'].includes(l.statut))
+    .reduce((total, lot) => total + calculateRetrocession(lot), 0);
+
+  const retrocessionActee = lotsPartenaire
+    .filter(l => l.statut === 'vendu')
+    .reduce((total, lot) => total + calculateRetrocession(lot), 0);
 
   const stats = {
     sous_option: lotsPartenaire.filter(l => l.statut === 'sous_option').length,
@@ -130,7 +141,7 @@ export default function SuiviDossierPartenaire() {
           )}
         </AnimatePresence>
 
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
             <p className="text-sm text-slate-500 mb-1">Sous option</p>
             <p className="text-2xl font-bold text-blue-600">{stats.sous_option}</p>
@@ -147,14 +158,57 @@ export default function SuiviDossierPartenaire() {
             <p className="text-sm text-slate-500 mb-1">Vendus</p>
             <p className="text-2xl font-bold text-purple-600">{stats.vendu}</p>
           </div>
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-xl shadow-sm border border-green-200">
-            <p className="text-sm text-green-700 mb-1 font-semibold">Commissions à venir</p>
-            <p className="text-2xl font-bold text-green-600">
-              {!isNaN(commissionsAVenir) ? commissionsAVenir.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' }) : '0,00 €'}
-            </p>
-            <p className="text-xs text-green-600 mt-1">
-              Taux de commission: {commissionTaux || 0}%
-            </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl shadow-sm border border-blue-200">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-blue-900">Honoraires</h3>
+              <span className="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded-full font-medium">
+                Taux: {commissionTaux}%
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs text-blue-700 mb-1">À percevoir</p>
+                <p className="text-xl font-bold text-blue-600">
+                  {honorairesAPercevoir.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+                </p>
+                <p className="text-xs text-blue-500 mt-1">Réservé + Compromis</p>
+              </div>
+              <div>
+                <p className="text-xs text-blue-700 mb-1">Perçus</p>
+                <p className="text-xl font-bold text-blue-600">
+                  {honorairesPercus.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+                </p>
+                <p className="text-xs text-blue-500 mt-1">Vendus</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-green-50 to-emerald-100 p-6 rounded-xl shadow-sm border border-green-200">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-green-900">Rétrocession</h3>
+              <span className="text-xs bg-green-200 text-green-800 px-2 py-1 rounded-full font-medium">
+                Taux: {tauxRetrocession}%
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs text-green-700 mb-1">À venir</p>
+                <p className="text-xl font-bold text-green-600">
+                  {retrocessionAVenir.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+                </p>
+                <p className="text-xs text-green-500 mt-1">Réservé + Compromis</p>
+              </div>
+              <div>
+                <p className="text-xs text-green-700 mb-1">Actée</p>
+                <p className="text-xl font-bold text-green-600">
+                  {retrocessionActee.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+                </p>
+                <p className="text-xs text-green-500 mt-1">Vendus</p>
+              </div>
+            </div>
           </div>
         </div>
 
