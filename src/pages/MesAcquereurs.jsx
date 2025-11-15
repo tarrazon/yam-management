@@ -5,14 +5,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Mail, Phone, User, Euro, Plus } from "lucide-react";
+import { Search, Mail, Phone, User, Euro, Plus, Eye, Edit, AlertCircle, Users as UsersIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import AcquereurForm from "../components/acquereurs/AcquereurForm";
+import AcquereurDetailPartenaire from "../components/acquereurs/AcquereurDetailPartenaire";
+import AcquereurCardPartenaire from "../components/acquereurs/AcquereurCardPartenaire";
 
 export default function MesAcquereurs() {
   const [currentUser, setCurrentUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [viewingAcquereur, setViewingAcquereur] = useState(null);
+  const [editingAcquereur, setEditingAcquereur] = useState(null);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -23,6 +27,11 @@ export default function MesAcquereurs() {
     queryKey: ['mes_acquereurs_full'],
     queryFn: () => base44.entities.Acquereur.filter({ partenaire_id: currentUser?.partenaire_id }),
     enabled: !!currentUser?.partenaire_id,
+  });
+
+  const { data: lots = [] } = useQuery({
+    queryKey: ['lots_lmnp'],
+    queryFn: () => base44.entities.LotLMNP.list(),
   });
 
   const { data: partenaires = [] } = useQuery({
@@ -38,6 +47,15 @@ export default function MesAcquereurs() {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Acquereur.update(id, data),
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ['mes_acquereurs_full'] });
+      setEditingAcquereur(null);
+      setViewingAcquereur(null);
+    },
+  });
+
   const handleSubmit = (data) => {
     const partenaire = partenaires.find(p => p.id === currentUser?.partenaire_id);
     const enrichedData = {
@@ -45,7 +63,26 @@ export default function MesAcquereurs() {
       partenaire_id: currentUser?.partenaire_id,
       partenaire_nom: partenaire?.nom || partenaire?.nom_societe || "",
     };
-    createMutation.mutate(enrichedData);
+
+    if (data.id) {
+      updateMutation.mutate({ id: data.id, data: enrichedData });
+    } else {
+      createMutation.mutate(enrichedData);
+    }
+  };
+
+  const handleView = (acquereur) => {
+    setViewingAcquereur(acquereur);
+    setEditingAcquereur(null);
+  };
+
+  const handleEdit = (acquereur) => {
+    setEditingAcquereur(acquereur);
+    setViewingAcquereur(null);
+  };
+
+  const getLotForAcquereur = (acquereurId) => {
+    return lots.find(lot => lot.acquereur_id === acquereurId);
   };
 
   const statusColors = {
@@ -93,7 +130,7 @@ export default function MesAcquereurs() {
         <AnimatePresence>
           {showForm && currentUser && (
             <AcquereurForm
-              acquereur={{ 
+              acquereur={{
                 partenaire_id: currentUser.partenaire_id,
                 date_entree_crm: new Date().toISOString().split('T')[0]
               }}
@@ -101,6 +138,25 @@ export default function MesAcquereurs() {
               onCancel={() => setShowForm(false)}
               isLoading={createMutation.isPending}
               isPartner={true}
+            />
+          )}
+
+          {editingAcquereur && (
+            <AcquereurForm
+              acquereur={editingAcquereur}
+              onSubmit={handleSubmit}
+              onCancel={() => setEditingAcquereur(null)}
+              isLoading={updateMutation.isPending}
+              isPartner={true}
+            />
+          )}
+
+          {viewingAcquereur && (
+            <AcquereurDetailPartenaire
+              acquereur={viewingAcquereur}
+              lot={getLotForAcquereur(viewingAcquereur.id)}
+              onClose={() => setViewingAcquereur(null)}
+              onEdit={handleEdit}
             />
           )}
         </AnimatePresence>
@@ -128,62 +184,13 @@ export default function MesAcquereurs() {
             </div>
           ) : (
             filteredAcquereurs.map(acquereur => (
-              <Card key={acquereur.id} className="border-none shadow-lg hover:shadow-xl transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#1E40AF] to-[#1E3A8A] flex items-center justify-center">
-                        <User className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg text-[#1E40AF]">
-                          {acquereur.prenom} {acquereur.nom}
-                        </CardTitle>
-                        <Badge className={`${statusColors[acquereur.statut_commercial]} border mt-1`}>
-                          {statusLabels[acquereur.statut_commercial]}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {acquereur.email && (
-                    <div className="flex items-center gap-2 text-sm text-slate-600">
-                      <Mail className="w-4 h-4 text-slate-400" />
-                      <a href={`mailto:${acquereur.email}`} className="hover:text-[#1E40AF]">
-                        {acquereur.email}
-                      </a>
-                    </div>
-                  )}
-
-                  {acquereur.telephone && (
-                    <div className="flex items-center gap-2 text-sm text-slate-600">
-                      <Phone className="w-4 h-4 text-slate-400" />
-                      <a href={`tel:${acquereur.telephone}`} className="hover:text-[#1E40AF]">
-                        {acquereur.telephone}
-                      </a>
-                    </div>
-                  )}
-
-                  {(acquereur.budget_min || acquereur.budget_max || acquereur.budget) && (
-                    <div className="pt-3 border-t">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Euro className="w-4 h-4 text-[#F59E0B]" />
-                        <span className="text-sm font-semibold text-slate-700">Budget</span>
-                      </div>
-                      {acquereur.budget_min || acquereur.budget_max ? (
-                        <p className="text-lg font-bold text-[#1E40AF]">
-                          {acquereur.budget_min?.toLocaleString('fr-FR') || '...'} - {acquereur.budget_max?.toLocaleString('fr-FR') || '...'} €
-                        </p>
-                      ) : (
-                        <p className="text-lg font-bold text-[#1E40AF]">
-                          {acquereur.budget?.toLocaleString('fr-FR')} €
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <AcquereurCardPartenaire
+                key={acquereur.id}
+                acquereur={acquereur}
+                lot={getLotForAcquereur(acquereur.id)}
+                onView={handleView}
+                onEdit={handleEdit}
+              />
             ))
           )}
         </div>
