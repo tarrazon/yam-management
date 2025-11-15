@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { TrendingUp, Euro, Users, Building2, Calendar, Download, Home, Target, Award, Percent, Eye } from "lucide-react";
+import { TrendingUp, Euro, Users, Building2, Calendar, Download, Home, Target, Award, Percent, Eye, Clock } from "lucide-react";
 import { viewsTracking } from "@/api/viewsTracking";
 
 const COLORS = ['#1E40AF', '#F59E0B', '#10B981', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316'];
