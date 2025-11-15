@@ -2,7 +2,7 @@ import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Users, Eye, Edit, TrendingUp, AlertCircle, ChevronRight, CheckCircle } from "lucide-react";
+import { Calendar, Users, Eye, Edit, TrendingUp, AlertCircle, ChevronRight, CheckCircle, Euro } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -22,7 +22,7 @@ const statusLabels = {
   vendu: "Vendu",
 };
 
-export default function SuiviDossierCard({ lot, onEdit, onView, hideVendeur = false }) {
+export default function SuiviDossierCard({ lot, onEdit, onView, hideVendeur = false, commission = null, honoraires = null }) {
   const { totalManquants, hasDocumentsManquants, documentsManquantsAcquereur, documentsManquantsVendeur } = useDocumentsManquants(lot);
 
   const formatDate = (dateString) => {
@@ -190,14 +190,40 @@ export default function SuiviDossierCard({ lot, onEdit, onView, hideVendeur = fa
             </div>
           </div>
 
-          {lot.prix_fai != null && (
-            <div className="pb-4 border-b border-slate-100">
-              <p className="text-xs text-slate-500 mb-1">Prix FAI</p>
-              <p className="text-2xl font-bold text-[#1E40AF]">
-                {lot.prix_fai.toLocaleString('fr-FR')} €
-              </p>
-            </div>
-          )}
+          <div className="pb-4 border-b border-slate-100 space-y-3">
+            {lot.prix_fai != null && (
+              <div>
+                <p className="text-xs text-slate-500 mb-1">Prix FAI</p>
+                <p className="text-2xl font-bold text-[#1E40AF]">
+                  {lot.prix_fai.toLocaleString('fr-FR')} €
+                </p>
+              </div>
+            )}
+
+            {commission != null && commission > 0 && (
+              <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                <div className="flex items-center gap-2 mb-1">
+                  <Euro className="w-4 h-4 text-green-600" />
+                  <p className="text-xs text-green-700 font-semibold">Commission à venir</p>
+                </div>
+                <p className="text-xl font-bold text-green-600">
+                  {commission.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+                </p>
+              </div>
+            )}
+
+            {honoraires != null && honoraires > 0 && (
+              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="flex items-center gap-2 mb-1">
+                  <Euro className="w-4 h-4 text-blue-600" />
+                  <p className="text-xs text-blue-700 font-semibold">Honoraires à venir</p>
+                </div>
+                <p className="text-xl font-bold text-blue-600">
+                  {honoraires.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+                </p>
+              </div>
+            )}
+          </div>
 
           {(lot.partenaire_nom || lot.acquereur_nom) && (
             <div className="space-y-2">

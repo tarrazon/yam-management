@@ -36,6 +36,12 @@ export default function SuiviDossierPartenaire() {
     enabled: !!currentUser?.partenaire_id,
   });
 
+  const { data: partenaireData } = useQuery({
+    queryKey: ['partenaire_info', currentUser?.partenaire_id],
+    queryFn: () => base44.entities.Partenaire.get(currentUser?.partenaire_id),
+    enabled: !!currentUser?.partenaire_id,
+  });
+
   const lotsPartenaire = lots.filter(lot => {
     const acquereur = acquereurs.find(a => a.id === lot.acquereur_id);
     return acquereur && lot.statut !== 'disponible' && lot.statut !== 'allotement';
@@ -59,6 +65,17 @@ export default function SuiviDossierPartenaire() {
       if (dateFin && date > new Date(dateFin)) return false;
       return true;
     });
+
+  const commissionTaux = partenaireData?.commission_taux || 0;
+
+  const calculateCommission = (lot) => {
+    const prixBase = lot.prix_ttc || lot.prix_ht || 0;
+    return (prixBase * commissionTaux) / 100;
+  };
+
+  const commissionsAVenir = lotsPartenaire
+    .filter(l => ['reserve', 'compromis'].includes(l.statut))
+    .reduce((total, lot) => total + calculateCommission(lot), 0);
 
   const stats = {
     sous_option: lotsPartenaire.filter(l => l.statut === 'sous_option').length,
@@ -104,7 +121,7 @@ export default function SuiviDossierPartenaire() {
           )}
         </AnimatePresence>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
           <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
             <p className="text-sm text-slate-500 mb-1">Sous option</p>
             <p className="text-2xl font-bold text-blue-600">{stats.sous_option}</p>
@@ -120,6 +137,11 @@ export default function SuiviDossierPartenaire() {
           <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
             <p className="text-sm text-slate-500 mb-1">Vendus</p>
             <p className="text-2xl font-bold text-purple-600">{stats.vendu}</p>
+          </div>
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-xl shadow-sm border border-green-200">
+            <p className="text-sm text-green-700 mb-1 font-semibold">Commissions à venir</p>
+            <p className="text-2xl font-bold text-green-600">{commissionsAVenir.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}</p>
+            <p className="text-xs text-green-600 mt-1">Taux: {commissionTaux}%</p>
           </div>
         </div>
 
@@ -211,6 +233,7 @@ export default function SuiviDossierPartenaire() {
                   lot={lot}
                   onView={handleView}
                   hideVendeur={true}
+                  commission={calculateCommission(lot)}
                 />
               </motion.div>
             ))}

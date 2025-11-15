@@ -58,6 +58,14 @@ export default function SuiviDossier() {
       return true;
     });
 
+  const getHonoraires = (lot) => {
+    return lot.honoraires || 0;
+  };
+
+  const honorairesAVenir = lotsEnCours
+    .filter(l => ['reserve', 'compromis'].includes(l.statut))
+    .reduce((total, lot) => total + getHonoraires(lot), 0);
+
   const stats = {
     sous_option: lotsEnCours.filter(l => l.statut === 'sous_option').length,
     reserve: lotsEnCours.filter(l => l.statut === 'reserve').length,
@@ -83,10 +91,22 @@ export default function SuiviDossier() {
     <div className="p-6 md:p-8 bg-[#F9FAFB] min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#1E40AF] tracking-tight">Suivi de dossier</h1>
-          <p className="text-slate-500 mt-1">
-            {lotsEnCours.length} dossiers en cours · {stats.compromis} compromis · {stats.vendu} vendus
-          </p>
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-bold text-[#1E40AF] tracking-tight">Suivi de dossier</h1>
+              <p className="text-slate-500 mt-1">
+                {lotsEnCours.length} dossiers en cours · {stats.compromis} compromis · {stats.vendu} vendus
+              </p>
+            </div>
+            {honorairesAVenir > 0 && (
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200 shadow-sm">
+                <p className="text-sm text-blue-700 font-semibold mb-1">Honoraires à venir</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {honorairesAVenir.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col gap-4 mb-6">
@@ -192,6 +212,7 @@ export default function SuiviDossier() {
                   lot={lot}
                   onEdit={handleEdit}
                   onView={handleView}
+                  honoraires={getHonoraires(lot)}
                 />
               ))}
             </AnimatePresence>
