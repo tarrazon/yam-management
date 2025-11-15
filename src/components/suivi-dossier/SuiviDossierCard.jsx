@@ -23,7 +23,7 @@ const statusLabels = {
 };
 
 export default function SuiviDossierCard({ lot, onEdit, onView }) {
-  const { totalManquants, hasDocumentsManquants } = useDocumentsManquants(lot);
+  const { totalManquants, hasDocumentsManquants, documentsManquantsAcquereur, documentsManquantsVendeur } = useDocumentsManquants(lot);
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';
@@ -221,16 +221,29 @@ export default function SuiviDossierCard({ lot, onEdit, onView }) {
           )}
 
           {hasDocumentsManquants && (
-            <div className="pt-4 border-t border-slate-100">
-              <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
-                <p className="text-xs text-orange-700 font-bold flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4" />
-                  {totalManquants} document{totalManquants > 1 ? 's' : ''} manquant{totalManquants > 1 ? 's' : ''}
-                </p>
-                <p className="text-xs text-orange-600 mt-1">
-                  Cliquez pour voir le détail
-                </p>
-              </div>
+            <div className="pt-4 border-t border-slate-100 space-y-2">
+              {documentsManquantsAcquereur.length > 0 && (
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-xs text-blue-700 font-bold flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    Acquéreur : {documentsManquantsAcquereur.length} doc{documentsManquantsAcquereur.length > 1 ? 's' : ''} manquant{documentsManquantsAcquereur.length > 1 ? 's' : ''}
+                  </p>
+                  <p className="text-xs text-blue-600 mt-1">
+                    {lot.acquereur_nom}
+                  </p>
+                </div>
+              )}
+              {documentsManquantsVendeur.length > 0 && (
+                <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
+                  <p className="text-xs text-orange-700 font-bold flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4" />
+                    Vendeur : {documentsManquantsVendeur.length} doc{documentsManquantsVendeur.length > 1 ? 's' : ''} manquant{documentsManquantsVendeur.length > 1 ? 's' : ''}
+                  </p>
+                  <p className="text-xs text-orange-600 mt-1">
+                    {lot.vendeur_nom}
+                  </p>
+                </div>
+              )}
             </div>
           )}
 

@@ -255,26 +255,26 @@ export default function SuiviDossierDetail({ lot, onClose, onEdit }) {
 
           {/* Documents manquants */}
           {(documentsManquantsAcquereur.length > 0 || documentsManquantsVendeur.length > 0) && (
-            <Card className="border-2 border-orange-200 bg-orange-50">
+            <Card className="border-2 border-slate-200">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5 text-orange-600" />
+                  <AlertCircle className="w-5 h-5 text-slate-600" />
                   Documents manquants
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {documentsManquantsAcquereur.length > 0 && (
-                  <div className="p-4 bg-white rounded-lg border-2 border-orange-200">
+                  <div className="p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
                     <div className="flex items-center gap-2 mb-3">
-                      <Users className="w-4 h-4 text-orange-600" />
-                      <p className="text-sm font-bold text-orange-800">
+                      <Users className="w-4 h-4 text-blue-600" />
+                      <p className="text-sm font-bold text-blue-800">
                         Acquéreur : {lot.acquereur_nom}
                       </p>
                     </div>
                     <ul className="space-y-2">
                       {documentsManquantsAcquereur.map((doc, idx) => (
-                        <li key={idx} className="flex items-center gap-2 text-sm text-orange-700">
-                          <div className="w-2 h-2 rounded-full bg-orange-500" />
+                        <li key={idx} className="flex items-center gap-2 text-sm text-blue-700">
+                          <div className="w-2 h-2 rounded-full bg-blue-500" />
                           {doc}
                         </li>
                       ))}
@@ -283,7 +283,7 @@ export default function SuiviDossierDetail({ lot, onClose, onEdit }) {
                 )}
 
                 {documentsManquantsVendeur.length > 0 && (
-                  <div className="p-4 bg-white rounded-lg border-2 border-orange-200">
+                  <div className="p-4 bg-orange-50 rounded-lg border-2 border-orange-200">
                     <div className="flex items-center gap-2 mb-3">
                       <Building2 className="w-4 h-4 text-orange-600" />
                       <p className="text-sm font-bold text-orange-800">
