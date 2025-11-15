@@ -48,8 +48,8 @@ export default function SuiviOptions() {
     // D'abord, on obtient tous les lots avec ce statut
     const lotsAvecStatut = lots.filter(l => l.statut === statut);
 
-    // Filtrer les options actives (non annulées)
-    const optionsActives = toutesOptions.filter(opt => opt.statut !== 'annulee');
+    // Filtrer uniquement les options actives (ni annulée, ni convertie)
+    const optionsActives = toutesOptions.filter(opt => opt.statut === 'active');
 
     // Ensuite, on garde seulement ceux qui ont au moins une option active du partenaire
     const lotsPartenaire = lotsAvecStatut
