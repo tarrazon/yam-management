@@ -55,15 +55,17 @@ export default function PartnersPerformance({ partenaires, lots }) {
                     <span className={`text-sm font-medium ${
                       ['text-blue-600', 'text-green-600', 'text-purple-600', 'text-orange-600', 'text-pink-600'][index % 5]
                     }`}>
-                      {partenaire.nom[0].toUpperCase()}
+                      {partenaire.nom ? partenaire.nom[0].toUpperCase() : '?'}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm truncate">{partenaire.nom}</p>
+                    <p className="font-semibold text-sm truncate">{partenaire.nom || partenaire.nom_societe || 'Sans nom'}</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <Badge className={`${typeColors[partenaire.type_partenaire]} text-xs`} variant="secondary">
-                        {partenaire.type_partenaire.toUpperCase()}
-                      </Badge>
+                      {partenaire.type_partenaire && (
+                        <Badge className={`${typeColors[partenaire.type_partenaire] || typeColors.autre} text-xs`} variant="secondary">
+                          {partenaire.type_partenaire.toUpperCase()}
+                        </Badge>
+                      )}
                       <span className="text-xs text-slate-500">
                         {partenaire.nombre_ventes_calcule || 0} ventes
                       </span>
