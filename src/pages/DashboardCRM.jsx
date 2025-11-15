@@ -8,6 +8,7 @@ import ActivityTimeline from "../components/dashboard/ActivityTimeline";
 import PartnersPerformance from "../components/dashboard/PartnersPerformance";
 import SalesChartCRM from "../components/dashboard/SalesChartCRM";
 import TopResidences from "../components/dashboard/TopResidences";
+import { formatCurrency } from "@/utils/formHelpers";
 
 export default function DashboardCRM() {
   const { data: lots = [] } = useQuery({
@@ -64,8 +65,10 @@ export default function DashboardCRM() {
     .reduce((sum, lot) => {
       const partenaire = partenaires.find(p => p.id === lot.partenaire_id);
       const tauxRetro = Number(partenaire?.taux_retrocession) || 0;
+      const prixFai = Number(lot.prix_fai) || 0;
       const honoraires = Number(lot.honoraires) || 0;
-      return sum + (honoraires * tauxRetro / 100);
+      const prixNetVendeur = (prixFai - honoraires) / (1 + tauxRetro / 100);
+      return sum + (prixNetVendeur * tauxRetro / 100);
     }, 0);
 
   const retrocessionAVenir = lots
@@ -73,8 +76,10 @@ export default function DashboardCRM() {
     .reduce((sum, lot) => {
       const partenaire = partenaires.find(p => p.id === lot.partenaire_id);
       const tauxRetro = Number(partenaire?.taux_retrocession) || 0;
+      const prixFai = Number(lot.prix_fai) || 0;
       const honoraires = Number(lot.honoraires) || 0;
-      return sum + (honoraires * tauxRetro / 100);
+      const prixNetVendeur = (prixFai - honoraires) / (1 + tauxRetro / 100);
+      return sum + (prixNetVendeur * tauxRetro / 100);
     }, 0);
 
   // Taux de conversion = lots vendus / total lots
@@ -105,14 +110,14 @@ export default function DashboardCRM() {
           />
           <StatsCard
             title="CA réalisé"
-            value={caRealise >= 1000000 ? `${(caRealise / 1000000).toFixed(2)}M€` : `${Math.round(caRealise / 1000)}k€`}
+            value={caRealise >= 1000000 ? `${Math.round(caRealise / 1000000)}M€` : `${Math.round(caRealise / 1000)}k€`}
             icon={Euro}
             color="green"
             subtitle={`${lotsVendus} lots vendus`}
           />
           <StatsCard
             title="CA potentiel"
-            value={caPotentiel >= 1000000 ? `${(caPotentiel / 1000000).toFixed(2)}M€` : `${Math.round(caPotentiel / 1000)}k€`}
+            value={caPotentiel >= 1000000 ? `${Math.round(caPotentiel / 1000000)}M€` : `${Math.round(caPotentiel / 1000)}k€`}
             icon={TrendingUp}
             color="amber"
             subtitle={`${lotsReserves + lotsSousOption} lots en cours`}
@@ -137,7 +142,7 @@ export default function DashboardCRM() {
                 <div>
                   <p className="text-sm text-green-700 font-medium">CA Total</p>
                   <p className="text-2xl font-bold text-green-800">
-                    {caRealise.toLocaleString('fr-FR')} €
+                    {formatCurrency(caRealise)} €
                   </p>
                   <p className="text-xs text-green-600 mt-1">{lotsVendus} ventes réalisées</p>
                 </div>
@@ -150,7 +155,7 @@ export default function DashboardCRM() {
               <div>
                 <p className="text-sm text-blue-700 font-medium mb-2">Honoraires perçus</p>
                 <p className="text-2xl font-bold text-blue-800">
-                  {honorairesPercus.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €
+                  {formatCurrency(honorairesPercus)} €
                 </p>
                 <p className="text-xs text-blue-600 mt-1">Lots vendus</p>
               </div>
@@ -162,7 +167,7 @@ export default function DashboardCRM() {
               <div>
                 <p className="text-sm text-blue-700 font-medium mb-2">Honoraires à percevoir</p>
                 <p className="text-2xl font-bold text-blue-800">
-                  {honorairesAPercevoir.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €
+                  {formatCurrency(honorairesAPercevoir)} €
                 </p>
                 <p className="text-xs text-blue-600 mt-1">Réservé + Compromis</p>
               </div>
@@ -178,7 +183,7 @@ export default function DashboardCRM() {
                 <div>
                   <p className="text-sm text-amber-700 font-medium">Rétrocessions actées</p>
                   <p className="text-2xl font-bold text-amber-800">
-                    {retrocessionActee.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €
+                    {formatCurrency(retrocessionActee)} €
                   </p>
                   <p className="text-xs text-amber-600 mt-1">Partenaires - Vendus</p>
                 </div>

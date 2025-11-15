@@ -96,3 +96,7 @@ export function autoCleanFormData(formData) {
 
   return cleaned;
 }
+
+export function formatCurrency(amount) {
+  return Math.round(Number(amount) || 0).toLocaleString('fr-FR');
+}

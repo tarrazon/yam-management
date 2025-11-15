@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Home, Users, FileCheck, Clock, AlertCircle, Download, Euro, TrendingUp, Building2, Mail, Briefcase } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { formatCurrency } from "@/utils/formHelpers";
 
 export default function PartenairesDashboard() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -236,7 +237,7 @@ export default function PartenairesDashboard() {
               <div className="pt-4 border-t border-green-200">
                 <p className="text-sm text-green-700 font-medium mb-2">Chiffre d'affaires généré</p>
                 <p className="text-2xl font-bold text-green-800">
-                  {chiffreAffaires.toLocaleString('fr-FR')} €
+                  {formatCurrency(chiffreAffaires)} €
                 </p>
                 <p className="text-xs text-green-600 mt-1">Total des ventes réalisées</p>
               </div>
@@ -255,14 +256,14 @@ export default function PartenairesDashboard() {
                 <div>
                   <p className="text-xs text-amber-700 mb-1">Actée</p>
                   <p className="text-xl font-bold text-amber-600">
-                    {retrocessionActee.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+                    {formatCurrency(retrocessionActee)} €
                   </p>
                   <p className="text-xs text-amber-500 mt-1">Vendus</p>
                 </div>
                 <div>
                   <p className="text-xs text-amber-700 mb-1">À venir</p>
                   <p className="text-xl font-bold text-amber-600">
-                    {retrocessionAVenir.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+                    {formatCurrency(retrocessionAVenir)} €
                   </p>
                   <p className="text-xs text-amber-500 mt-1">En cours</p>
                 </div>

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp, Euro, Users, Building2, Calendar, Download, Home, Target, Award, Percent, Eye, Clock } from "lucide-react";
 import { viewsTracking } from "@/api/viewsTracking";
+import { formatCurrency } from "@/utils/formHelpers";
 
 const COLORS = ['#1E40AF', '#F59E0B', '#10B981', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316'];
 
@@ -376,7 +377,7 @@ export default function Statistiques() {
                 <div>
                   <p className="text-sm text-green-700 font-medium">CA Total</p>
                   <p className="text-2xl font-bold text-green-800">
-                    {stats.caTotal.toLocaleString('fr-FR')} €
+                    {formatCurrency(stats.caTotal)} €
                   </p>
                   <p className="text-xs text-green-600 mt-1">{stats.nombreVentes} ventes</p>
                 </div>
@@ -393,7 +394,7 @@ export default function Statistiques() {
                 <div>
                   <p className="text-sm text-amber-700 font-medium">Rétrocessions Perçues</p>
                   <p className="text-2xl font-bold text-amber-800">
-                    {stats.retrocessionsPercues.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €
+                    {formatCurrency(stats.retrocessionsPercues)} €
                   </p>
                   <p className="text-xs text-amber-600 mt-1">Lots vendus</p>
                 </div>
@@ -410,7 +411,7 @@ export default function Statistiques() {
                 <div>
                   <p className="text-sm text-sky-700 font-medium">Honoraires Perçus</p>
                   <p className="text-2xl font-bold text-sky-800">
-                    {stats.honorairesPercus.toLocaleString('fr-FR')} €
+                    {formatCurrency(stats.honorairesPercus)} €
                   </p>
                   <p className="text-xs text-sky-600 mt-1">Lots vendus</p>
                 </div>
@@ -427,7 +428,7 @@ export default function Statistiques() {
                 <div>
                   <p className="text-sm text-rose-700 font-medium">Marge Brute Perçue</p>
                   <p className="text-2xl font-bold text-rose-800">
-                    {stats.margeBrutePercue.toLocaleString('fr-FR')} €
+                    {formatCurrency(stats.margeBrutePercue)} €
                   </p>
                   <p className="text-xs text-rose-600 mt-1">Taux: {stats.tauxMarge}%</p>
                 </div>
@@ -447,7 +448,7 @@ export default function Statistiques() {
                 <div>
                   <p className="text-sm text-purple-700 font-medium">CA Potentiel</p>
                   <p className="text-2xl font-bold text-purple-800">
-                    {stats.caPotentiel.toLocaleString('fr-FR')} €
+                    {formatCurrency(stats.caPotentiel)} €
                   </p>
                   <p className="text-xs text-purple-600 mt-1">En cours</p>
                 </div>
@@ -464,7 +465,7 @@ export default function Statistiques() {
                 <div>
                   <p className="text-sm text-orange-700 font-medium">Rétrocessions À Venir</p>
                   <p className="text-2xl font-bold text-orange-800">
-                    {stats.retrocessionsAVenir.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €
+                    {formatCurrency(stats.retrocessionsAVenir)} €
                   </p>
                   <p className="text-xs text-orange-600 mt-1">Réservé/Compromis</p>
                 </div>
@@ -481,7 +482,7 @@ export default function Statistiques() {
                 <div>
                   <p className="text-sm text-cyan-700 font-medium">Honoraires À Venir</p>
                   <p className="text-2xl font-bold text-cyan-800">
-                    {stats.honorairesAVenir.toLocaleString('fr-FR')} €
+                    {formatCurrency(stats.honorairesAVenir)} €
                   </p>
                   <p className="text-xs text-cyan-600 mt-1">Réservé/Compromis</p>
                 </div>
@@ -498,7 +499,7 @@ export default function Statistiques() {
                 <div>
                   <p className="text-sm text-pink-700 font-medium">Marge Brute À Venir</p>
                   <p className="text-2xl font-bold text-pink-800">
-                    {stats.margeBruteAVenir.toLocaleString('fr-FR')} €
+                    {formatCurrency(stats.margeBruteAVenir)} €
                   </p>
                   <p className="text-xs text-pink-600 mt-1">Réservé/Compromis</p>
                 </div>
@@ -552,7 +553,7 @@ export default function Statistiques() {
                 <div>
                   <p className="text-sm text-indigo-700 font-medium">Prix moyen</p>
                   <p className="text-2xl font-bold text-indigo-800">
-                    {stats.prixMoyenVente.toLocaleString('fr-FR')} €
+                    {formatCurrency(stats.prixMoyenVente)} €
                   </p>
                   <p className="text-xs text-indigo-600 mt-1">Par vente</p>
                 </div>
@@ -656,7 +657,7 @@ export default function Statistiques() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="nom" angle={-45} textAnchor="end" height={100} />
                   <YAxis />
-                  <Tooltip formatter={(value) => `${value.toLocaleString('fr-FR')} €`} />
+                  <Tooltip formatter={(value) => `${formatCurrency(value)} €`} />
                   <Legend />
                   <Bar dataKey="ca" fill="#1E40AF" name="CA" />
                   <Bar dataKey="commissions" fill="#F59E0B" name="Commissions" />

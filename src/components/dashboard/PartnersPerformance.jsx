@@ -2,6 +2,7 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp } from "lucide-react";
+import { formatCurrency } from "@/utils/formHelpers";
 
 const typeColors = {
   cgp: "bg-purple-100 text-purple-700",
@@ -74,7 +75,7 @@ export default function PartnersPerformance({ partenaires, lots }) {
                 </div>
                 <div className="text-right">
                   <p className="font-bold text-[#1E40AF] text-sm">
-                    {((partenaire.ca_genere_calcule || 0) / 1000).toFixed(0)}k€
+                    {Math.round((partenaire.ca_genere_calcule || 0) / 1000)}k€
                   </p>
                 </div>
               </div>
