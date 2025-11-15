@@ -87,8 +87,10 @@ export default function PartenairesDashboard() {
   const mesLotsAPayer = mesLotsAvecAcquereur.filter(l => ['reserve', 'compromis'].includes(l.statut));
 
   const calculateRetrocession = (lot) => {
+    const prixFai = Number(lot.prix_fai) || 0;
     const honoraires = Number(lot.honoraires) || 0;
-    return (honoraires * tauxRetrocession) / 100;
+    const prixNetVendeur = (prixFai - honoraires) / (1 + tauxRetrocession / 100);
+    return prixNetVendeur * (tauxRetrocession / 100);
   };
 
   const chiffreAffaires = mesLotsVendus.reduce((total, lot) => {

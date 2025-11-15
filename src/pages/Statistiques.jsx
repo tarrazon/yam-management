@@ -90,8 +90,10 @@ export default function Statistiques() {
       if (lot.partenaire_id) {
         const partenaire = partenaires.find(p => p.id === lot.partenaire_id);
         const tauxRetrocession = Number(partenaire?.taux_retrocession) || 0;
+        const prixFai = Number(lot.prix_fai) || 0;
         const honoraires = Number(lot.honoraires) || 0;
-        return sum + (honoraires * tauxRetrocession / 100);
+        const prixNetVendeur = (prixFai - honoraires) / (1 + tauxRetrocession / 100);
+        return sum + (prixNetVendeur * tauxRetrocession / 100);
       }
       return sum;
     }, 0);
@@ -101,8 +103,10 @@ export default function Statistiques() {
       if (lot.partenaire_id) {
         const partenaire = partenaires.find(p => p.id === lot.partenaire_id);
         const tauxRetrocession = Number(partenaire?.taux_retrocession) || 0;
+        const prixFai = Number(lot.prix_fai) || 0;
         const honoraires = Number(lot.honoraires) || 0;
-        return sum + (honoraires * tauxRetrocession / 100);
+        const prixNetVendeur = (prixFai - honoraires) / (1 + tauxRetrocession / 100);
+        return sum + (prixNetVendeur * tauxRetrocession / 100);
       }
       return sum;
     }, 0);

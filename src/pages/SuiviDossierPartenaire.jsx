@@ -71,8 +71,10 @@ export default function SuiviDossierPartenaire() {
   const tauxRetrocession = Number(partenaireData?.taux_retrocession) || 0;
 
   const calculateRetrocession = (lot) => {
+    const prixFai = Number(lot.prix_fai) || 0;
     const honoraires = Number(lot.honoraires) || 0;
-    return (honoraires * tauxRetrocession) / 100;
+    const prixNetVendeur = (prixFai - honoraires) / (1 + tauxRetrocession / 100);
+    return prixNetVendeur * (tauxRetrocession / 100);
   };
 
   const retrocessionAVenir = lotsPartenaire
