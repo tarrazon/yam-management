@@ -3,7 +3,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { LayoutDashboard, Users, Home, FileCheck, Handshake, Building2, Contact, Settings, LogOut, BarChart3, Shield, FileCode, Clock, Mail, Briefcase } from "lucide-react";
+import { LayoutDashboard, Users, Home, FileCheck, Handshake, Building2, Contact, Settings, LogOut, BarChart3, Shield, FileCode, Clock, Mail, Briefcase, Code } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -105,6 +105,12 @@ const getNavigationItems = (userRole) => {
       title: "Emails de notification",
       url: createPageUrl("NotificationEmails"),
       icon: Mail,
+      roles: ['admin'],
+    },
+    {
+      title: "API Documentation",
+      url: createPageUrl("APIDocumentation"),
+      icon: Code,
       roles: ['admin'],
     },
   ];

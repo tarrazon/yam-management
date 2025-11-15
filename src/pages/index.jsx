@@ -58,6 +58,8 @@ import OnboardingPartenaire from "./OnboardingPartenaire";
 
 import NotificationEmails from "./NotificationEmails";
 
+import APIDocumentation from "./APIDocumentation";
+
 import ForgotPassword from "./ForgotPassword";
 
 import ResetPassword from "./ResetPassword";
@@ -142,6 +144,10 @@ const PAGES = {
     OnboardingPartenaire: OnboardingPartenaire,
 
     SuiviDossierPartenaire: SuiviDossierPartenaire,
+
+    NotificationEmails: NotificationEmails,
+
+    APIDocumentation: APIDocumentation,
 
 }
 
@@ -251,6 +257,8 @@ function PagesContent() {
             <Route path="/OnboardingPartenaire" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['partenaire']}><OnboardingPartenaire /></ProtectedRoute></Layout>} />
 
             <Route path="/NotificationEmails" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['admin']}><NotificationEmails /></ProtectedRoute></Layout>} />
+
+            <Route path="/APIDocumentation" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['admin']}><APIDocumentation /></ProtectedRoute></Layout>} />
 
         </Routes>
     );
