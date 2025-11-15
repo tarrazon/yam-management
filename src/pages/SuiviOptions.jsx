@@ -105,13 +105,6 @@ export default function SuiviOptions() {
     const acquereurNom = lot.acquereur_nom || 'Non spécifié';
     const lotStatut = lot.statut || 'inconnu';
 
-    const statusConfig = {
-      active: { icon: Clock, color: "bg-green-100 text-green-800", label: "Active" },
-      expiree: { icon: AlertCircle, color: "bg-red-100 text-red-800", label: "Expirée" },
-      convertie: { icon: CheckCircle, color: "bg-blue-100 text-blue-800", label: "Convertie" },
-      annulee: { icon: XCircle, color: "bg-slate-100 text-slate-800", label: "Annulée" },
-    };
-
     const lotStatusColors = {
       disponible: "bg-green-100 text-green-800",
       sous_option: "bg-blue-100 text-blue-800",
@@ -129,9 +122,6 @@ export default function SuiviOptions() {
       compromis: "Compromis",
       vendu: "Vendu",
     };
-
-    const config = statusConfig[option.statut];
-    const Icon = config.icon;
 
     return (
       <Card key={lot.id} className="border-none shadow-md">
@@ -155,10 +145,6 @@ export default function SuiviOptions() {
                 {lotStatusLabels[lotStatut]}
               </Badge>
             </div>
-            <Badge className={config.color}>
-              <Icon className="w-3 h-3 mr-1" />
-              {config.label}
-            </Badge>
           </div>
 
           <div className="space-y-2 text-sm">
