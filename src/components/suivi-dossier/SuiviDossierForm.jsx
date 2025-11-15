@@ -10,9 +10,7 @@ import { motion } from "framer-motion";
 
 export default function SuiviDossierForm({ lot, onSubmit, onCancel, isLoading }) {
   const [formData, setFormData] = useState({
-    date_prise_option: lot.date_prise_option || '',
     date_premier_contact: lot.date_premier_contact || '',
-    date_signature_compromis: lot.date_signature_compromis || '',
     date_signature_acte: lot.date_signature_acte || '',
     statut_suivi: lot.statut_suivi || 'en_cours',
     statut_suivi_libre: lot.statut_suivi_libre || '',
@@ -169,13 +167,23 @@ export default function SuiviDossierForm({ lot, onSubmit, onCancel, isLoading })
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="date_signature_compromis">Date signature compromis</Label>
-                <Input
-                  id="date_signature_compromis"
-                  type="date"
-                  value={formData.date_signature_compromis}
-                  onChange={(e) => setFormData({ ...formData, date_signature_compromis: e.target.value })}
-                />
+                <Label>Date signature compromis</Label>
+                {lot.date_signature_compromis ? (
+                  <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
+                    <p className="text-sm font-semibold text-orange-700">
+                      {new Date(lot.date_signature_compromis).toLocaleDateString('fr-FR')}
+                    </p>
+                    <p className="text-xs text-orange-600 mt-1">
+                      Date générée automatiquement lors du passage en statut "Compromis"
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <p className="text-xs text-slate-600">
+                      La date sera générée automatiquement lors du passage du statut "Réservé" à "Compromis"
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">

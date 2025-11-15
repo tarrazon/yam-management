@@ -11,7 +11,6 @@ import SuiviPipeline from "./SuiviPipeline";
 
 const statusColors = {
   sous_option: "bg-blue-100 text-blue-800 border-blue-200",
-  allotement: "bg-cyan-100 text-cyan-800 border-cyan-200",
   reserve: "bg-yellow-100 text-yellow-800 border-yellow-200",
   compromis: "bg-orange-100 text-orange-800 border-orange-200",
   vendu: "bg-purple-100 text-purple-800 border-purple-200",
@@ -19,7 +18,6 @@ const statusColors = {
 
 const statusLabels = {
   sous_option: "Sous option",
-  allotement: "Allotement",
   reserve: "Réservé",
   compromis: "Compromis",
   vendu: "Vendu",

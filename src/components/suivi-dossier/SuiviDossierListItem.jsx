@@ -9,7 +9,6 @@ import { useDocumentsManquants } from "@/hooks/useDocumentsManquants";
 
 const statusColors = {
   sous_option: "bg-blue-100 text-blue-800",
-  allotement: "bg-cyan-100 text-cyan-800",
   reserve: "bg-yellow-100 text-yellow-800",
   compromis: "bg-orange-100 text-orange-800",
   vendu: "bg-purple-100 text-purple-800",
@@ -17,7 +16,6 @@ const statusColors = {
 
 const statusLabels = {
   sous_option: "Sous option",
-  allotement: "Allotement",
   reserve: "Réservé",
   compromis: "Compromis",
   vendu: "Vendu",

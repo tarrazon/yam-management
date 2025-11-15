@@ -10,7 +10,6 @@ import { useDocumentsManquants } from "@/hooks/useDocumentsManquants";
 
 const statusColors = {
   sous_option: "bg-blue-100 text-blue-800 border-blue-200",
-  allotement: "bg-cyan-100 text-cyan-800 border-cyan-200",
   reserve: "bg-yellow-100 text-yellow-800 border-yellow-200",
   compromis: "bg-orange-100 text-orange-800 border-orange-200",
   vendu: "bg-purple-100 text-purple-800 border-purple-200",
@@ -18,7 +17,6 @@ const statusColors = {
 
 const statusLabels = {
   sous_option: "Sous option",
-  allotement: "Allotement",
   reserve: "Réservé",
   compromis: "Compromis",
   vendu: "Vendu",
@@ -85,10 +83,9 @@ export default function SuiviDossierCard({ lot, onEdit, onView }) {
           <div className="pb-4 border-b border-slate-100">
             <p className="text-xs text-slate-500 mb-3 font-semibold">Progression du dossier</p>
             <div className="flex items-center gap-2">
-              {['sous_option', 'allotement', 'reserve', 'compromis', 'vendu'].map((status, idx) => {
+              {['sous_option', 'reserve', 'compromis', 'vendu'].map((status, idx) => {
                 const statusLabelsShort = {
                   sous_option: "Option",
-                  allotement: "Validation",
                   reserve: "Réservé",
                   compromis: "Compromis",
                   vendu: "Vendu"
@@ -96,10 +93,9 @@ export default function SuiviDossierCard({ lot, onEdit, onView }) {
 
                 const statusPositions = {
                   sous_option: 0,
-                  allotement: 1,
-                  reserve: 2,
-                  compromis: 3,
-                  vendu: 4,
+                  reserve: 1,
+                  compromis: 2,
+                  vendu: 3,
                 };
 
                 const currentPosition = statusPositions[lot.statut] || 0;
