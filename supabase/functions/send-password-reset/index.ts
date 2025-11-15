@@ -34,15 +34,12 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Générer un token de réinitialisation (valide 1 heure)
     const resetToken = crypto.randomUUID();
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 heure
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
 
-    // Stocker le token dans Supabase
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    // Vérifier que l'utilisateur existe
     const userCheckResponse = await fetch(
       `${supabaseUrl}/rest/v1/profiles?email=eq.${email}&select=email,id`,
       {
@@ -56,7 +53,6 @@ Deno.serve(async (req: Request) => {
     const users = await userCheckResponse.json();
 
     if (!users || users.length === 0) {
-      // Pour des raisons de sécurité, on retourne un succès même si l'email n'existe pas
       return new Response(
         JSON.stringify({ success: true, message: "If the email exists, a reset link has been sent" }),
         {
@@ -69,8 +65,6 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Créer une table pour stocker les tokens si elle n'existe pas
-    // (à faire via migration, mais pour simplifier on vérifie ici)
     const insertResponse = await fetch(
       `${supabaseUrl}/rest/v1/password_reset_tokens`,
       {
@@ -94,7 +88,6 @@ Deno.serve(async (req: Request) => {
       throw new Error("Failed to store reset token");
     }
 
-    // Envoyer l'email via Resend
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
 
     if (!resendApiKey) {
@@ -110,7 +103,7 @@ Deno.serve(async (req: Request) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "YAM Management <noreply@votre-domaine.com>",
+        from: "YAM Management <onboarding@resend.dev>",
         to: [email],
         subject: "Réinitialisation de votre mot de passe - YAM Management",
         html: `
@@ -121,7 +114,7 @@ Deno.serve(async (req: Request) => {
               <style>
                 body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                 .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+                .header { background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
                 .content { background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; }
                 .button { display: inline-block; padding: 12px 30px; background: #2563eb; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 20px 0; }
                 .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }

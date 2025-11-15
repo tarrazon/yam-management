@@ -172,7 +172,7 @@ Yam Management - Gestion LMNP
           Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
         },
         body: JSON.stringify({
-          from: "Yam Management <notifications@yammanagement.com>",
+          from: "Yam Management <onboarding@resend.dev>",
           to: [item.email],
           subject: `Nouvelle option - ${payload.residence_nom} - Lot ${payload.lot_numero}`,
           html: emailHtml,
