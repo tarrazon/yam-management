@@ -123,12 +123,11 @@ export default function LotLMNPForm({ lot, residences, vendeurs, onSubmit, onCan
         <form onSubmit={handleSubmit}>
           <CardContent className="p-6">
             <Tabs defaultValue="general" className="w-full">
-              <TabsList className="grid w-full grid-cols-5">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="general">Général</TabsTrigger>
                 <TabsTrigger value="caracteristiques">Caractéristiques</TabsTrigger>
                 <TabsTrigger value="financier">Financier</TabsTrigger>
                 <TabsTrigger value="suivi">Suivi dossier</TabsTrigger>
-                <TabsTrigger value="publication">Publication</TabsTrigger>
               </TabsList>
 
               <TabsContent value="general" className="space-y-6 mt-6">
@@ -559,40 +558,6 @@ export default function LotLMNPForm({ lot, residences, vendeurs, onSubmit, onCan
                 </div>
               </TabsContent>
 
-              <TabsContent value="publication" className="space-y-6 mt-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="en_ligne_wordpress"
-                      checked={formData.en_ligne_wordpress}
-                      onCheckedChange={(checked) => setFormData({ ...formData, en_ligne_wordpress: checked })}
-                    />
-                    <Label htmlFor="en_ligne_wordpress">Publié sur WordPress</Label>
-                  </div>
-
-                  {formData.en_ligne_wordpress && (
-                    <div className="space-y-2">
-                      <Label htmlFor="date_mise_en_ligne">Date de mise en ligne</Label>
-                      <Input
-                        id="date_mise_en_ligne"
-                        type="date"
-                        value={formData.date_mise_en_ligne}
-                        onChange={(e) => setFormData({ ...formData, date_mise_en_ligne: e.target.value })}
-                      />
-                    </div>
-                  )}
-
-                  <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="notes">Notes internes</Label>
-                    <Textarea
-                      id="notes"
-                      value={formData.notes}
-                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      rows={6}
-                    />
-                  </div>
-                </div>
-              </TabsContent>
             </Tabs>
           </CardContent>
           <CardFooter className="flex justify-end gap-3 border-t border-slate-100 p-6">
