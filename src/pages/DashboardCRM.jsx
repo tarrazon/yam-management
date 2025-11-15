@@ -191,23 +191,6 @@ export default function DashboardCRM() {
               </div>
             </CardContent>
           </Card>
-
-          <Card className="border-none shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-white/80 shadow-sm">
-                  <FileCheck className="w-6 h-6 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-blue-700 font-medium">Honoraires Totaux</p>
-                  <p className="text-2xl font-bold text-blue-800">
-                    {honorairesTotaux.toLocaleString('fr-FR')} €
-                  </p>
-                  <p className="text-xs text-blue-600 mt-1">Honoraires perçus</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Statistiques secondaires */}
