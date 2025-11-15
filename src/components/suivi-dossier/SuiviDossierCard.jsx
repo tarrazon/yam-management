@@ -2,7 +2,7 @@ import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Users, Eye, Edit, TrendingUp, AlertCircle } from "lucide-react";
+import { Calendar, Users, Eye, Edit, TrendingUp, AlertCircle, ChevronRight, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -82,7 +82,7 @@ export default function SuiviDossierCard({ lot, onEdit, onView }) {
           {/* Mini pipeline de progression */}
           <div className="pb-4 border-b border-slate-100">
             <p className="text-xs text-slate-500 mb-3 font-semibold">Progression du dossier</p>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between">
               {['sous_option', 'reserve', 'compromis', 'vendu'].map((status, idx) => {
                 const statusLabelsShort = {
                   sous_option: "Option",
@@ -103,24 +103,47 @@ export default function SuiviDossierCard({ lot, onEdit, onView }) {
                 const isCurrent = idx === currentPosition;
 
                 return (
-                  <div key={status} className="flex-1 flex flex-col items-center">
-                    <div
-                      className={`
-                        w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all
-                        ${isCompleted ? 'bg-green-500 text-white' : ''}
-                        ${isCurrent ? 'bg-blue-500 text-white ring-2 ring-blue-200' : ''}
-                        ${!isCompleted && !isCurrent ? 'bg-slate-200 text-slate-400' : ''}
-                      `}
-                    >
-                      {idx + 1}
+                  <React.Fragment key={status}>
+                    <div className="flex flex-col items-center flex-1">
+                      <div
+                        className={`
+                          w-10 h-10 rounded-full flex items-center justify-center transition-all
+                          ${isCompleted ? 'bg-gradient-to-br from-green-400 to-green-600 shadow-md' : ''}
+                          ${isCurrent ? 'bg-gradient-to-br from-blue-500 to-blue-700 ring-2 ring-blue-200 shadow-lg' : ''}
+                          ${!isCompleted && !isCurrent ? 'bg-slate-200 border-2 border-slate-300' : ''}
+                        `}
+                      >
+                        {isCompleted ? (
+                          <CheckCircle className="w-5 h-5 text-white" strokeWidth={2.5} />
+                        ) : (
+                          <span className={`text-xs font-bold ${
+                            isCurrent ? 'text-white' : 'text-slate-400'
+                          }`}>
+                            {idx + 1}
+                          </span>
+                        )}
+                      </div>
+                      <p className={`
+                        text-[10px] mt-1 text-center leading-tight
+                        ${isCompleted ? 'font-bold text-green-700' : ''}
+                        ${isCurrent ? 'font-bold text-blue-700' : ''}
+                        ${!isCompleted && !isCurrent ? 'text-slate-400' : ''}
+                      `}>
+                        {statusLabelsShort[status]}
+                      </p>
                     </div>
-                    <p className={`
-                      text-[10px] mt-1 text-center leading-tight
-                      ${isCurrent ? 'font-bold text-blue-600' : 'text-slate-400'}
-                    `}>
-                      {statusLabelsShort[status]}
-                    </p>
-                  </div>
+                    {idx < 3 && (
+                      <div className="flex items-center justify-center px-1">
+                        <ChevronRight
+                          className={`
+                            w-5 h-5 transition-all
+                            ${isCompleted ? 'text-green-600' : 'text-slate-300'}
+                          `}
+                          strokeWidth={2.5}
+                        />
+                      </div>
+                    )}
+                  </React.Fragment>
                 );
               })}
             </div>

@@ -4,13 +4,21 @@ import { base44 } from "@/api/base44Client";
 export function useDocumentsManquants(lot) {
   const { data: acquereur } = useQuery({
     queryKey: ['acquereur', lot.acquereur_id],
-    queryFn: () => lot.acquereur_id ? base44.entities.Acquereur.get(lot.acquereur_id) : null,
+    queryFn: async () => {
+      if (!lot.acquereur_id) return null;
+      const result = await base44.entities.Acquereur.findOne({ id: lot.acquereur_id });
+      return result;
+    },
     enabled: !!lot.acquereur_id,
   });
 
   const { data: vendeur } = useQuery({
     queryKey: ['vendeur', lot.vendeur_id],
-    queryFn: () => lot.vendeur_id ? base44.entities.Vendeur.get(lot.vendeur_id) : null,
+    queryFn: async () => {
+      if (!lot.vendeur_id) return null;
+      const result = await base44.entities.Vendeur.findOne({ id: lot.vendeur_id });
+      return result;
+    },
     enabled: !!lot.vendeur_id,
   });
 
