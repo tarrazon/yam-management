@@ -259,7 +259,7 @@ export default function SuiviDossierPartenaire() {
                   lot={lot}
                   onView={handleView}
                   hideVendeur={true}
-                  commission={calculateCommission(lot)}
+                  commission={calculateRetrocession(lot)}
                 />
               </motion.div>
             ))}
