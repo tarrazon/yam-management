@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import StorageImage from "@/components/common/StorageImage";
+import { formatCurrency, calculatePrixFAI } from "@/utils/formHelpers";
 
 const statusColors = {
   disponible: "bg-green-100 text-green-800",
@@ -26,8 +27,12 @@ const statusLabels = {
   vendu: "Vendu",
 };
 
-export default function LotLMNPListItem({ lot, onEdit, onView, onDelete, onPoserOption, showCommission = false, commission = 0, hidePartenaireAcquereur = false }) {
+export default function LotLMNPListItem({ lot, onEdit, onView, onDelete, onPoserOption, showCommission = false, commission = 0, hidePartenaireAcquereur = false, partenaires = [] }) {
   const firstPhoto = lot.photos?.[0];
+
+  const partenaire = partenaires.find(p => p.id === lot.partenaire_id);
+  const tauxRetrocession = Number(partenaire?.taux_retrocession) || 0;
+  const prixFAI = calculatePrixFAI(lot, tauxRetrocession);
 
   const { data: residences = [] } = useQuery({
     queryKey: ['residences_gestion'],
@@ -121,11 +126,11 @@ export default function LotLMNPListItem({ lot, onEdit, onView, onDelete, onPoser
           <div>
             <p className="text-xs text-slate-500">Prix FAI</p>
             <p className="font-bold text-[#1E40AF] text-sm">
-              {lot.prix_fai != null ? `${lot.prix_fai.toLocaleString('fr-FR')} €` : '-'}
+              {prixFAI > 0 ? `${formatCurrency(prixFAI)} €` : '-'}
             </p>
             {showCommission && commission > 0 && (
               <p className="text-xs text-amber-700 font-semibold mt-1">
-                Commission: {commission.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €
+                Commission: {formatCurrency(commission)} €
               </p>
             )}
           </div>

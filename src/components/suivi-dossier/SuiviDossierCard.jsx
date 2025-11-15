@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useDocumentsManquants } from "@/hooks/useDocumentsManquants";
+import { formatCurrency, calculatePrixFAI } from "@/utils/formHelpers";
 
 const statusColors = {
   sous_option: "bg-blue-100 text-blue-800 border-blue-200",
@@ -22,8 +23,11 @@ const statusLabels = {
   vendu: "Vendu",
 };
 
-export default function SuiviDossierCard({ lot, onEdit, onView, hideVendeur = false, commission = null, honoraires = null }) {
+export default function SuiviDossierCard({ lot, onEdit, onView, hideVendeur = false, commission = null, honoraires = null, partenaire = null }) {
   const { totalManquants, hasDocumentsManquants, documentsManquantsAcquereur, documentsManquantsVendeur } = useDocumentsManquants(lot);
+
+  const tauxRetrocession = Number(partenaire?.taux_retrocession) || 0;
+  const prixFAI = calculatePrixFAI(lot, tauxRetrocession);
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';
@@ -191,11 +195,11 @@ export default function SuiviDossierCard({ lot, onEdit, onView, hideVendeur = fa
           </div>
 
           <div className="pb-4 border-b border-slate-100 space-y-3">
-            {lot.prix_fai != null && (
+            {prixFAI > 0 && (
               <div>
                 <p className="text-xs text-slate-500 mb-1">Prix FAI</p>
                 <p className="text-2xl font-bold text-[#1E40AF]">
-                  {lot.prix_fai.toLocaleString('fr-FR')} €
+                  {formatCurrency(prixFAI)} €
                 </p>
               </div>
             )}

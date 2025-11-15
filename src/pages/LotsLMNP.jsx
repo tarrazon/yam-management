@@ -610,6 +610,7 @@ export default function LotsLMNP() {
                   onDelete={handleDelete}
                   onPoserOption={lot.statut === 'disponible' ? () => setLotForOption(lot) : null}
                   viewsStats={currentUser?.role_custom === 'admin' ? lotsViewsStats.get(lot.id) : null}
+                  partenaires={partenaires}
                 />
               ))}
             </AnimatePresence>
@@ -625,6 +626,7 @@ export default function LotsLMNP() {
                   onView={handleView}
                   onDelete={handleDelete}
                   onPoserOption={lot.statut === 'disponible' ? () => setLotForOption(lot) : null}
+                  partenaires={partenaires}
                 />
               ))}
             </AnimatePresence>

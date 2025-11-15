@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useDocumentsManquants } from "@/hooks/useDocumentsManquants";
+import { formatCurrency, calculatePrixFAI } from "@/utils/formHelpers";
 
 const statusColors = {
   sous_option: "bg-blue-100 text-blue-800",
@@ -23,8 +24,11 @@ const statusLabels = {
 
 const MINI_PIPELINE_STEPS = ['sous_option', 'reserve', 'compromis', 'vendu'];
 
-export default function SuiviDossierListItem({ lot, onEdit, onView, hideVendeur = false }) {
+export default function SuiviDossierListItem({ lot, onEdit, onView, hideVendeur = false, partenaire = null }) {
   const { totalManquants, hasDocumentsManquants, documentsManquantsAcquereur, documentsManquantsVendeur } = useDocumentsManquants(lot);
+
+  const tauxRetrocession = Number(partenaire?.taux_retrocession) || 0;
+  const prixFAI = calculatePrixFAI(lot, tauxRetrocession);
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';
@@ -66,7 +70,7 @@ export default function SuiviDossierListItem({ lot, onEdit, onView, hideVendeur 
           <div>
             <p className="text-xs text-slate-500">Prix FAI</p>
             <p className="font-bold text-[#1E40AF] text-sm">
-              {lot.prix_fai != null ? `${lot.prix_fai.toLocaleString('fr-FR')} €` : '-'}
+              {prixFAI > 0 ? `${formatCurrency(prixFAI)} €` : '-'}
             </p>
           </div>
 

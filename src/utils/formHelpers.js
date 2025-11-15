@@ -100,3 +100,33 @@ export function autoCleanFormData(formData) {
 export function formatCurrency(amount) {
   return Math.round(Number(amount) || 0).toLocaleString('fr-FR');
 }
+
+export function calculatePrixFAI(lot, tauxRetrocession = null) {
+  const prixNetVendeur = Number(lot.prix_net_vendeur) || 0;
+  const honoraires = Number(lot.honoraires) || 0;
+  const partenaireId = lot.partenaire_id;
+  const taux = tauxRetrocession !== null ? Number(tauxRetrocession) : 0;
+
+  if (!honoraires) {
+    return prixNetVendeur;
+  }
+
+  if (!partenaireId || taux === 0) {
+    return prixNetVendeur + honoraires;
+  }
+
+  const retrocession = prixNetVendeur * (taux / 100);
+  return prixNetVendeur + honoraires + retrocession;
+}
+
+export function calculateRetrocession(lot, tauxRetrocession) {
+  const prixNetVendeur = Number(lot.prix_net_vendeur) || 0;
+  const taux = Number(tauxRetrocession) || 0;
+  const partenaireId = lot.partenaire_id;
+
+  if (!partenaireId || taux === 0) {
+    return 0;
+  }
+
+  return prixNetVendeur * (taux / 100);
+}

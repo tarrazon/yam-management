@@ -27,6 +27,11 @@ export default function SuiviDossier() {
     queryFn: () => base44.entities.LotLMNP.list('-updated_at'),
   });
 
+  const { data: partenaires = [] } = useQuery({
+    queryKey: ['partenaires'],
+    queryFn: () => base44.entities.Partenaire.list(),
+  });
+
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.LotLMNP.update(id, data),
     onSuccess: () => {
@@ -206,28 +211,36 @@ export default function SuiviDossier() {
         ) : viewMode === "grid" ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <AnimatePresence>
-              {filteredLots.map((lot) => (
-                <SuiviDossierCard
-                  key={lot.id}
-                  lot={lot}
-                  onEdit={handleEdit}
-                  onView={handleView}
-                  honoraires={getHonoraires(lot)}
-                />
-              ))}
+              {filteredLots.map((lot) => {
+                const partenaire = partenaires.find(p => p.id === lot.partenaire_id);
+                return (
+                  <SuiviDossierCard
+                    key={lot.id}
+                    lot={lot}
+                    onEdit={handleEdit}
+                    onView={handleView}
+                    honoraires={getHonoraires(lot)}
+                    partenaire={partenaire}
+                  />
+                );
+              })}
             </AnimatePresence>
           </div>
         ) : (
           <div className="space-y-3">
             <AnimatePresence>
-              {filteredLots.map((lot) => (
-                <SuiviDossierListItem
-                  key={lot.id}
-                  lot={lot}
-                  onEdit={handleEdit}
-                  onView={handleView}
-                />
-              ))}
+              {filteredLots.map((lot) => {
+                const partenaire = partenaires.find(p => p.id === lot.partenaire_id);
+                return (
+                  <SuiviDossierListItem
+                    key={lot.id}
+                    lot={lot}
+                    onEdit={handleEdit}
+                    onView={handleView}
+                    partenaire={partenaire}
+                  />
+                );
+              })}
             </AnimatePresence>
           </div>
         )}

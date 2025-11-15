@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import StorageImage from "@/components/common/StorageImage";
+import { formatCurrency, calculatePrixFAI } from "@/utils/formHelpers";
 
 const statusColors = {
   disponible: "bg-green-100 text-green-800 border-green-200",
@@ -43,7 +44,7 @@ const typeLabels = {
   affaires: "Affaires",
 };
 
-export default function LotLMNPCard({ lot, onEdit, onView, onDelete, onPoserOption, showCommission = false, commission = 0, hidePartenaireAcquereur = false, viewsStats = null }) {
+export default function LotLMNPCard({ lot, onEdit, onView, onDelete, onPoserOption, showCommission = false, commission = 0, hidePartenaireAcquereur = false, viewsStats = null, partenaires = [] }) {
   const firstPhoto = lot.photos?.[0];
 
   const { data: residences = [] } = useQuery({
@@ -53,6 +54,10 @@ export default function LotLMNPCard({ lot, onEdit, onView, onDelete, onPoserOpti
 
   const residence = residences.find(r => r.id === lot.residence_id);
   const residencePhoto = residence?.documents?.photos?.[0];
+
+  const partenaire = partenaires.find(p => p.id === lot.partenaire_id);
+  const tauxRetrocession = Number(partenaire?.taux_retrocession) || 0;
+  const prixFAI = calculatePrixFAI(lot, tauxRetrocession);
 
   return (
     <motion.div
@@ -259,22 +264,22 @@ export default function LotLMNPCard({ lot, onEdit, onView, onDelete, onPoserOpti
           )}
 
           <div className="pt-3 border-t border-slate-100 space-y-2">
-            {lot.prix_net_vendeur != null && (
+            {lot.prix_net_vendeur != null && lot.prix_net_vendeur > 0 && (
               <div className="flex justify-between items-center">
                 <span className="text-xs text-slate-500">Prix net vendeur</span>
-                <span className="font-bold text-[#1E40AF] text-sm">{lot.prix_net_vendeur.toLocaleString('fr-FR')} €</span>
+                <span className="font-bold text-[#1E40AF] text-sm">{formatCurrency(lot.prix_net_vendeur)} €</span>
               </div>
             )}
-            {lot.prix_fai != null && (
+            {prixFAI > 0 && (
               <div className="flex justify-between items-center">
                 <span className="text-xs text-slate-500">Prix FAI</span>
-                <span className="font-bold text-green-600 text-sm">{lot.prix_fai.toLocaleString('fr-FR')} €</span>
+                <span className="font-bold text-green-600 text-sm">{formatCurrency(prixFAI)} €</span>
               </div>
             )}
             {showCommission && commission > 0 && (
               <div className="flex justify-between items-center p-2 bg-amber-50 rounded-lg border border-amber-200">
                 <span className="text-xs font-semibold text-amber-800">Ma commission</span>
-                <span className="font-bold text-amber-700 text-sm">{commission.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €</span>
+                <span className="font-bold text-amber-700 text-sm">{formatCurrency(commission)} €</span>
               </div>
             )}
           </div>
