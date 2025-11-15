@@ -105,10 +105,38 @@ export default function SuiviDossierCard({ lot, onEdit, onView }) {
                   vendu: lot.date_signature_acte
                 };
 
+                const bubbleColors = {
+                  sous_option: {
+                    completed: 'bg-gradient-to-br from-blue-400 to-blue-600 shadow-md',
+                    current: 'bg-gradient-to-br from-blue-500 to-blue-700 ring-2 ring-blue-200 shadow-lg',
+                    textCurrent: 'text-blue-700',
+                    arrowCompleted: 'text-blue-600'
+                  },
+                  reserve: {
+                    completed: 'bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-md',
+                    current: 'bg-gradient-to-br from-yellow-500 to-yellow-700 ring-2 ring-yellow-200 shadow-lg',
+                    textCurrent: 'text-yellow-700',
+                    arrowCompleted: 'text-yellow-600'
+                  },
+                  compromis: {
+                    completed: 'bg-gradient-to-br from-orange-400 to-orange-600 shadow-md',
+                    current: 'bg-gradient-to-br from-orange-500 to-orange-700 ring-2 ring-orange-200 shadow-lg',
+                    textCurrent: 'text-orange-700',
+                    arrowCompleted: 'text-orange-600'
+                  },
+                  vendu: {
+                    completed: 'bg-gradient-to-br from-purple-400 to-purple-600 shadow-md',
+                    current: 'bg-gradient-to-br from-purple-500 to-purple-700 ring-2 ring-purple-200 shadow-lg',
+                    textCurrent: 'text-purple-700',
+                    arrowCompleted: 'text-purple-600'
+                  }
+                };
+
                 const currentPosition = statusPositions[lot.statut] || 0;
                 const isCompleted = idx < currentPosition;
                 const isCurrent = idx === currentPosition;
                 const dateForStatus = statusDates[status];
+                const colors = bubbleColors[status];
 
                 return (
                   <React.Fragment key={status}>
@@ -116,8 +144,8 @@ export default function SuiviDossierCard({ lot, onEdit, onView }) {
                       <div
                         className={`
                           w-10 h-10 rounded-full flex items-center justify-center transition-all
-                          ${isCompleted ? 'bg-gradient-to-br from-green-400 to-green-600 shadow-md' : ''}
-                          ${isCurrent ? 'bg-gradient-to-br from-blue-500 to-blue-700 ring-2 ring-blue-200 shadow-lg' : ''}
+                          ${isCompleted ? colors.completed : ''}
+                          ${isCurrent ? colors.current : ''}
                           ${!isCompleted && !isCurrent ? 'bg-slate-200 border-2 border-slate-300' : ''}
                         `}
                       >
@@ -133,8 +161,8 @@ export default function SuiviDossierCard({ lot, onEdit, onView }) {
                       </div>
                       <p className={`
                         text-[10px] mt-1 text-center leading-tight
-                        ${isCompleted ? 'font-bold text-green-700' : ''}
-                        ${isCurrent ? 'font-bold text-blue-700' : ''}
+                        ${isCompleted ? `font-bold ${colors.textCurrent}` : ''}
+                        ${isCurrent ? `font-bold ${colors.textCurrent}` : ''}
                         ${!isCompleted && !isCurrent ? 'text-slate-400' : ''}
                       `}>
                         {statusLabelsShort[status]}
@@ -150,7 +178,7 @@ export default function SuiviDossierCard({ lot, onEdit, onView }) {
                         <ChevronRight
                           className={`
                             w-5 h-5 transition-all
-                            ${isCompleted ? 'text-green-600' : 'text-slate-300'}
+                            ${isCompleted ? colors.arrowCompleted : 'text-slate-300'}
                           `}
                           strokeWidth={2.5}
                         />

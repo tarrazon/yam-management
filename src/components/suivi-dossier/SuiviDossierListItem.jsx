@@ -89,13 +89,39 @@ export default function SuiviDossierListItem({ lot, onEdit, onView }) {
             <div className="flex items-center gap-1">
               {MINI_PIPELINE_STEPS.map((step, index) => {
                 const status = getStepStatus(step);
+
+                const stepColors = {
+                  sous_option: {
+                    completed: 'bg-blue-500',
+                    current: 'bg-blue-600 ring-2 ring-blue-200',
+                    arrow: 'text-blue-500'
+                  },
+                  reserve: {
+                    completed: 'bg-yellow-500',
+                    current: 'bg-yellow-600 ring-2 ring-yellow-200',
+                    arrow: 'text-yellow-500'
+                  },
+                  compromis: {
+                    completed: 'bg-orange-500',
+                    current: 'bg-orange-600 ring-2 ring-orange-200',
+                    arrow: 'text-orange-500'
+                  },
+                  vendu: {
+                    completed: 'bg-purple-500',
+                    current: 'bg-purple-600 ring-2 ring-purple-200',
+                    arrow: 'text-purple-500'
+                  }
+                };
+
+                const colors = stepColors[step];
+
                 return (
                   <React.Fragment key={step}>
                     <div
                       className={`
                         w-6 h-6 rounded-full flex items-center justify-center transition-all
-                        ${status === 'completed' ? 'bg-green-500' : ''}
-                        ${status === 'current' ? 'bg-blue-500 ring-2 ring-blue-200' : ''}
+                        ${status === 'completed' ? colors.completed : ''}
+                        ${status === 'current' ? colors.current : ''}
                         ${status === 'pending' ? 'bg-slate-200' : ''}
                       `}
                       title={statusLabels[step]}
@@ -110,7 +136,7 @@ export default function SuiviDossierListItem({ lot, onEdit, onView }) {
                       <ChevronRight
                         className={`
                           w-3 h-3
-                          ${status === 'completed' ? 'text-green-500' : 'text-slate-300'}
+                          ${status === 'completed' ? colors.arrow : 'text-slate-300'}
                         `}
                         strokeWidth={3}
                       />

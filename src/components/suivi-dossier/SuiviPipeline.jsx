@@ -9,36 +9,72 @@ const PIPELINE_STEPS = [
     label: "Sous option",
     icon: FileCheck,
     position: 0,
+    colors: {
+      completed: 'from-blue-400 to-blue-600',
+      current: 'from-blue-500 to-blue-700 ring-blue-300',
+      text: 'text-blue-700',
+      arrow: 'text-blue-600'
+    }
   },
   {
     id: "reservation",
     label: "Réservé",
     icon: FileSignature,
     position: 1,
+    colors: {
+      completed: 'from-yellow-400 to-yellow-600',
+      current: 'from-yellow-500 to-yellow-700 ring-yellow-300',
+      text: 'text-yellow-700',
+      arrow: 'text-yellow-600'
+    }
   },
   {
     id: "compromis",
     label: "Compromis",
     icon: FileSignature,
     position: 2,
+    colors: {
+      completed: 'from-orange-400 to-orange-600',
+      current: 'from-orange-500 to-orange-700 ring-orange-300',
+      text: 'text-orange-700',
+      arrow: 'text-orange-600'
+    }
   },
   {
     id: "vente",
     label: "Vendu",
     icon: Home,
     position: 3,
+    colors: {
+      completed: 'from-purple-400 to-purple-600',
+      current: 'from-purple-500 to-purple-700 ring-purple-300',
+      text: 'text-purple-700',
+      arrow: 'text-purple-600'
+    }
   },
   {
     id: "suivi",
     label: "Suivi post-vente",
     icon: TrendingUp,
     position: 4,
+    colors: {
+      completed: 'from-green-400 to-green-600',
+      current: 'from-green-500 to-green-700 ring-green-300',
+      text: 'text-green-700',
+      arrow: 'text-green-600'
+    }
   },
   {
     id: "archive",
     label: "Archivage",
     icon: Archive,
     position: 5,
+    colors: {
+      completed: 'from-slate-400 to-slate-600',
+      current: 'from-slate-500 to-slate-700 ring-slate-300',
+      text: 'text-slate-700',
+      arrow: 'text-slate-600'
+    }
   },
 ];
 
@@ -117,8 +153,8 @@ export default function SuiviPipeline({ lot }) {
                     <div
                       className={`
                         w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300
-                        ${isCompleted ? 'bg-gradient-to-br from-green-400 to-green-600 shadow-lg shadow-green-200' : ''}
-                        ${isCurrent ? 'bg-gradient-to-br from-blue-500 to-blue-700 shadow-xl shadow-blue-300 scale-110' : ''}
+                        ${isCompleted ? `bg-gradient-to-br ${step.colors.completed} shadow-lg` : ''}
+                        ${isCurrent ? `bg-gradient-to-br ${step.colors.current} shadow-xl scale-110 ring-2` : ''}
                         ${isPending ? 'bg-slate-200 border-2 border-slate-300' : ''}
                       `}
                     >
@@ -138,7 +174,7 @@ export default function SuiviPipeline({ lot }) {
 
                     {/* Indicateur de progression pour l'étape en cours */}
                     {isCurrent && (
-                      <div className="absolute -inset-2 rounded-full border-2 border-blue-400 animate-ping opacity-75" />
+                      <div className={`absolute -inset-2 rounded-full border-2 ${step.colors.arrow.replace('text-', 'border-')} animate-ping opacity-75`} />
                     )}
                   </div>
 
@@ -147,8 +183,7 @@ export default function SuiviPipeline({ lot }) {
                     <p
                       className={`
                         text-xs font-bold leading-tight
-                        ${isCompleted ? 'text-green-700' : ''}
-                        ${isCurrent ? 'text-blue-700' : ''}
+                        ${isCompleted || isCurrent ? step.colors.text : ''}
                         ${isPending ? 'text-slate-400' : ''}
                       `}
                     >
@@ -168,7 +203,7 @@ export default function SuiviPipeline({ lot }) {
                     <ChevronRight
                       className={`
                         w-8 h-8 transition-all duration-500
-                        ${isCompleted ? 'text-green-600' : 'text-slate-300'}
+                        ${isCompleted ? step.colors.arrow : 'text-slate-300'}
                       `}
                       strokeWidth={3}
                     />
