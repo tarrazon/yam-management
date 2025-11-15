@@ -25,9 +25,20 @@ export default function SuiviDossierForm({ lot, onSubmit, onCancel, isLoading })
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const cleanedData = {};
+    Object.keys(formData).forEach(key => {
+      const value = formData[key];
+      if (value === '' || value === null || value === undefined) {
+        cleanedData[key] = null;
+      } else {
+        cleanedData[key] = value;
+      }
+    });
+
     onSubmit({
       ...lot,
-      ...formData,
+      ...cleanedData,
     });
   };
 
