@@ -6,6 +6,7 @@ import { X, Edit, Calendar, Users, FileText, Euro, CheckCircle, Building2 } from
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import SuiviPipeline from "./SuiviPipeline";
 
 const statusColors = {
   sous_option: "bg-blue-100 text-blue-800 border-blue-200",
@@ -83,6 +84,19 @@ export default function SuiviDossierDetail({ lot, onClose, onEdit }) {
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* Pipeline visuel */}
+          <Card className="border-2 border-slate-200 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-slate-50 to-white">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-[#F59E0B]" />
+                Parcours du dossier
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4">
+              <SuiviPipeline lot={lot} />
+            </CardContent>
+          </Card>
+
           {/* Informations du lot */}
           <Card>
             <CardHeader>

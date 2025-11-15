@@ -78,6 +78,55 @@ export default function SuiviDossierCard({ lot, onEdit, onView }) {
         </CardHeader>
 
         <CardContent className="p-6 space-y-4">
+          {/* Mini pipeline de progression */}
+          <div className="pb-4 border-b border-slate-100">
+            <p className="text-xs text-slate-500 mb-3 font-semibold">Progression du dossier</p>
+            <div className="flex items-center gap-2">
+              {['sous_option', 'allotement', 'reserve', 'compromis', 'vendu'].map((status, idx) => {
+                const statusLabelsShort = {
+                  sous_option: "Option",
+                  allotement: "Validation",
+                  reserve: "Réservé",
+                  compromis: "Compromis",
+                  vendu: "Vendu"
+                };
+
+                const statusPositions = {
+                  sous_option: 0,
+                  allotement: 1,
+                  reserve: 2,
+                  compromis: 3,
+                  vendu: 4,
+                };
+
+                const currentPosition = statusPositions[lot.statut] || 0;
+                const isCompleted = idx < currentPosition;
+                const isCurrent = idx === currentPosition;
+
+                return (
+                  <div key={status} className="flex-1 flex flex-col items-center">
+                    <div
+                      className={`
+                        w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all
+                        ${isCompleted ? 'bg-green-500 text-white' : ''}
+                        ${isCurrent ? 'bg-blue-500 text-white ring-2 ring-blue-200' : ''}
+                        ${!isCompleted && !isCurrent ? 'bg-slate-200 text-slate-400' : ''}
+                      `}
+                    >
+                      {idx + 1}
+                    </div>
+                    <p className={`
+                      text-[10px] mt-1 text-center leading-tight
+                      ${isCurrent ? 'font-bold text-blue-600' : 'text-slate-400'}
+                    `}>
+                      {statusLabelsShort[status]}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
           {lot.prix_fai != null && (
             <div className="pb-4 border-b border-slate-100">
               <p className="text-xs text-slate-500 mb-1">Prix FAI</p>
