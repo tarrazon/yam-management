@@ -38,7 +38,11 @@ export default function SuiviDossierPartenaire() {
 
   const { data: partenaireData } = useQuery({
     queryKey: ['partenaire_info', currentUser?.partenaire_id],
-    queryFn: () => base44.entities.Partenaire.get(currentUser?.partenaire_id),
+    queryFn: async () => {
+      const data = await base44.entities.Partenaire.get(currentUser?.partenaire_id);
+      console.log('Données partenaire:', data);
+      return data;
+    },
     enabled: !!currentUser?.partenaire_id,
   });
 
@@ -69,13 +73,22 @@ export default function SuiviDossierPartenaire() {
   const commissionTaux = partenaireData?.commission_taux || 0;
 
   const calculateCommission = (lot) => {
-    const prixBase = lot.prix_ttc || lot.prix_ht || 0;
-    return (prixBase * commissionTaux) / 100;
+    const prixBase = lot.prix_ttc || lot.prix_ht || lot.prix_fai || 0;
+    const commission = (prixBase * commissionTaux) / 100;
+    console.log('Calcul commission:', {
+      reference: lot.reference,
+      prixBase,
+      commissionTaux,
+      commission
+    });
+    return commission;
   };
 
   const commissionsAVenir = lotsPartenaire
     .filter(l => ['reserve', 'compromis'].includes(l.statut))
     .reduce((total, lot) => total + calculateCommission(lot), 0);
+
+  console.log('Commissions à venir:', commissionsAVenir, 'Taux:', commissionTaux);
 
   const stats = {
     sous_option: lotsPartenaire.filter(l => l.statut === 'sous_option').length,
@@ -140,8 +153,12 @@ export default function SuiviDossierPartenaire() {
           </div>
           <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-xl shadow-sm border border-green-200">
             <p className="text-sm text-green-700 mb-1 font-semibold">Commissions à venir</p>
-            <p className="text-2xl font-bold text-green-600">{commissionsAVenir.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}</p>
-            <p className="text-xs text-green-600 mt-1">Taux: {commissionTaux}%</p>
+            <p className="text-2xl font-bold text-green-600">
+              {!isNaN(commissionsAVenir) ? commissionsAVenir.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' }) : '0,00 €'}
+            </p>
+            <p className="text-xs text-green-600 mt-1">
+              Taux: {commissionTaux || 0}% • Partenaire ID: {currentUser?.partenaire_id || 'N/A'}
+            </p>
           </div>
         </div>
 
