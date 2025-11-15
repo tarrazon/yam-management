@@ -6,69 +6,76 @@ const PIPELINE_STEPS = [
     id: "prospect",
     label: "Prospect partenaire",
     icon: Users,
-    statuts: ["sous_option"],
+    position: 0,
   },
   {
     id: "option",
     label: "Option accordée",
     sublabel: "(en attente dossier)",
     icon: FileCheck,
-    statuts: ["sous_option", "allotement"],
+    position: 1,
   },
   {
     id: "validation",
     label: "Dossier complet",
     sublabel: "Validation interne",
     icon: FileCheck,
-    statuts: ["allotement", "reserve"],
+    position: 2,
   },
   {
     id: "reservation",
     label: "Réservation formalisée",
     icon: FileSignature,
-    statuts: ["reserve"],
+    position: 3,
   },
   {
     id: "preparation",
     label: "Préparation vente",
     sublabel: "Acte en cours",
     icon: FileSignature,
-    statuts: ["reserve", "compromis"],
+    position: 4,
   },
   {
     id: "vente",
     label: "Vente finalisée",
     sublabel: "Transfert propriété",
     icon: Home,
-    statuts: ["compromis", "vendu"],
+    position: 5,
   },
   {
     id: "suivi",
     label: "Suivi post-vente",
     icon: TrendingUp,
-    statuts: ["vendu"],
+    position: 6,
   },
   {
     id: "archive",
     label: "Archivage / Clôture",
     icon: Archive,
-    statuts: ["vendu"],
+    position: 7,
   },
 ];
 
-const getStepStatus = (stepIndex, currentStatut) => {
-  const step = PIPELINE_STEPS[stepIndex];
-
+const getStepStatus = (stepIndex, currentStatut, phasePostVente) => {
   // Mapping des statuts vers leur position dans le pipeline
   const statutPositions = {
     sous_option: 1,
     allotement: 2,
     reserve: 3,
-    compromis: 5,
-    vendu: 6,
+    compromis: 4,
+    vendu: 5,
   };
 
-  const currentPosition = statutPositions[currentStatut] || 0;
+  let currentPosition = statutPositions[currentStatut] || 0;
+
+  // Si le statut est "vendu" et qu'on a une phase post-vente, ajuster la position
+  if (currentStatut === 'vendu' && phasePostVente) {
+    if (phasePostVente === 'suivi_post_vente') {
+      currentPosition = 6;
+    } else if (phasePostVente === 'archive') {
+      currentPosition = 7;
+    }
+  }
 
   if (stepIndex < currentPosition) return "completed";
   if (stepIndex === currentPosition) return "current";
@@ -77,6 +84,7 @@ const getStepStatus = (stepIndex, currentStatut) => {
 
 export default function SuiviPipeline({ lot }) {
   const currentStatut = lot.statut;
+  const phasePostVente = lot.phase_post_vente;
 
   return (
     <div className="w-full py-8">
@@ -88,7 +96,7 @@ export default function SuiviPipeline({ lot }) {
         {/* Étapes */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 relative">
           {PIPELINE_STEPS.map((step, index) => {
-            const status = getStepStatus(index, currentStatut);
+            const status = getStepStatus(index, currentStatut, phasePostVente);
             const Icon = step.icon;
 
             const isCompleted = status === "completed";
@@ -174,7 +182,7 @@ export default function SuiviPipeline({ lot }) {
           <div
             className="h-full bg-gradient-to-r from-green-500 to-blue-500 transition-all duration-700 ease-in-out"
             style={{
-              width: `${((PIPELINE_STEPS.findIndex(s => getStepStatus(PIPELINE_STEPS.indexOf(s), currentStatut) === "current") + 1) / PIPELINE_STEPS.length) * 100}%`,
+              width: `${((PIPELINE_STEPS.findIndex(s => getStepStatus(PIPELINE_STEPS.indexOf(s), currentStatut, phasePostVente) === "current") + 1) / PIPELINE_STEPS.length) * 100}%`,
             }}
           />
         </div>

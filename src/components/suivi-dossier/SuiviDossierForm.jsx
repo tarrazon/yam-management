@@ -20,6 +20,7 @@ export default function SuiviDossierForm({ lot, onSubmit, onCancel, isLoading })
     comptes_rendus_visite: lot.comptes_rendus_visite || '',
     observations_acquereurs: lot.observations_acquereurs || '',
     negociation_en_cours: lot.negociation_en_cours || '',
+    phase_post_vente: lot.phase_post_vente || '',
   });
 
   const handleSubmit = (e) => {
@@ -66,7 +67,7 @@ export default function SuiviDossierForm({ lot, onSubmit, onCancel, isLoading })
             <div className="space-y-6">
               <div>
                 <h3 className="text-sm font-semibold text-slate-700 mb-4">Statut du suivi</h3>
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid md:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="statut_suivi">Statut</Label>
                     <Select
@@ -93,6 +94,28 @@ export default function SuiviDossierForm({ lot, onSubmit, onCancel, isLoading })
                       placeholder="Ex: En attente documents"
                     />
                   </div>
+
+                  {lot.statut === 'vendu' && (
+                    <div className="space-y-2">
+                      <Label htmlFor="phase_post_vente">Phase post-vente</Label>
+                      <Select
+                        value={formData.phase_post_vente}
+                        onValueChange={(value) => setFormData({ ...formData, phase_post_vente: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner une phase" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">Aucune</SelectItem>
+                          <SelectItem value="suivi_post_vente">Suivi post-vente</SelectItem>
+                          <SelectItem value="archive">Archivé / Clôturé</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-slate-500 mt-1">
+                        Avancement après la vente finalisée
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
 
