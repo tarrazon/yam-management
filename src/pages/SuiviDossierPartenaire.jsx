@@ -71,12 +71,12 @@ export default function SuiviDossierPartenaire() {
   const tauxRetrocession = Number(partenaireData?.taux_retrocession) || 0;
 
   const calculateRetrocession = (lot) => {
-    const prixBase = lot.prix_ttc || lot.prix_ht || lot.prix_fai || 0;
-    return (prixBase * tauxRetrocession) / 100;
+    const honoraires = Number(lot.honoraires) || 0;
+    return (honoraires * tauxRetrocession) / 100;
   };
 
   const retrocessionAVenir = lotsPartenaire
-    .filter(l => ['reserve', 'compromis'].includes(l.statut))
+    .filter(l => ['reserve', 'compromis', 'sous_option'].includes(l.statut))
     .reduce((total, lot) => total + calculateRetrocession(lot), 0);
 
   const retrocessionActee = lotsPartenaire

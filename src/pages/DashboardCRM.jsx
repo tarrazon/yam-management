@@ -51,36 +51,30 @@ export default function DashboardCRM() {
     .filter(l => ['reserve', 'compromis', 'sous_option'].includes(l.statut))
     .reduce((sum, lot) => sum + (lot.prix_fai || 0), 0);
 
-  const calculateHonoraires = (lot) => {
-    const prixBase = lot.prix_ttc || lot.prix_ht || lot.prix_fai || 0;
-    const tauxCommission = 3;
-    return (prixBase * tauxCommission) / 100;
-  };
-
   const honorairesPercus = lots
     .filter(l => l.statut === 'vendu')
-    .reduce((sum, lot) => sum + calculateHonoraires(lot), 0);
+    .reduce((sum, lot) => sum + (Number(lot.honoraires) || 0), 0);
 
   const honorairesAPercevoir = lots
-    .filter(l => ['reserve', 'compromis'].includes(l.statut))
-    .reduce((sum, lot) => sum + calculateHonoraires(lot), 0);
+    .filter(l => ['reserve', 'compromis', 'sous_option'].includes(l.statut))
+    .reduce((sum, lot) => sum + (Number(lot.honoraires) || 0), 0);
 
   const retrocessionActee = lots
     .filter(l => l.statut === 'vendu' && l.partenaire_id)
     .reduce((sum, lot) => {
       const partenaire = partenaires.find(p => p.id === lot.partenaire_id);
       const tauxRetro = Number(partenaire?.taux_retrocession) || 0;
-      const prixBase = lot.prix_ttc || lot.prix_ht || lot.prix_fai || 0;
-      return sum + (prixBase * tauxRetro / 100);
+      const honoraires = Number(lot.honoraires) || 0;
+      return sum + (honoraires * tauxRetro / 100);
     }, 0);
 
   const retrocessionAVenir = lots
-    .filter(l => ['reserve', 'compromis'].includes(l.statut) && l.partenaire_id)
+    .filter(l => ['reserve', 'compromis', 'sous_option'].includes(l.statut) && l.partenaire_id)
     .reduce((sum, lot) => {
       const partenaire = partenaires.find(p => p.id === lot.partenaire_id);
       const tauxRetro = Number(partenaire?.taux_retrocession) || 0;
-      const prixBase = lot.prix_ttc || lot.prix_ht || lot.prix_fai || 0;
-      return sum + (prixBase * tauxRetro / 100);
+      const honoraires = Number(lot.honoraires) || 0;
+      return sum + (honoraires * tauxRetro / 100);
     }, 0);
 
   // Taux de conversion = lots vendus / total lots

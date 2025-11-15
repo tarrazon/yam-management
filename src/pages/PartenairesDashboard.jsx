@@ -84,15 +84,15 @@ export default function PartenairesDashboard() {
   });
 
   const mesLotsVendus = mesLotsAvecAcquereur.filter(l => l.statut === 'vendu');
-  const mesLotsAPayer = mesLotsAvecAcquereur.filter(l => ['reserve', 'compromis'].includes(l.statut));
+  const mesLotsAPayer = mesLotsAvecAcquereur.filter(l => ['reserve', 'compromis', 'sous_option'].includes(l.statut));
 
   const calculateRetrocession = (lot) => {
-    const prixBase = lot.prix_ttc || lot.prix_ht || lot.prix_fai || 0;
-    return (prixBase * tauxRetrocession) / 100;
+    const honoraires = Number(lot.honoraires) || 0;
+    return (honoraires * tauxRetrocession) / 100;
   };
 
   const chiffreAffaires = mesLotsVendus.reduce((total, lot) => {
-    return total + (lot.prix_ttc || lot.prix_ht || lot.prix_fai || 0);
+    return total + (Number(lot.prix_fai) || 0);
   }, 0);
 
   const retrocessionActee = mesLotsVendus.reduce((total, lot) => total + calculateRetrocession(lot), 0);
