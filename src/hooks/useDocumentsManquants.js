@@ -28,21 +28,32 @@ export function useDocumentsManquants(lot) {
 
     if (type === 'acquereur') {
       const docs = entity.documents || {};
-      if (!docs.carte_identite && !docs.passeport) manquants.push("Justificatif d'identité");
-      if (!docs.justificatif_domicile) manquants.push("Justificatif de domicile");
-      if (!docs.avis_imposition) manquants.push("Avis d'imposition");
-      if (!docs.justificatifs_revenus) manquants.push("Justificatifs de revenus");
-      if (!docs.attestation_assurance) manquants.push("Attestation d'assurance");
+      if (!docs.cni && !docs.passeport) manquants.push("Pièce d'identité (CNI ou Passeport)");
+      if (!docs.lettre_intention_achat) manquants.push("Lettre d'intention d'achat");
+      if (!docs.mandat_gestion) manquants.push("Mandat de gestion");
+      if (!docs.mandat_acquereur_honoraires) manquants.push("Mandat acquéreur pour honoraires");
     } else if (type === 'vendeur') {
       if (entity.type_vendeur === 'entreprise') {
         const docsEntreprise = entity.documents_entreprise || {};
         if (!docsEntreprise.kbis) manquants.push("KBIS");
-        if (!docsEntreprise.statuts) manquants.push("Statuts");
+        if (!docsEntreprise.statuts) manquants.push("Statuts de la société");
+        if (!docsEntreprise.pv_ag) manquants.push("PV AG autorisant la vente");
+        if (!docsEntreprise.rib) manquants.push("RIB");
+        if (!docsEntreprise.titre_propriete) manquants.push("Titre de propriété");
+        if (!docsEntreprise.diagnostic) manquants.push("Diagnostic");
+        if (!docsEntreprise.certificat_mesurage) manquants.push("Certificat de mesurage");
+        if (!docsEntreprise.bail_commercial) manquants.push("Bail commercial");
+        if (!docsEntreprise.convention_signee) manquants.push("Convention signée");
       } else if (entity.type_vendeur === 'particulier') {
         const docsParticulier = entity.documents_particulier || {};
-        if (!docsParticulier.carte_identite && !docsParticulier.passeport) {
-          manquants.push("Justificatif d'identité");
-        }
+        if (!docsParticulier.cni) manquants.push("CNI");
+        if (!docsParticulier.questionnaire_etat_civil) manquants.push("Questionnaire état civil");
+        if (!docsParticulier.rib) manquants.push("RIB");
+        if (!docsParticulier.titre_propriete) manquants.push("Titre de propriété");
+        if (!docsParticulier.diagnostic) manquants.push("Diagnostic");
+        if (!docsParticulier.certificat_mesurage) manquants.push("Certificat de mesurage");
+        if (!docsParticulier.bail_commercial) manquants.push("Bail commercial");
+        if (!docsParticulier.convention_signee) manquants.push("Convention signée");
       }
     }
 
