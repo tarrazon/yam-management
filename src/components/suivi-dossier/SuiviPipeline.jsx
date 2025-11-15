@@ -3,67 +3,50 @@ import { CheckCircle, Circle, Users, FileCheck, FileSignature, Home, Archive, Tr
 
 const PIPELINE_STEPS = [
   {
-    id: "prospect",
-    label: "Prospect partenaire",
-    icon: Users,
+    id: "option",
+    label: "Sous option",
+    icon: FileCheck,
     position: 0,
   },
   {
-    id: "option",
-    label: "Option accordée",
-    sublabel: "(en attente dossier)",
-    icon: FileCheck,
+    id: "reservation",
+    label: "Réservé",
+    icon: FileSignature,
     position: 1,
   },
   {
-    id: "validation",
-    label: "Dossier complet",
-    sublabel: "Validation interne",
-    icon: FileCheck,
+    id: "compromis",
+    label: "Compromis",
+    icon: FileSignature,
     position: 2,
   },
   {
-    id: "reservation",
-    label: "Réservation formalisée",
-    icon: FileSignature,
-    position: 3,
-  },
-  {
-    id: "preparation",
-    label: "Préparation vente",
-    sublabel: "Acte en cours",
-    icon: FileSignature,
-    position: 4,
-  },
-  {
     id: "vente",
-    label: "Vente finalisée",
-    sublabel: "Transfert propriété",
+    label: "Vendu",
     icon: Home,
-    position: 5,
+    position: 3,
   },
   {
     id: "suivi",
     label: "Suivi post-vente",
     icon: TrendingUp,
-    position: 6,
+    position: 4,
   },
   {
     id: "archive",
-    label: "Archivage / Clôture",
+    label: "Archivage",
     icon: Archive,
-    position: 7,
+    position: 5,
   },
 ];
 
 const getStepStatus = (stepIndex, currentStatut, phasePostVente) => {
   // Mapping des statuts vers leur position dans le pipeline
   const statutPositions = {
-    sous_option: 1,
-    allotement: 2,
-    reserve: 3,
-    compromis: 4,
-    vendu: 5,
+    sous_option: 0,
+    reserve: 1,
+    compromis: 2,
+    vendu: 3,
   };
 
   let currentPosition = statutPositions[currentStatut] || 0;
@@ -71,9 +54,9 @@ const getStepStatus = (stepIndex, currentStatut, phasePostVente) => {
   // Si le statut est "vendu" et qu'on a une phase post-vente, ajuster la position
   if (currentStatut === 'vendu' && phasePostVente) {
     if (phasePostVente === 'suivi_post_vente') {
-      currentPosition = 6;
+      currentPosition = 4;
     } else if (phasePostVente === 'archive') {
-      currentPosition = 7;
+      currentPosition = 5;
     }
   }
 
