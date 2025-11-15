@@ -221,10 +221,10 @@ export default function NotificationEmails() {
       </div>
 
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent>
+        <DialogContent className="bg-white">
           <DialogHeader>
-            <DialogTitle>Ajouter un email de notification</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-slate-900">Ajouter un email de notification</DialogTitle>
+            <DialogDescription className="text-slate-600">
               Ces emails recevront une notification à chaque prise d'option par un partenaire.
               Vous pouvez ajouter plusieurs emails en les séparant par des virgules, points-virgules ou sauts de ligne.
             </DialogDescription>
@@ -232,7 +232,7 @@ export default function NotificationEmails() {
           <form onSubmit={handleSubmit}>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="emails">Emails *</Label>
+                <Label htmlFor="emails" className="text-slate-700">Emails *</Label>
                 <Textarea
                   id="emails"
                   placeholder="exemple1@email.com, exemple2@email.com&#10;exemple3@email.com"
@@ -240,19 +240,21 @@ export default function NotificationEmails() {
                   onChange={(e) => setFormData({ ...formData, emails: e.target.value })}
                   required
                   rows={4}
+                  className="bg-white border-slate-300 text-slate-900"
                 />
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-slate-500">
                   Séparez les emails par des virgules, points-virgules ou sauts de ligne
                 </p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description" className="text-slate-700">Description</Label>
                 <Textarea
                   id="description"
                   placeholder="Note ou description de ce contact..."
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={3}
+                  className="bg-white border-slate-300 text-slate-900"
                 />
               </div>
               <div className="flex items-center gap-2">
@@ -260,8 +262,9 @@ export default function NotificationEmails() {
                   id="active"
                   checked={formData.active}
                   onCheckedChange={(checked) => setFormData({ ...formData, active: checked })}
+                  className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-300"
                 />
-                <Label htmlFor="active">Activer les notifications</Label>
+                <Label htmlFor="active" className="text-slate-700">Activer les notifications</Label>
               </div>
             </div>
             <DialogFooter>
@@ -270,10 +273,15 @@ export default function NotificationEmails() {
                 variant="outline"
                 onClick={() => setShowAddDialog(false)}
                 disabled={submitting}
+                className="border-slate-300 text-slate-700 hover:bg-slate-100"
               >
                 Annuler
               </Button>
-              <Button type="submit" disabled={submitting}>
+              <Button
+                type="submit"
+                disabled={submitting}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
                 {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Ajouter
               </Button>
