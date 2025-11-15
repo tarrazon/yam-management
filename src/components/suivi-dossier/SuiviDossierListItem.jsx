@@ -1,7 +1,7 @@
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, Eye, Calendar, Users, AlertCircle } from "lucide-react";
+import { Edit, Eye, Calendar, Users, AlertCircle, ChevronRight, CheckCircle, Circle } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -21,6 +21,8 @@ const statusLabels = {
   vendu: "Vendu",
 };
 
+const MINI_PIPELINE_STEPS = ['sous_option', 'reserve', 'compromis', 'vendu'];
+
 export default function SuiviDossierListItem({ lot, onEdit, onView }) {
   const { totalManquants, hasDocumentsManquants } = useDocumentsManquants(lot);
 
@@ -31,6 +33,15 @@ export default function SuiviDossierListItem({ lot, onEdit, onView }) {
     } catch {
       return '-';
     }
+  };
+
+  const getStepStatus = (step) => {
+    const currentPosition = MINI_PIPELINE_STEPS.indexOf(lot.statut);
+    const stepPosition = MINI_PIPELINE_STEPS.indexOf(step);
+
+    if (stepPosition < currentPosition) return 'completed';
+    if (stepPosition === currentPosition) return 'current';
+    return 'pending';
   };
 
   return (
@@ -73,41 +84,70 @@ export default function SuiviDossierListItem({ lot, onEdit, onView }) {
             )}
           </div>
 
-          <div>
-            <p className="text-xs text-slate-500">Prise d'option</p>
-            <p className="font-semibold text-green-600 text-sm">{formatDate(lot.date_prise_option)}</p>
+          <div className="md:col-span-2">
+            <p className="text-xs text-slate-500 mb-2">Progression</p>
+            <div className="flex items-center gap-1">
+              {MINI_PIPELINE_STEPS.map((step, index) => {
+                const status = getStepStatus(step);
+                return (
+                  <React.Fragment key={step}>
+                    <div
+                      className={`
+                        w-6 h-6 rounded-full flex items-center justify-center transition-all
+                        ${status === 'completed' ? 'bg-green-500' : ''}
+                        ${status === 'current' ? 'bg-blue-500 ring-2 ring-blue-200' : ''}
+                        ${status === 'pending' ? 'bg-slate-200' : ''}
+                      `}
+                      title={statusLabels[step]}
+                    >
+                      {status === 'completed' ? (
+                        <CheckCircle className="w-3 h-3 text-white" strokeWidth={3} />
+                      ) : (
+                        <Circle className="w-3 h-3 text-white" strokeWidth={2} />
+                      )}
+                    </div>
+                    {index < MINI_PIPELINE_STEPS.length - 1 && (
+                      <ChevronRight
+                        className={`
+                          w-3 h-3
+                          ${status === 'completed' ? 'text-green-500' : 'text-slate-300'}
+                        `}
+                        strokeWidth={3}
+                      />
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </div>
           </div>
 
-          <div className="flex items-center justify-center">
-            {hasDocumentsManquants ? (
+          <div className="flex items-center gap-3 justify-end">
+            {hasDocumentsManquants && (
               <div className="flex items-center gap-1 px-2 py-1 bg-orange-100 rounded-full">
                 <AlertCircle className="w-4 h-4 text-orange-600" />
                 <span className="text-xs font-bold text-orange-700">{totalManquants}</span>
               </div>
-            ) : (
-              <span className="text-xs text-slate-400">-</span>
             )}
-          </div>
-
-          <div className="flex gap-1 justify-end">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onView(lot)}
-              className="hover:bg-slate-100 h-8 w-8"
-              title="Voir"
-            >
-              <Eye className="w-4 h-4 text-slate-500" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onEdit(lot)}
-              className="hover:bg-slate-100 h-8 w-8"
-              title="Éditer"
-            >
-              <Edit className="w-4 h-4 text-slate-500" />
-            </Button>
+            <div className="flex gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onView(lot)}
+                className="hover:bg-slate-100 h-8 w-8"
+                title="Voir"
+              >
+                <Eye className="w-4 h-4 text-slate-500" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onEdit(lot)}
+                className="hover:bg-slate-100 h-8 w-8"
+                title="Éditer"
+              >
+                <Edit className="w-4 h-4 text-slate-500" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>

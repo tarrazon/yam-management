@@ -1,5 +1,5 @@
 import React from "react";
-import { CheckCircle, Circle, Users, FileCheck, FileSignature, Home, Archive, TrendingUp } from "lucide-react";
+import { CheckCircle, FileCheck, FileSignature, Home, Archive, TrendingUp, ChevronRight } from "lucide-react";
 
 const PIPELINE_STEPS = [
   {
@@ -41,7 +41,6 @@ const PIPELINE_STEPS = [
 ];
 
 const getStepStatus = (stepIndex, currentStatut, phasePostVente) => {
-  // Mapping des statuts vers leur position dans le pipeline
   const statutPositions = {
     sous_option: 0,
     reserve: 1,
@@ -51,7 +50,6 @@ const getStepStatus = (stepIndex, currentStatut, phasePostVente) => {
 
   let currentPosition = statutPositions[currentStatut] || 0;
 
-  // Si le statut est "vendu" et qu'on a une phase post-vente, ajuster la position
   if (currentStatut === 'vendu' && phasePostVente) {
     if (phasePostVente === 'suivi_post_vente') {
       currentPosition = 4;
@@ -72,12 +70,8 @@ export default function SuiviPipeline({ lot }) {
   return (
     <div className="w-full py-8">
       <div className="relative">
-        {/* Ligne de connexion */}
-        <div className="absolute top-8 left-0 right-0 h-1 bg-slate-200 hidden md:block"
-          style={{ width: 'calc(100% - 48px)', marginLeft: '24px' }} />
-
-        {/* Étapes */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 relative">
+        {/* Étapes avec flèches */}
+        <div className="flex items-center justify-between">
           {PIPELINE_STEPS.map((step, index) => {
             const status = getStepStatus(index, currentStatut, phasePostVente);
             const Icon = step.icon;
@@ -87,92 +81,74 @@ export default function SuiviPipeline({ lot }) {
             const isPending = status === "pending";
 
             return (
-              <div key={step.id} className="flex flex-col items-center text-center">
-                {/* Icône de l'étape */}
-                <div className="relative z-10 mb-3">
-                  <div
-                    className={`
-                      w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300
-                      ${isCompleted ? 'bg-green-500 ring-4 ring-green-100' : ''}
-                      ${isCurrent ? 'bg-blue-500 ring-4 ring-blue-100 scale-110 shadow-lg' : ''}
-                      ${isPending ? 'bg-slate-200 ring-4 ring-slate-100' : ''}
-                    `}
-                  >
-                    {isCompleted ? (
-                      <CheckCircle className="w-8 h-8 text-white" />
-                    ) : (
-                      <Icon
-                        className={`
-                          w-8 h-8
-                          ${isCurrent ? 'text-white' : ''}
-                          ${isPending ? 'text-slate-400' : ''}
-                        `}
-                      />
+              <React.Fragment key={step.id}>
+                {/* Étape */}
+                <div className="flex flex-col items-center text-center flex-1">
+                  {/* Icône de l'étape */}
+                  <div className="relative z-10 mb-3">
+                    <div
+                      className={`
+                        w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300
+                        ${isCompleted ? 'bg-gradient-to-br from-green-400 to-green-600 shadow-lg shadow-green-200' : ''}
+                        ${isCurrent ? 'bg-gradient-to-br from-blue-500 to-blue-700 shadow-xl shadow-blue-300 scale-110' : ''}
+                        ${isPending ? 'bg-slate-200 border-2 border-slate-300' : ''}
+                      `}
+                    >
+                      {isCompleted ? (
+                        <CheckCircle className="w-8 h-8 text-white" strokeWidth={2.5} />
+                      ) : (
+                        <Icon
+                          className={`
+                            w-8 h-8
+                            ${isCurrent ? 'text-white' : ''}
+                            ${isPending ? 'text-slate-400' : ''}
+                          `}
+                          strokeWidth={isCurrent ? 2.5 : 2}
+                        />
+                      )}
+                    </div>
+
+                    {/* Indicateur de progression pour l'étape en cours */}
+                    {isCurrent && (
+                      <div className="absolute -inset-2 rounded-full border-2 border-blue-400 animate-ping opacity-75" />
                     )}
                   </div>
 
-                  {/* Indicateur de progression pour l'étape en cours */}
-                  {isCurrent && (
-                    <div className="absolute -inset-1 rounded-full border-4 border-blue-300 animate-ping opacity-75" />
-                  )}
-                </div>
-
-                {/* Label de l'étape */}
-                <div className="space-y-1">
-                  <p
-                    className={`
-                      text-xs font-semibold leading-tight
-                      ${isCompleted ? 'text-green-700' : ''}
-                      ${isCurrent ? 'text-blue-700' : ''}
-                      ${isPending ? 'text-slate-400' : ''}
-                    `}
-                  >
-                    {step.label}
-                  </p>
-                  {step.sublabel && (
+                  {/* Label de l'étape */}
+                  <div className="space-y-1">
                     <p
                       className={`
-                        text-xs leading-tight
-                        ${isCompleted ? 'text-green-600' : ''}
-                        ${isCurrent ? 'text-blue-600' : ''}
+                        text-xs font-bold leading-tight
+                        ${isCompleted ? 'text-green-700' : ''}
+                        ${isCurrent ? 'text-blue-700' : ''}
                         ${isPending ? 'text-slate-400' : ''}
                       `}
                     >
-                      {step.sublabel}
+                      {step.label}
                     </p>
-                  )}
+                  </div>
                 </div>
 
-                {/* Barre de progression verticale sur mobile */}
+                {/* Flèche entre les étapes */}
                 {index < PIPELINE_STEPS.length - 1 && (
-                  <div className="md:hidden w-1 h-12 mt-2 bg-slate-200">
-                    <div
+                  <div className="flex items-center justify-center px-2">
+                    <ChevronRight
                       className={`
-                        w-full transition-all duration-500
-                        ${isCompleted ? 'h-full bg-green-500' : 'h-0'}
+                        w-8 h-8 transition-all duration-500
+                        ${isCompleted ? 'text-green-600' : 'text-slate-300'}
                       `}
+                      strokeWidth={3}
                     />
                   </div>
                 )}
-              </div>
+              </React.Fragment>
             );
           })}
-        </div>
-
-        {/* Barre de progression horizontale sur desktop */}
-        <div className="absolute top-8 left-0 right-0 h-1 hidden md:block pointer-events-none"
-          style={{ width: 'calc(100% - 48px)', marginLeft: '24px' }}>
-          <div
-            className="h-full bg-gradient-to-r from-green-500 to-blue-500 transition-all duration-700 ease-in-out"
-            style={{
-              width: `${((PIPELINE_STEPS.findIndex(s => getStepStatus(PIPELINE_STEPS.indexOf(s), currentStatut, phasePostVente) === "current") + 1) / PIPELINE_STEPS.length) * 100}%`,
-            }}
-          />
         </div>
       </div>
 
       {/* Légende des dates clés */}
-      <div className="mt-8 p-4 bg-slate-50 rounded-lg">
+      <div className="mt-8 p-4 bg-slate-50 rounded-lg border border-slate-200">
         <h4 className="text-sm font-semibold text-slate-700 mb-3">Dates clés</h4>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
           {lot.date_premier_contact && (
