@@ -84,13 +84,16 @@ export default function SuiviOptionsAdmin() {
   };
 
   // Regrouper les LOTS par statut (pas les options)
-  // Pour chaque lot, on récupère l'option la plus récente
+  // Pour chaque lot, on récupère l'option la plus récente (non annulée)
   const getLotsByStatut = (statut) => {
+    // Filtrer les options actives (non annulées)
+    const optionsActives = toutesOptions.filter(opt => opt.statut !== 'annulee');
+
     return lots
       .filter(l => l.statut === statut)
       .map(lot => {
-        // Trouver l'option la plus récente pour ce lot
-        const optionsForLot = toutesOptions
+        // Trouver l'option active la plus récente pour ce lot
+        const optionsForLot = optionsActives
           .filter(o => o.lot_lmnp_id === lot.id)
           .sort((a, b) => new Date(b.created_at || b.date_option) - new Date(a.created_at || a.date_option));
 

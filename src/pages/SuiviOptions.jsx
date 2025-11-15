@@ -48,15 +48,18 @@ export default function SuiviOptions() {
     // D'abord, on obtient tous les lots avec ce statut
     const lotsAvecStatut = lots.filter(l => l.statut === statut);
 
-    // Ensuite, on garde seulement ceux qui ont au moins une option du partenaire
+    // Filtrer les options actives (non annulées)
+    const optionsActives = toutesOptions.filter(opt => opt.statut !== 'annulee');
+
+    // Ensuite, on garde seulement ceux qui ont au moins une option active du partenaire
     const lotsPartenaire = lotsAvecStatut
       .filter(lot => {
-        // Vérifier si ce lot a au moins une option du partenaire
-        return toutesOptions.some(opt => opt.lot_lmnp_id === lot.id);
+        // Vérifier si ce lot a au moins une option active du partenaire
+        return optionsActives.some(opt => opt.lot_lmnp_id === lot.id);
       })
       .map(lot => {
-        // Trouver l'option la plus récente pour ce lot
-        const optionsForLot = toutesOptions
+        // Trouver l'option active la plus récente pour ce lot
+        const optionsForLot = optionsActives
           .filter(o => o.lot_lmnp_id === lot.id)
           .sort((a, b) => new Date(b.created_at || b.date_option) - new Date(a.created_at || a.date_option));
 
