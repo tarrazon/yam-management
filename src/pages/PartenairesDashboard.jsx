@@ -128,7 +128,7 @@ export default function PartenairesDashboard() {
                 <div className="p-4 rounded-xl bg-[#F59E0B]/10">
                   <Building2 className="w-8 h-8 text-[#F59E0B]" />
                 </div>
-                <div className="flex-1 grid md:grid-cols-3 gap-4">
+                <div className="flex-1 grid md:grid-cols-4 gap-4">
                   <div>
                     <div className="flex items-center gap-2 mb-2">
                       <Building2 className="w-4 h-4 text-[#1E40AF]" />
@@ -136,7 +136,15 @@ export default function PartenairesDashboard() {
                     </div>
                     <p className="text-lg font-bold text-[#1E40AF]">{partenaire.nom}</p>
                   </div>
-                  
+
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <TrendingUp className="w-4 h-4 text-[#1E40AF]" />
+                      <p className="text-xs font-semibold text-slate-500 uppercase">Taux de rétrocession</p>
+                    </div>
+                    <p className="text-lg font-bold text-[#10B981]">{tauxRetrocession}%</p>
+                  </div>
+
                   {partenaire.contact_principal && (
                     <div>
                       <div className="flex items-center gap-2 mb-2">
@@ -146,14 +154,14 @@ export default function PartenairesDashboard() {
                       <p className="text-lg font-bold text-slate-700">{partenaire.contact_principal}</p>
                     </div>
                   )}
-                  
+
                   {partenaire.type_partenaire && (
                     <div>
                       <div className="flex items-center gap-2 mb-2">
                         <Briefcase className="w-4 h-4 text-[#1E40AF]" />
                         <p className="text-xs font-semibold text-slate-500 uppercase">Type</p>
                       </div>
-                      <Badge className="bg-indigo-100 text-indigo-800 text-sm">
+                      <Badge className="bg-sky-100 text-sky-800 text-sm">
                         {partenaire.type_partenaire.toUpperCase()}
                       </Badge>
                     </div>

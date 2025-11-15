@@ -72,27 +72,42 @@ export default function Statistiques() {
   // Calculs statistiques enrichis
   const stats = useMemo(() => {
     const lotsVendus = filteredLots.filter(l => l.statut === 'vendu');
+    const lotsEnCours = filteredLots.filter(l => ['reserve', 'compromis'].includes(l.statut));
     const lotsDisponibles = filteredLots.filter(l => l.statut === 'disponible').length;
     const lotsSousOption = filteredLots.filter(l => l.statut === 'sous_option').length;
-    const lotsReserves = filteredLots.filter(l => ['reserve', 'compromis'].includes(l.statut)).length;
-    
-    const caTotal = lotsVendus.reduce((sum, lot) => sum + (lot.prix_fai || 0), 0);
-    
-    // Calcul des commissions partenaires avec fallback sur taux de rétrocession
-    const commissionsPartenaires = lotsVendus.reduce((sum, lot) => {
-      if (lot.commission_partenaire) {
-        return sum + lot.commission_partenaire;
-      }
-      // Fallback: calculer avec le taux de rétrocession du partenaire
-      if (lot.partenaire_id && lot.honoraires) {
+    const lotsReserves = lotsEnCours.length;
+
+    const caTotal = lotsVendus.reduce((sum, lot) => sum + (Number(lot.prix_fai) || 0), 0);
+
+    // Honoraires perçus (lots vendus)
+    const honorairesPercus = lotsVendus.reduce((sum, lot) => sum + (Number(lot.honoraires) || 0), 0);
+
+    // Honoraires à venir (lots réservés/compromis)
+    const honorairesAVenir = lotsEnCours.reduce((sum, lot) => sum + (Number(lot.honoraires) || 0), 0);
+
+    // Rétrocessions perçues (lots vendus)
+    const retrocessionsPercues = lotsVendus.reduce((sum, lot) => {
+      if (lot.partenaire_id) {
         const partenaire = partenaires.find(p => p.id === lot.partenaire_id);
-        const tauxRetrocession = partenaire?.taux_retrocession || 0;
-        return sum + (lot.honoraires * tauxRetrocession / 100);
+        const tauxRetrocession = Number(partenaire?.taux_retrocession) || 0;
+        const honoraires = Number(lot.honoraires) || 0;
+        return sum + (honoraires * tauxRetrocession / 100);
       }
       return sum;
     }, 0);
-    
-    const honorairesTotal = lotsVendus.reduce((sum, lot) => sum + (lot.honoraires || 0) + (lot.honoraires_acquereur_ht || 0), 0);
+
+    // Rétrocessions à venir (lots réservés/compromis)
+    const retrocessionsAVenir = lotsEnCours.reduce((sum, lot) => {
+      if (lot.partenaire_id) {
+        const partenaire = partenaires.find(p => p.id === lot.partenaire_id);
+        const tauxRetrocession = Number(partenaire?.taux_retrocession) || 0;
+        const honoraires = Number(lot.honoraires) || 0;
+        return sum + (honoraires * tauxRetrocession / 100);
+      }
+      return sum;
+    }, 0);
+
+    const honorairesTotal = honorairesPercus + honorairesAVenir;
 
     // Nouvelles stats
     const prixMoyenVente = lotsVendus.length > 0 ? Math.round(caTotal / lotsVendus.length) : 0;
@@ -101,19 +116,21 @@ export default function Statistiques() {
       ? (lotsVendus.reduce((sum, lot) => sum + (lot.rentabilite || 0), 0) / lotsVendus.filter(l => l.rentabilite).length).toFixed(1)
       : 0;
     
-    const margeBrute = honorairesTotal - commissionsPartenaires;
-    const tauxMarge = honorairesTotal > 0 ? ((margeBrute / honorairesTotal) * 100).toFixed(1) : 0;
-    
+    const margeBrutePercue = honorairesPercus - retrocessionsPercues;
+    const margeBruteAVenir = honorairesAVenir - retrocessionsAVenir;
+    const margeBruteTotal = margeBrutePercue + margeBruteAVenir;
+    const tauxMarge = honorairesTotal > 0 ? ((margeBruteTotal / honorairesTotal) * 100).toFixed(1) : 0;
+
     const caPotentiel = filteredLots
       .filter(l => ['sous_option', 'reserve', 'compromis'].includes(l.statut))
-      .reduce((sum, lot) => sum + (lot.prix_fai || 0), 0);
-    
+      .reduce((sum, lot) => sum + (Number(lot.prix_fai) || 0), 0);
+
     // Acquéreurs actifs
-    const acquereurActifs = acquereurs.filter(a => 
-      a.statut_commercial === 'acheteur' || 
+    const acquereurActifs = acquereurs.filter(a =>
+      a.statut_commercial === 'acheteur' ||
       lotsVendus.some(l => l.acquereur_id === a.id)
     ).length;
-    
+
     // Partenaires contributeurs
     const partenairesContributeurs = new Set(
       lotsVendus.filter(l => l.partenaire_id).map(l => l.partenaire_id)
@@ -121,14 +138,20 @@ export default function Statistiques() {
 
     return {
       caTotal,
-      commissionsPartenaires,
+      honorairesPercus,
+      honorairesAVenir,
       honorairesTotal,
+      retrocessionsPercues,
+      retrocessionsAVenir,
+      retrocessionsTotal: retrocessionsPercues + retrocessionsAVenir,
+      margeBrutePercue,
+      margeBruteAVenir,
+      margeBruteTotal,
       nombreVentes: lotsVendus.length,
       nombreLotsTotal: filteredLots.length,
       tauxConversion: filteredLots.length > 0 ? ((lotsVendus.length / filteredLots.length) * 100).toFixed(1) : 0,
       prixMoyenVente,
       rentabiliteMoyenne,
-      margeBrute,
       tauxMarge,
       caPotentiel,
       lotsDisponibles,
@@ -218,8 +241,15 @@ export default function Statistiques() {
     const data = [
       ["STATISTIQUES GLOBALES", ""],
       ["CA Total", stats.caTotal],
-      ["Commissions Partenaires", stats.commissionsPartenaires],
+      ["Honoraires Perçus", stats.honorairesPercus],
+      ["Honoraires À Venir", stats.honorairesAVenir],
       ["Honoraires Total", stats.honorairesTotal],
+      ["Rétrocessions Perçues", stats.retrocessionsPercues],
+      ["Rétrocessions À Venir", stats.retrocessionsAVenir],
+      ["Rétrocessions Total", stats.retrocessionsTotal],
+      ["Marge Brute Perçue", stats.margeBrutePercue],
+      ["Marge Brute À Venir", stats.margeBruteAVenir],
+      ["Marge Brute Total", stats.margeBruteTotal],
       ["Nombre de ventes", stats.nombreVentes],
       ["Taux de conversion", `${stats.tauxConversion}%`],
       [""],
@@ -357,28 +387,28 @@ export default function Statistiques() {
                   <TrendingUp className="w-6 h-6 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-amber-700 font-medium">Commissions</p>
+                  <p className="text-sm text-amber-700 font-medium">Rétrocessions Perçues</p>
                   <p className="text-2xl font-bold text-amber-800">
-                    {stats.commissionsPartenaires.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €
+                    {stats.retrocessionsPercues.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €
                   </p>
-                  <p className="text-xs text-amber-600 mt-1">Partenaires</p>
+                  <p className="text-xs text-amber-600 mt-1">Lots vendus</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50">
+          <Card className="border-none shadow-lg bg-gradient-to-br from-sky-50 to-cyan-50">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
                 <div className="p-3 rounded-xl bg-white/80 shadow-sm">
-                  <Euro className="w-6 h-6 text-blue-600" />
+                  <Euro className="w-6 h-6 text-sky-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-blue-700 font-medium">Honoraires</p>
-                  <p className="text-2xl font-bold text-blue-800">
-                    {stats.honorairesTotal.toLocaleString('fr-FR')} €
+                  <p className="text-sm text-sky-700 font-medium">Honoraires Perçus</p>
+                  <p className="text-2xl font-bold text-sky-800">
+                    {stats.honorairesPercus.toLocaleString('fr-FR')} €
                   </p>
-                  <p className="text-xs text-blue-600 mt-1">Total perçus</p>
+                  <p className="text-xs text-sky-600 mt-1">Lots vendus</p>
                 </div>
               </div>
             </CardContent>
@@ -391,9 +421,9 @@ export default function Statistiques() {
                   <Award className="w-6 h-6 text-rose-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-rose-700 font-medium">Marge Brute</p>
+                  <p className="text-sm text-rose-700 font-medium">Marge Brute Perçue</p>
                   <p className="text-2xl font-bold text-rose-800">
-                    {stats.margeBrute.toLocaleString('fr-FR')} €
+                    {stats.margeBrutePercue.toLocaleString('fr-FR')} €
                   </p>
                   <p className="text-xs text-rose-600 mt-1">Taux: {stats.tauxMarge}%</p>
                 </div>
@@ -402,7 +432,78 @@ export default function Statistiques() {
           </Card>
         </div>
 
-        {/* KPIs Ligne 2 - Stock et performances */}
+        {/* KPIs Ligne 2 - Montants à venir */}
+        <div className="grid md:grid-cols-4 gap-6 mb-6">
+          <Card className="border-none shadow-lg bg-gradient-to-br from-purple-50 to-fuchsia-50">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-xl bg-white/80 shadow-sm">
+                  <Clock className="w-6 h-6 text-purple-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-purple-700 font-medium">CA Potentiel</p>
+                  <p className="text-2xl font-bold text-purple-800">
+                    {stats.caPotentiel.toLocaleString('fr-FR')} €
+                  </p>
+                  <p className="text-xs text-purple-600 mt-1">En cours</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-lg bg-gradient-to-br from-orange-50 to-amber-50">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-xl bg-white/80 shadow-sm">
+                  <Clock className="w-6 h-6 text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-orange-700 font-medium">Rétrocessions À Venir</p>
+                  <p className="text-2xl font-bold text-orange-800">
+                    {stats.retrocessionsAVenir.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €
+                  </p>
+                  <p className="text-xs text-orange-600 mt-1">Réservé/Compromis</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-lg bg-gradient-to-br from-cyan-50 to-blue-50">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-xl bg-white/80 shadow-sm">
+                  <Clock className="w-6 h-6 text-cyan-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-cyan-700 font-medium">Honoraires À Venir</p>
+                  <p className="text-2xl font-bold text-cyan-800">
+                    {stats.honorairesAVenir.toLocaleString('fr-FR')} €
+                  </p>
+                  <p className="text-xs text-cyan-600 mt-1">Réservé/Compromis</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-lg bg-gradient-to-br from-pink-50 to-red-50">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-xl bg-white/80 shadow-sm">
+                  <Clock className="w-6 h-6 text-pink-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-pink-700 font-medium">Marge Brute À Venir</p>
+                  <p className="text-2xl font-bold text-pink-800">
+                    {stats.margeBruteAVenir.toLocaleString('fr-FR')} €
+                  </p>
+                  <p className="text-xs text-pink-600 mt-1">Réservé/Compromis</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* KPIs Ligne 3 - Stock et performances */}
         <div className="grid md:grid-cols-4 gap-6 mb-6">
           <Card className="border-none shadow-lg bg-gradient-to-br from-violet-50 to-purple-50">
             <CardContent className="p-6">

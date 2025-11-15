@@ -148,6 +148,12 @@ export default function PartenaireDetail({ partenaire, onClose, onEdit, onDelete
                   <span className="text-slate-700">{partenaire.adresse}</span>
                 </div>
               )}
+              {partenaire.taux_retrocession && (
+                <div className="pt-3 border-t">
+                  <p className="text-xs text-slate-500">Taux de rétrocession</p>
+                  <p className="font-semibold text-[#10B981] text-lg">{partenaire.taux_retrocession}%</p>
+                </div>
+              )}
               {partenaire.zone_activite && (
                 <div className="pt-3 border-t">
                   <p className="text-xs text-slate-500">Zone d'activité</p>
