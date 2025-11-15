@@ -1,10 +1,11 @@
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, Eye, Calendar, Users } from "lucide-react";
+import { Edit, Eye, Calendar, Users, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { useDocumentsManquants } from "@/hooks/useDocumentsManquants";
 
 const statusColors = {
   sous_option: "bg-blue-100 text-blue-800",
@@ -23,6 +24,8 @@ const statusLabels = {
 };
 
 export default function SuiviDossierListItem({ lot, onEdit, onView }) {
+  const { totalManquants, hasDocumentsManquants } = useDocumentsManquants(lot);
+
   const formatDate = (dateString) => {
     if (!dateString) return '-';
     try {
@@ -37,10 +40,12 @@ export default function SuiviDossierListItem({ lot, onEdit, onView }) {
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="bg-white rounded-lg shadow hover:shadow-lg transition-all p-4 border border-slate-100"
+      className={`bg-white rounded-lg shadow hover:shadow-lg transition-all p-4 border ${
+        hasDocumentsManquants ? 'border-orange-300 border-l-4' : 'border-slate-100'
+      }`}
     >
       <div className="flex items-center gap-4">
-        <div className="flex-1 min-w-0 grid md:grid-cols-6 gap-4 items-center">
+        <div className="flex-1 min-w-0 grid md:grid-cols-7 gap-4 items-center">
           <div className="md:col-span-2">
             <h3 className="font-bold text-[#1E40AF] text-sm mb-1">Lot {lot.reference}</h3>
             <p className="text-xs text-slate-500 truncate">{lot.residence_nom}</p>
@@ -73,6 +78,17 @@ export default function SuiviDossierListItem({ lot, onEdit, onView }) {
           <div>
             <p className="text-xs text-slate-500">Prise d'option</p>
             <p className="font-semibold text-green-600 text-sm">{formatDate(lot.date_prise_option)}</p>
+          </div>
+
+          <div className="flex items-center justify-center">
+            {hasDocumentsManquants ? (
+              <div className="flex items-center gap-1 px-2 py-1 bg-orange-100 rounded-full">
+                <AlertCircle className="w-4 h-4 text-orange-600" />
+                <span className="text-xs font-bold text-orange-700">{totalManquants}</span>
+              </div>
+            ) : (
+              <span className="text-xs text-slate-400">-</span>
+            )}
           </div>
 
           <div className="flex gap-1 justify-end">

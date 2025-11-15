@@ -2,10 +2,11 @@ import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Users, Eye, Edit, TrendingUp } from "lucide-react";
+import { Calendar, Users, Eye, Edit, TrendingUp, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { useDocumentsManquants } from "@/hooks/useDocumentsManquants";
 
 const statusColors = {
   sous_option: "bg-blue-100 text-blue-800 border-blue-200",
@@ -24,6 +25,8 @@ const statusLabels = {
 };
 
 export default function SuiviDossierCard({ lot, onEdit, onView }) {
+  const { totalManquants, hasDocumentsManquants } = useDocumentsManquants(lot);
+
   const formatDate = (dateString) => {
     if (!dateString) return '-';
     try {
@@ -181,6 +184,20 @@ export default function SuiviDossierCard({ lot, onEdit, onView }) {
               </div>
             )}
           </div>
+
+          {hasDocumentsManquants && (
+            <div className="pt-4 border-t border-slate-100">
+              <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
+                <p className="text-xs text-orange-700 font-bold flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4" />
+                  {totalManquants} document{totalManquants > 1 ? 's' : ''} manquant{totalManquants > 1 ? 's' : ''}
+                </p>
+                <p className="text-xs text-orange-600 mt-1">
+                  Cliquez pour voir le détail
+                </p>
+              </div>
+            </div>
+          )}
 
           {(lot.observations_acquereurs || lot.negociation_en_cours) && (
             <div className="pt-4 border-t border-slate-100">
