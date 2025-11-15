@@ -6,11 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { X, Save, Upload, CheckCircle2, Loader2, Trash2 } from "lucide-react";
+import { X, Save, Upload, CheckCircle2, Loader2, Trash2, Download, Eye } from "lucide-react";
 import { motion } from "framer-motion";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { autoCleanFormData } from "@/utils/formHelpers";
+import { useSignedUrls } from "@/hooks/useSignedUrl";
 
 export default function AcquereurForm({ acquereur, onSubmit, onCancel, isLoading, isPartner = false }) {
   const [formData, setFormData] = useState(acquereur || {
@@ -44,6 +45,7 @@ export default function AcquereurForm({ acquereur, onSubmit, onCancel, isLoading
 
   const [uploading, setUploading] = useState({});
   const [uploadError, setUploadError] = useState("");
+  const { urls: signedUrls, loading: urlsLoading } = useSignedUrls(formData.documents || {});
 
   const { data: partenaires = [] } = useQuery({
     queryKey: ['partenaires'],
@@ -100,6 +102,7 @@ export default function AcquereurForm({ acquereur, onSubmit, onCancel, isLoading
   const documentsConfig = [
     { key: "cni", label: "CNI", category: "Identité" },
     { key: "passeport", label: "Passeport", category: "Identité" },
+    { key: "justificatif_domicile", label: "Justificatif de domicile", category: "Identité" },
     { key: "lettre_intention_achat", label: "Lettre d'intention d'achat", category: "Documents contractuels" },
     { key: "mandat_gestion", label: "Mandat de gestion", category: "Documents contractuels" },
     { key: "mandat_acquereur_honoraires", label: "Mandat acquéreur pour honoraires", category: "Documents contractuels" },
@@ -498,13 +501,27 @@ export default function AcquereurForm({ acquereur, onSubmit, onCancel, isLoading
                               />
                             </label>
                             {formData.documents?.[doc.key] && (
-                              <button
-                                type="button"
-                                onClick={() => removeFile(doc.key)}
-                                className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
+                              <>
+                                {signedUrls[doc.key] && (
+                                  <a
+                                    href={signedUrls[doc.key]}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors flex items-center justify-center"
+                                    title="Voir/Télécharger"
+                                  >
+                                    <Download className="w-4 h-4" />
+                                  </a>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => removeFile(doc.key)}
+                                  className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+                                  title="Supprimer"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </>
                             )}
                           </div>
                         </div>

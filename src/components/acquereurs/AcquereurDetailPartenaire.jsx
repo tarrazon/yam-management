@@ -18,10 +18,12 @@ import {
   Building2,
   Users,
   Home,
-  Edit
+  Edit,
+  Download
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useDocumentsManquants } from "@/hooks/useDocumentsManquants";
+import { useSignedUrls } from "@/hooks/useSignedUrl";
 
 const statusColors = {
   sous_option: "bg-blue-100 text-blue-800",
@@ -44,8 +46,25 @@ const PIPELINE_STEPS = [
   { key: 'vendu', label: 'Vendu', icon: CheckCircle },
 ];
 
+const documentsConfig = [
+  { key: "cni", label: "CNI", category: "Identité" },
+  { key: "passeport", label: "Passeport", category: "Identité" },
+  { key: "justificatif_domicile", label: "Justificatif de domicile", category: "Identité" },
+  { key: "lettre_intention_achat", label: "Lettre d'intention d'achat", category: "Documents contractuels" },
+  { key: "mandat_gestion", label: "Mandat de gestion", category: "Documents contractuels" },
+  { key: "mandat_acquereur_honoraires", label: "Mandat acquéreur pour honoraires", category: "Documents contractuels" },
+];
+
 export default function AcquereurDetailPartenaire({ acquereur, lot, onClose, onEdit }) {
   const { documentsManquantsAcquereur } = useDocumentsManquants(lot || {});
+  const documents = acquereur.documents || {};
+  const { urls: signedUrls, loading: urlsLoading } = useSignedUrls(documents);
+
+  const groupedDocuments = documentsConfig.reduce((acc, doc) => {
+    if (!acc[doc.category]) acc[doc.category] = [];
+    acc[doc.category].push(doc);
+    return acc;
+  }, {});
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';
@@ -254,6 +273,55 @@ export default function AcquereurDetailPartenaire({ acquereur, lot, onClose, onE
                       </p>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* Documents */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-[#1E40AF]" />
+                    Documents
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {Object.entries(groupedDocuments).map(([category, docs]) => (
+                    <div key={category} className="mb-6 last:mb-0">
+                      <h4 className="font-semibold text-sm text-slate-600 mb-3 border-b pb-2">{category}</h4>
+                      <div className="space-y-2">
+                        {docs.map((doc) => {
+                          const hasDocument = documents[doc.key];
+                          return (
+                            <div
+                              key={doc.key}
+                              className={`flex items-center justify-between p-3 rounded-lg ${
+                                hasDocument
+                                  ? 'bg-green-50 border border-green-200'
+                                  : 'bg-slate-50 border border-slate-200'
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <FileText className={`w-4 h-4 ${hasDocument ? 'text-green-600' : 'text-slate-400'}`} />
+                                <span className={`text-sm ${hasDocument ? 'text-green-900 font-medium' : 'text-slate-500'}`}>
+                                  {doc.label}
+                                </span>
+                              </div>
+                              {hasDocument && signedUrls[doc.key] && (
+                                <a
+                                  href={signedUrls[doc.key]}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-green-600 hover:text-green-800"
+                                >
+                                  <Download className="w-4 h-4" />
+                                </a>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
                 </CardContent>
               </Card>
 
