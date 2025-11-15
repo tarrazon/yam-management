@@ -96,12 +96,6 @@ const getNavigationItems = (userRole) => {
       roles: ['admin'],
     },
     {
-      title: "Export XML",
-      url: createPageUrl("ExportXML"),
-      icon: FileCode,
-      roles: ['admin'],
-    },
-    {
       title: "Gestion utilisateurs",
       url: createPageUrl("UsersManagement"),
       icon: Shield,
