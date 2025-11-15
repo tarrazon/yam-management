@@ -153,7 +153,7 @@ export default function NotificationEmails() {
             Gérez les emails qui recevront les notifications de prise d'option
           </p>
         </div>
-        <Button onClick={() => setShowAddDialog(true)} className="gap-2">
+        <Button onClick={() => setShowAddDialog(true)} className="gap-2 bg-[#1E40AF] hover:bg-[#1E3A8A] text-white">
           <Plus className="h-4 w-4" />
           Ajouter un email
         </Button>
