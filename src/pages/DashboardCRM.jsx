@@ -51,22 +51,37 @@ export default function DashboardCRM() {
     .filter(l => ['reserve', 'compromis', 'sous_option'].includes(l.statut))
     .reduce((sum, lot) => sum + (lot.prix_fai || 0), 0);
 
-  // Commissions partenaires sur les lots vendus
-  const commissionsPartenaires = lots
+  const calculateHonoraires = (lot) => {
+    const prixBase = lot.prix_ttc || lot.prix_ht || lot.prix_fai || 0;
+    const tauxCommission = 3;
+    return (prixBase * tauxCommission) / 100;
+  };
+
+  const honorairesPercus = lots
+    .filter(l => l.statut === 'vendu')
+    .reduce((sum, lot) => sum + calculateHonoraires(lot), 0);
+
+  const honorairesAPercevoir = lots
+    .filter(l => ['reserve', 'compromis'].includes(l.statut))
+    .reduce((sum, lot) => sum + calculateHonoraires(lot), 0);
+
+  const retrocessionActee = lots
     .filter(l => l.statut === 'vendu' && l.partenaire_id)
     .reduce((sum, lot) => {
       const partenaire = partenaires.find(p => p.id === lot.partenaire_id);
-      const commission = lot.commission_partenaire || 
-        (lot.honoraires && partenaire?.taux_retrocession 
-          ? (lot.honoraires * partenaire.taux_retrocession / 100) 
-          : 0);
-      return sum + commission;
+      const tauxRetro = Number(partenaire?.taux_retrocession) || 0;
+      const prixBase = lot.prix_ttc || lot.prix_ht || lot.prix_fai || 0;
+      return sum + (prixBase * tauxRetro / 100);
     }, 0);
 
-  // Honoraires totaux sur les lots vendus
-  const honorairesTotaux = lots
-    .filter(l => l.statut === 'vendu')
-    .reduce((sum, lot) => sum + (lot.honoraires || 0) + (lot.honoraires_acquereur_ht || 0), 0);
+  const retrocessionAVenir = lots
+    .filter(l => ['reserve', 'compromis'].includes(l.statut) && l.partenaire_id)
+    .reduce((sum, lot) => {
+      const partenaire = partenaires.find(p => p.id === lot.partenaire_id);
+      const tauxRetro = Number(partenaire?.taux_retrocession) || 0;
+      const prixBase = lot.prix_ttc || lot.prix_ht || lot.prix_fai || 0;
+      return sum + (prixBase * tauxRetro / 100);
+    }, 0);
 
   // Taux de conversion = lots vendus / total lots
   const tauxConversion = lots.length > 0 
@@ -118,7 +133,7 @@ export default function DashboardCRM() {
         </div>
 
         {/* KPIs financiers détaillés */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="border-none shadow-lg bg-gradient-to-br from-green-50 to-emerald-50">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -136,6 +151,30 @@ export default function DashboardCRM() {
             </CardContent>
           </Card>
 
+          <Card className="border-none shadow-lg bg-gradient-to-br from-blue-50 to-blue-100">
+            <CardContent className="p-6">
+              <div>
+                <p className="text-sm text-blue-700 font-medium mb-2">Honoraires perçus</p>
+                <p className="text-2xl font-bold text-blue-800">
+                  {honorairesPercus.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €
+                </p>
+                <p className="text-xs text-blue-600 mt-1">Lots vendus</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-lg bg-gradient-to-br from-blue-50 to-indigo-100">
+            <CardContent className="p-6">
+              <div>
+                <p className="text-sm text-blue-700 font-medium mb-2">Honoraires à percevoir</p>
+                <p className="text-2xl font-bold text-blue-800">
+                  {honorairesAPercevoir.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €
+                </p>
+                <p className="text-xs text-blue-600 mt-1">Réservé + Compromis</p>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card className="border-none shadow-lg bg-gradient-to-br from-amber-50 to-orange-50">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -143,11 +182,11 @@ export default function DashboardCRM() {
                   <TrendingUp className="w-6 h-6 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-amber-700 font-medium">Commissions Partenaires</p>
+                  <p className="text-sm text-amber-700 font-medium">Rétrocessions actées</p>
                   <p className="text-2xl font-bold text-amber-800">
-                    {commissionsPartenaires.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €
+                    {retrocessionActee.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} €
                   </p>
-                  <p className="text-xs text-amber-600 mt-1">Sur les ventes réalisées</p>
+                  <p className="text-xs text-amber-600 mt-1">Partenaires - Vendus</p>
                 </div>
               </div>
             </CardContent>
