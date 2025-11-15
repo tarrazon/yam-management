@@ -29,6 +29,7 @@ export function useDocumentsManquants(lot) {
     if (type === 'acquereur') {
       const docs = entity.documents || {};
       if (!docs.cni && !docs.passeport) manquants.push("Pièce d'identité (CNI ou Passeport)");
+      if (!docs.justificatif_domicile) manquants.push("Justificatif de domicile");
       if (!docs.lettre_intention_achat) manquants.push("Lettre d'intention d'achat");
       if (!docs.mandat_gestion) manquants.push("Mandat de gestion");
       if (!docs.mandat_acquereur_honoraires) manquants.push("Mandat acquéreur pour honoraires");

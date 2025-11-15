@@ -7,6 +7,7 @@ import { X, Edit, Mail, Phone, MapPin, User, Euro, Building2, FileText, Download
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useSignedUrls } from "@/hooks/useSignedUrl";
 
 const statusColors = {
   prospect: "bg-blue-100 text-blue-800 border-blue-200",
@@ -29,6 +30,7 @@ const statusLabels = {
 const documentsConfig = [
   { key: "cni", label: "CNI", category: "Identité" },
   { key: "passeport", label: "Passeport", category: "Identité" },
+  { key: "justificatif_domicile", label: "Justificatif de domicile", category: "Identité" },
   { key: "lettre_intention_achat", label: "Lettre d'intention d'achat", category: "Documents contractuels" },
   { key: "mandat_gestion", label: "Mandat de gestion", category: "Documents contractuels" },
   { key: "mandat_acquereur_honoraires", label: "Mandat acquéreur pour honoraires", category: "Documents contractuels" },
@@ -36,6 +38,7 @@ const documentsConfig = [
 
 export default function AcquereurDetail({ acquereur, onClose, onEdit, onDelete }) {
   const documents = acquereur.documents || {};
+  const { urls: signedUrls, loading: urlsLoading } = useSignedUrls(documents);
 
   // Récupérer le partenaire associé
   const { data: partenaire } = useQuery({
@@ -331,9 +334,9 @@ export default function AcquereurDetail({ acquereur, onClose, onEdit, onDelete }
                               {doc.label}
                             </span>
                           </div>
-                          {hasDocument && (
+                          {hasDocument && signedUrls[doc.key] && (
                             <a
-                              href={documents[doc.key]}
+                              href={signedUrls[doc.key]}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-green-600 hover:text-green-800"

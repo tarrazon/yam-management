@@ -210,6 +210,7 @@ export default function SuiviDossierPartenaire() {
                 <SuiviDossierCard
                   lot={lot}
                   onView={handleView}
+                  hideVendeur={true}
                 />
               </motion.div>
             ))}
@@ -222,6 +223,7 @@ export default function SuiviDossierPartenaire() {
                   key={lot.id}
                   lot={lot}
                   onView={handleView}
+                  hideVendeur={true}
                 />
               ))}
             </div>

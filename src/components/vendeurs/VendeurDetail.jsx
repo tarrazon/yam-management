@@ -7,6 +7,7 @@ import { X, Edit, Mail, Phone, MapPin, User, Building2, FileText, Download, Home
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { useSignedUrls } from "@/hooks/useSignedUrl";
 
 const statusColors = {
   prospect: "bg-blue-100 text-blue-800 border-blue-200",
@@ -61,6 +62,7 @@ export default function VendeurDetail({ vendeur, lotsAssocies = [], onClose, onE
   const isEntreprise = vendeur.type_vendeur === 'entreprise';
   const documents = isEntreprise ? vendeur.documents_entreprise : vendeur.documents_particulier;
   const documentsList = isEntreprise ? documentsEntreprise : documentsParticulier;
+  const { urls: signedUrls, loading: urlsLoading } = useSignedUrls(documents || {});
 
   const groupedDocuments = documentsList.reduce((acc, doc) => {
     if (!acc[doc.category]) acc[doc.category] = [];
@@ -255,9 +257,9 @@ export default function VendeurDetail({ vendeur, lotsAssocies = [], onClose, onE
                               {doc.label}
                             </span>
                           </div>
-                          {hasDocument && (
+                          {hasDocument && signedUrls[doc.key] && (
                             <a
-                              href={documents[doc.key]}
+                              href={signedUrls[doc.key]}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-green-600 hover:text-green-800"

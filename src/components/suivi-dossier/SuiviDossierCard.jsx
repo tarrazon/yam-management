@@ -22,7 +22,7 @@ const statusLabels = {
   vendu: "Vendu",
 };
 
-export default function SuiviDossierCard({ lot, onEdit, onView }) {
+export default function SuiviDossierCard({ lot, onEdit, onView, hideVendeur = false }) {
   const { totalManquants, hasDocumentsManquants, documentsManquantsAcquereur, documentsManquantsVendeur } = useDocumentsManquants(lot);
 
   const formatDate = (dateString) => {
@@ -233,7 +233,7 @@ export default function SuiviDossierCard({ lot, onEdit, onView }) {
                   </p>
                 </div>
               )}
-              {documentsManquantsVendeur.length > 0 && (
+              {!hideVendeur && documentsManquantsVendeur.length > 0 && (
                 <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
                   <p className="text-xs text-orange-700 font-bold flex items-center gap-2">
                     <AlertCircle className="w-4 h-4" />

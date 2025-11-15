@@ -23,7 +23,7 @@ const statusLabels = {
 
 const MINI_PIPELINE_STEPS = ['sous_option', 'reserve', 'compromis', 'vendu'];
 
-export default function SuiviDossierListItem({ lot, onEdit, onView }) {
+export default function SuiviDossierListItem({ lot, onEdit, onView, hideVendeur = false }) {
   const { totalManquants, hasDocumentsManquants, documentsManquantsAcquereur, documentsManquantsVendeur } = useDocumentsManquants(lot);
 
   const formatDate = (dateString) => {
@@ -156,7 +156,7 @@ export default function SuiviDossierListItem({ lot, onEdit, onView }) {
                     <span className="text-xs font-bold text-blue-700">{documentsManquantsAcquereur.length}</span>
                   </div>
                 )}
-                {documentsManquantsVendeur.length > 0 && (
+                {!hideVendeur && documentsManquantsVendeur.length > 0 && (
                   <div className="flex items-center gap-1 px-2 py-1 bg-orange-100 rounded-full" title={`Vendeur: ${documentsManquantsVendeur.length} document(s) manquant(s)`}>
                     <AlertCircle className="w-3 h-3 text-orange-600" />
                     <span className="text-xs font-bold text-orange-700">{documentsManquantsVendeur.length}</span>
