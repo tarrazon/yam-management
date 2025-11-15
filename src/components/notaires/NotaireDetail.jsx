@@ -152,16 +152,15 @@ export default function NotaireDetail({ notaire, onClose, onEdit, onDelete }) {
               </Card>
             )}
 
-            {notaire.nombre_dossiers > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Dossiers traités</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-4xl font-bold text-[#1E40AF]">{notaire.nombre_dossiers}</p>
-                </CardContent>
-              </Card>
-            )}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Dossiers traités</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-4xl font-bold text-[#1E40AF]">{notaire.nombre_dossiers || 0}</p>
+                <p className="text-sm text-slate-500 mt-2">Dossiers finalisés avec ce notaire</p>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Notes */}

@@ -26,7 +26,6 @@ export default function NotaireForm({ notaire, onSubmit, onCancel, isLoading }) 
     vendeurs_ids: [],
     acquereurs_ids: [],
     specialites: "",
-    nombre_dossiers: 0,
     notes: "",
   });
 
@@ -45,12 +44,11 @@ export default function NotaireForm({ notaire, onSubmit, onCancel, isLoading }) 
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Nettoyer les données : convertir les strings vides en null pour les champs numériques
+    // Nettoyer les données
     const cleanedData = {
       ...formData,
-      nombre_dossiers: formData.nombre_dossiers ? Number(formData.nombre_dossiers) : 0,
     };
-    
+
     onSubmit(cleanedData);
   };
 
@@ -217,16 +215,6 @@ export default function NotaireForm({ notaire, onSubmit, onCancel, isLoading }) 
                       id="specialites"
                       value={formData.specialites}
                       onChange={(e) => setFormData({ ...formData, specialites: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="nombre_dossiers">Nombre de dossiers traités</Label>
-                    <Input
-                      id="nombre_dossiers"
-                      type="number"
-                      value={formData.nombre_dossiers}
-                      onChange={(e) => setFormData({ ...formData, nombre_dossiers: e.target.value })}
                     />
                   </div>
 

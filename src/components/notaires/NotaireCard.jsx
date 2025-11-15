@@ -128,12 +128,10 @@ export default function NotaireCard({ notaire, onEdit, onView, onDelete }) {
             </div>
           )}
 
-          {notaire.nombre_dossiers > 0 && (
-            <div className="pt-3 border-t border-slate-100">
-              <p className="text-xs text-slate-500">Dossiers traités</p>
-              <p className="text-2xl font-bold text-[#1E40AF]">{notaire.nombre_dossiers}</p>
-            </div>
-          )}
+          <div className="pt-3 border-t border-slate-100">
+            <p className="text-xs text-slate-500">Dossiers traités</p>
+            <p className="text-2xl font-bold text-[#1E40AF]">{notaire.nombre_dossiers || 0}</p>
+          </div>
         </CardContent>
       </Card>
     </motion.div>
