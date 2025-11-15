@@ -38,11 +38,7 @@ export default function SuiviDossierPartenaire() {
 
   const { data: partenaireData } = useQuery({
     queryKey: ['partenaire_info', currentUser?.partenaire_id],
-    queryFn: async () => {
-      const data = await base44.entities.Partenaire.get(currentUser?.partenaire_id);
-      console.log('Données partenaire:', data);
-      return data;
-    },
+    queryFn: () => base44.entities.Partenaire.get(currentUser?.partenaire_id),
     enabled: !!currentUser?.partenaire_id,
   });
 
@@ -74,21 +70,12 @@ export default function SuiviDossierPartenaire() {
 
   const calculateCommission = (lot) => {
     const prixBase = lot.prix_ttc || lot.prix_ht || lot.prix_fai || 0;
-    const commission = (prixBase * commissionTaux) / 100;
-    console.log('Calcul commission:', {
-      reference: lot.reference,
-      prixBase,
-      commissionTaux,
-      commission
-    });
-    return commission;
+    return (prixBase * commissionTaux) / 100;
   };
 
   const commissionsAVenir = lotsPartenaire
     .filter(l => ['reserve', 'compromis'].includes(l.statut))
     .reduce((total, lot) => total + calculateCommission(lot), 0);
-
-  console.log('Commissions à venir:', commissionsAVenir, 'Taux:', commissionTaux);
 
   const stats = {
     sous_option: lotsPartenaire.filter(l => l.statut === 'sous_option').length,
@@ -157,7 +144,7 @@ export default function SuiviDossierPartenaire() {
               {!isNaN(commissionsAVenir) ? commissionsAVenir.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' }) : '0,00 €'}
             </p>
             <p className="text-xs text-green-600 mt-1">
-              Taux: {commissionTaux || 0}% • Partenaire ID: {currentUser?.partenaire_id || 'N/A'}
+              Taux de commission: {commissionTaux || 0}%
             </p>
           </div>
         </div>
