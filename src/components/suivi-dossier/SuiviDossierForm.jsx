@@ -99,14 +99,14 @@ export default function SuiviDossierForm({ lot, onSubmit, onCancel, isLoading })
                     <div className="space-y-2">
                       <Label htmlFor="phase_post_vente">Phase post-vente</Label>
                       <Select
-                        value={formData.phase_post_vente}
-                        onValueChange={(value) => setFormData({ ...formData, phase_post_vente: value })}
+                        value={formData.phase_post_vente || "none"}
+                        onValueChange={(value) => setFormData({ ...formData, phase_post_vente: value === "none" ? null : value })}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionner une phase" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Aucune</SelectItem>
+                          <SelectItem value="none">Aucune</SelectItem>
                           <SelectItem value="suivi_post_vente">Suivi post-vente</SelectItem>
                           <SelectItem value="archive">Archivé / Clôturé</SelectItem>
                         </SelectContent>

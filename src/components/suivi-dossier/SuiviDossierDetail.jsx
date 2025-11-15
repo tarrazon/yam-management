@@ -2,10 +2,12 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { X, Edit, Calendar, Users, FileText, Euro, CheckCircle, Building2 } from "lucide-react";
+import { X, Edit, Calendar, Users, FileText, Euro, CheckCircle, Building2, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { useQuery } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
 import SuiviPipeline from "./SuiviPipeline";
 
 const statusColors = {
@@ -33,6 +35,45 @@ export default function SuiviDossierDetail({ lot, onClose, onEdit }) {
       return '-';
     }
   };
+
+  // Charger les données de l'acquéreur et du vendeur
+  const { data: acquereur } = useQuery({
+    queryKey: ['acquereur', lot.acquereur_id],
+    queryFn: () => lot.acquereur_id ? base44.entities.Acquereur.get(lot.acquereur_id) : null,
+    enabled: !!lot.acquereur_id,
+  });
+
+  const { data: vendeur } = useQuery({
+    queryKey: ['vendeur', lot.vendeur_id],
+    queryFn: () => lot.vendeur_id ? base44.entities.Vendeur.get(lot.vendeur_id) : null,
+    enabled: !!lot.vendeur_id,
+  });
+
+  // Calculer les documents manquants
+  const getDocumentsManquants = (entity, type) => {
+    if (!entity) return [];
+    const manquants = [];
+
+    if (type === 'acquereur') {
+      if (!entity.justificatif_identite) manquants.push("Justificatif d'identité");
+      if (!entity.justificatif_domicile) manquants.push("Justificatif de domicile");
+      if (!entity.derniers_avis_imposition) manquants.push("Derniers avis d'imposition");
+      if (!entity.justificatifs_revenus) manquants.push("Justificatifs de revenus");
+      if (!entity.attestation_assurance) manquants.push("Attestation d'assurance");
+    } else if (type === 'vendeur') {
+      if (!entity.documents_entreprise && entity.type_vendeur === 'entreprise') {
+        manquants.push("Documents d'entreprise");
+      }
+      if (!entity.justificatif_identite && entity.type_vendeur === 'particulier') {
+        manquants.push("Justificatif d'identité");
+      }
+    }
+
+    return manquants;
+  };
+
+  const documentsManquantsAcquereur = acquereur ? getDocumentsManquants(acquereur, 'acquereur') : [];
+  const documentsManquantsVendeur = vendeur ? getDocumentsManquants(vendeur, 'vendeur') : [];
 
   return (
     <motion.div
@@ -248,6 +289,63 @@ export default function SuiviDossierDetail({ lot, onClose, onEdit }) {
                     <p className="text-sm text-slate-600 whitespace-pre-wrap">{lot.observations_suivi}</p>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Documents manquants */}
+          {(documentsManquantsAcquereur.length > 0 || documentsManquantsVendeur.length > 0) && (
+            <Card className="border-2 border-orange-200 bg-orange-50">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-orange-600" />
+                  Documents manquants
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {documentsManquantsAcquereur.length > 0 && (
+                  <div className="p-4 bg-white rounded-lg border-2 border-orange-200">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Users className="w-4 h-4 text-orange-600" />
+                      <p className="text-sm font-bold text-orange-800">
+                        Acquéreur : {lot.acquereur_nom}
+                      </p>
+                    </div>
+                    <ul className="space-y-2">
+                      {documentsManquantsAcquereur.map((doc, idx) => (
+                        <li key={idx} className="flex items-center gap-2 text-sm text-orange-700">
+                          <div className="w-2 h-2 rounded-full bg-orange-500" />
+                          {doc}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {documentsManquantsVendeur.length > 0 && (
+                  <div className="p-4 bg-white rounded-lg border-2 border-orange-200">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Building2 className="w-4 h-4 text-orange-600" />
+                      <p className="text-sm font-bold text-orange-800">
+                        Vendeur : {lot.vendeur_nom}
+                      </p>
+                    </div>
+                    <ul className="space-y-2">
+                      {documentsManquantsVendeur.map((doc, idx) => (
+                        <li key={idx} className="flex items-center gap-2 text-sm text-orange-700">
+                          <div className="w-2 h-2 rounded-full bg-orange-500" />
+                          {doc}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <div className="p-3 bg-orange-100 rounded-lg border border-orange-200">
+                  <p className="text-xs text-orange-800 font-medium">
+                    ⚠️ Ces documents sont nécessaires pour finaliser le dossier. Contactez les parties concernées pour obtenir les pièces manquantes.
+                  </p>
+                </div>
               </CardContent>
             </Card>
           )}

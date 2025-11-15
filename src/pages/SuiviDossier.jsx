@@ -24,7 +24,7 @@ export default function SuiviDossier() {
 
   const { data: lots = [], isLoading } = useQuery({
     queryKey: ['lots_lmnp'],
-    queryFn: () => base44.entities.LotLMNP.list('-updated_date'),
+    queryFn: () => base44.entities.LotLMNP.list('-updated_at'),
   });
 
   const updateMutation = useMutation({
