@@ -40,6 +40,8 @@ export default function SuiviDossierPartenaire() {
     queryKey: ['partenaire_info', currentUser?.partenaire_id],
     queryFn: () => base44.entities.Partenaire.get(currentUser?.partenaire_id),
     enabled: !!currentUser?.partenaire_id,
+    staleTime: 0,
+    cacheTime: 0,
   });
 
   const lotsPartenaire = lots.filter(lot => {
@@ -66,7 +68,14 @@ export default function SuiviDossierPartenaire() {
       return true;
     });
 
-  const commissionTaux = partenaireData?.commission_taux || 0;
+  const commissionTaux = Number(partenaireData?.commission_taux) || 0;
+
+  console.log('DEBUG Partenaire:', {
+    partenaireData,
+    commission_taux_raw: partenaireData?.commission_taux,
+    commission_taux_number: commissionTaux,
+    partenaire_id: currentUser?.partenaire_id
+  });
 
   const calculateCommission = (lot) => {
     const prixBase = lot.prix_ttc || lot.prix_ht || lot.prix_fai || 0;
