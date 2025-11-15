@@ -82,7 +82,7 @@ export default function SuiviDossierCard({ lot, onEdit, onView }) {
           {/* Mini pipeline de progression */}
           <div className="pb-4 border-b border-slate-100">
             <p className="text-xs text-slate-500 mb-3 font-semibold">Progression du dossier</p>
-            <div className="flex items-center justify-between">
+            <div className="flex items-start justify-between">
               {['sous_option', 'reserve', 'compromis', 'vendu'].map((status, idx) => {
                 const statusLabelsShort = {
                   sous_option: "Option",
@@ -98,9 +98,17 @@ export default function SuiviDossierCard({ lot, onEdit, onView }) {
                   vendu: 3,
                 };
 
+                const statusDates = {
+                  sous_option: lot.date_prise_option,
+                  reserve: lot.date_prise_option,
+                  compromis: lot.date_signature_compromis,
+                  vendu: lot.date_signature_acte
+                };
+
                 const currentPosition = statusPositions[lot.statut] || 0;
                 const isCompleted = idx < currentPosition;
                 const isCurrent = idx === currentPosition;
+                const dateForStatus = statusDates[status];
 
                 return (
                   <React.Fragment key={status}>
@@ -131,9 +139,14 @@ export default function SuiviDossierCard({ lot, onEdit, onView }) {
                       `}>
                         {statusLabelsShort[status]}
                       </p>
+                      {(isCompleted || isCurrent) && dateForStatus && (
+                        <p className="text-[9px] text-slate-500 mt-0.5 text-center">
+                          {formatDate(dateForStatus)}
+                        </p>
+                      )}
                     </div>
                     {idx < 3 && (
-                      <div className="flex items-center justify-center px-1">
+                      <div className="flex items-center justify-center px-1 pt-3">
                         <ChevronRight
                           className={`
                             w-5 h-5 transition-all
@@ -178,31 +191,6 @@ export default function SuiviDossierCard({ lot, onEdit, onView }) {
               )}
             </div>
           )}
-
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-xs text-slate-500">
-              <Calendar className="w-3 h-3" />
-              <span className="font-semibold">Dates clés</span>
-            </div>
-            {lot.date_prise_option && (
-              <div>
-                <p className="text-xs text-slate-500">Prise d'option</p>
-                <p className="font-semibold text-green-600">{formatDate(lot.date_prise_option)}</p>
-              </div>
-            )}
-            {lot.date_signature_compromis && (
-              <div>
-                <p className="text-xs text-slate-500">Compromis signé</p>
-                <p className="font-semibold text-orange-600">{formatDate(lot.date_signature_compromis)}</p>
-              </div>
-            )}
-            {lot.date_signature_acte && (
-              <div>
-                <p className="text-xs text-slate-500">Acte signé</p>
-                <p className="font-semibold text-purple-600">{formatDate(lot.date_signature_acte)}</p>
-              </div>
-            )}
-          </div>
 
           {hasDocumentsManquants && (
             <div className="pt-4 border-t border-slate-100">

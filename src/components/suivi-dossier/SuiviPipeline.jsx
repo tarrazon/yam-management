@@ -1,5 +1,7 @@
 import React from "react";
 import { CheckCircle, FileCheck, FileSignature, Home, Archive, TrendingUp, ChevronRight } from "lucide-react";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 const PIPELINE_STEPS = [
   {
@@ -67,11 +69,34 @@ export default function SuiviPipeline({ lot }) {
   const currentStatut = lot.statut;
   const phasePostVente = lot.phase_post_vente;
 
+  const formatDate = (dateString) => {
+    if (!dateString) return null;
+    try {
+      return format(new Date(dateString), 'dd MMM yyyy', { locale: fr });
+    } catch {
+      return null;
+    }
+  };
+
+  const getDateForStep = (stepId) => {
+    switch (stepId) {
+      case 'option':
+      case 'reservation':
+        return lot.date_prise_option;
+      case 'compromis':
+        return lot.date_signature_compromis;
+      case 'vente':
+        return lot.date_signature_acte;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="w-full py-8">
       <div className="relative">
         {/* Étapes avec flèches */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-start justify-between">
           {PIPELINE_STEPS.map((step, index) => {
             const status = getStepStatus(index, currentStatut, phasePostVente);
             const Icon = step.icon;
@@ -79,6 +104,9 @@ export default function SuiviPipeline({ lot }) {
             const isCompleted = status === "completed";
             const isCurrent = status === "current";
             const isPending = status === "pending";
+
+            const dateForStep = getDateForStep(step.id);
+            const formattedDate = formatDate(dateForStep);
 
             return (
               <React.Fragment key={step.id}>
@@ -126,12 +154,17 @@ export default function SuiviPipeline({ lot }) {
                     >
                       {step.label}
                     </p>
+                    {(isCompleted || isCurrent) && formattedDate && (
+                      <p className="text-[10px] text-slate-600 font-medium">
+                        {formattedDate}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 {/* Flèche entre les étapes */}
                 {index < PIPELINE_STEPS.length - 1 && (
-                  <div className="flex items-center justify-center px-2">
+                  <div className="flex items-center justify-center px-2 pt-6">
                     <ChevronRight
                       className={`
                         w-8 h-8 transition-all duration-500
