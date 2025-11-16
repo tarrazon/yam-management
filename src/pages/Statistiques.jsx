@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp, Euro, Users, Building2, Calendar, Download, Home, Target, Award, Percent, Eye, Clock } from "lucide-react";
 import { viewsTracking } from "@/api/viewsTracking";
-import { formatCurrency } from "@/utils/formHelpers";
+import { formatCurrency, calculateRetrocession } from "@/utils/formHelpers";
 
 const COLORS = ['#1E40AF', '#F59E0B', '#10B981', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316'];
 
@@ -91,10 +91,7 @@ export default function Statistiques() {
       if (lot.partenaire_id) {
         const partenaire = partenaires.find(p => p.id === lot.partenaire_id);
         const tauxRetrocession = Number(partenaire?.taux_retrocession) || 0;
-        const prixFai = Number(lot.prix_fai) || 0;
-        const honoraires = Number(lot.honoraires) || 0;
-        const prixNetVendeur = (prixFai - honoraires) / (1 + tauxRetrocession / 100);
-        return sum + (prixNetVendeur * tauxRetrocession / 100);
+        return sum + calculateRetrocession(lot, tauxRetrocession);
       }
       return sum;
     }, 0);
@@ -104,10 +101,7 @@ export default function Statistiques() {
       if (lot.partenaire_id) {
         const partenaire = partenaires.find(p => p.id === lot.partenaire_id);
         const tauxRetrocession = Number(partenaire?.taux_retrocession) || 0;
-        const prixFai = Number(lot.prix_fai) || 0;
-        const honoraires = Number(lot.honoraires) || 0;
-        const prixNetVendeur = (prixFai - honoraires) / (1 + tauxRetrocession / 100);
-        return sum + (prixNetVendeur * tauxRetrocession / 100);
+        return sum + calculateRetrocession(lot, tauxRetrocession);
       }
       return sum;
     }, 0);
@@ -183,10 +177,10 @@ export default function Statistiques() {
           };
         }
         data[nom].ca += lot.prix_fai || 0;
-        
-        // Calcul commission avec fallback
-        const commission = lot.commission_partenaire || 
-          (lot.honoraires && partenaire?.taux_retrocession ? (lot.honoraires * partenaire.taux_retrocession / 100) : 0);
+
+        // Calcul commission
+        const tauxRetrocession = Number(partenaire?.taux_retrocession) || 0;
+        const commission = calculateRetrocession(lot, tauxRetrocession);
         data[nom].commissions += commission;
         
         data[nom].ventes += 1;

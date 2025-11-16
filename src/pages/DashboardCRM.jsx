@@ -8,7 +8,7 @@ import ActivityTimeline from "../components/dashboard/ActivityTimeline";
 import PartnersPerformance from "../components/dashboard/PartnersPerformance";
 import SalesChartCRM from "../components/dashboard/SalesChartCRM";
 import TopResidences from "../components/dashboard/TopResidences";
-import { formatCurrency } from "@/utils/formHelpers";
+import { formatCurrency, calculateRetrocession } from "@/utils/formHelpers";
 
 export default function DashboardCRM() {
   const { data: lots = [] } = useQuery({
@@ -65,10 +65,7 @@ export default function DashboardCRM() {
     .reduce((sum, lot) => {
       const partenaire = partenaires.find(p => p.id === lot.partenaire_id);
       const tauxRetro = Number(partenaire?.taux_retrocession) || 0;
-      const prixFai = Number(lot.prix_fai) || 0;
-      const honoraires = Number(lot.honoraires) || 0;
-      const prixNetVendeur = (prixFai - honoraires) / (1 + tauxRetro / 100);
-      return sum + (prixNetVendeur * tauxRetro / 100);
+      return sum + calculateRetrocession(lot, tauxRetro);
     }, 0);
 
   const retrocessionAVenir = lots
@@ -76,10 +73,7 @@ export default function DashboardCRM() {
     .reduce((sum, lot) => {
       const partenaire = partenaires.find(p => p.id === lot.partenaire_id);
       const tauxRetro = Number(partenaire?.taux_retrocession) || 0;
-      const prixFai = Number(lot.prix_fai) || 0;
-      const honoraires = Number(lot.honoraires) || 0;
-      const prixNetVendeur = (prixFai - honoraires) / (1 + tauxRetro / 100);
-      return sum + (prixNetVendeur * tauxRetro / 100);
+      return sum + calculateRetrocession(lot, tauxRetro);
     }, 0);
 
   // Taux de conversion = lots vendus / total lots
