@@ -232,7 +232,8 @@ export default function LotsPartenaire() {
     const tauxRetrocession = partenaire?.taux_retrocession || 0;
     const dataToExport = filteredLots.map(lot => {
       const residence = residences.find(r => r.id === lot.residence_id);
-      const commission = lot.commission_partenaire || (lot.honoraires ? (lot.honoraires * tauxRetrocession / 100) : 0);
+      const prixNetVendeur = Number(lot.prix_net_vendeur) || 0;
+      const commission = prixNetVendeur > 0 ? (prixNetVendeur * tauxRetrocession / 100) : 0;
       return {
         "Référence": lot.reference || "",
         "Résidence": lot.residence_nom || "",
@@ -242,7 +243,7 @@ export default function LotsPartenaire() {
         "Surface (m²)": lot.surface || "",
         "Prix FAI (€)": lot.prix_fai || "",
         "Honoraires (€)": lot.honoraires || "",
-        "Ma Commission (€)": commission.toFixed(2),
+        "Ma Commission (€)": Math.round(commission),
         "Loyer mensuel (€)": lot.loyer_mensuel || "",
         "Rentabilité (%)": lot.rentabilite || "",
         "Statut": lot.statut || "",
@@ -284,7 +285,8 @@ export default function LotsPartenaire() {
   // Enrichir les lots avec la commission
   const lotsWithCommission = filteredLots.map(lot => {
     const tauxRetrocession = partenaire?.taux_retrocession || 0;
-    const commission = lot.commission_partenaire || (lot.honoraires ? (lot.honoraires * tauxRetrocession / 100) : 0);
+    const prixNetVendeur = Number(lot.prix_net_vendeur) || 0;
+    const commission = prixNetVendeur > 0 ? (prixNetVendeur * tauxRetrocession / 100) : 0;
     return { ...lot, commission_calculee: commission };
   });
 
@@ -531,6 +533,7 @@ export default function LotsPartenaire() {
               residence={getResidenceForLot(viewingLot.residence_id)}
               onClose={() => setViewingLot(null)}
               onEdit={null}
+              partenaire={partenaire}
             />
           )}
         </AnimatePresence>

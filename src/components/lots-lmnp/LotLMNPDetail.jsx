@@ -7,6 +7,7 @@ import { X, Edit, MapPin, Home, Euro, TrendingUp, Building2, FileText, Download,
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { formatCurrency, calculatePrixFAI } from "@/utils/formHelpers";
 
 const statusColors = {
   disponible: "bg-green-100 text-green-800 border-green-200",
@@ -42,9 +43,12 @@ const typeLabels = {
   affaires: "Résidence Affaires",
 };
 
-export default function LotLMNPDetail({ lot, residence, onClose, onEdit, onDelete }) {
+export default function LotLMNPDetail({ lot, residence, onClose, onEdit, onDelete, partenaire = null }) {
   const firstPhoto = lot.photos?.[0];
   const prixVente = (lot.prix_net_vendeur || 0) + (lot.honoraires || 0);
+
+  const tauxRetrocession = Number(partenaire?.taux_retrocession) || 0;
+  const prixFAI = calculatePrixFAI(lot, tauxRetrocession);
 
   return (
     <motion.div
@@ -225,7 +229,7 @@ export default function LotLMNPDetail({ lot, residence, onClose, onEdit, onDelet
                 {lot.loyer_mensuel != null && (
                   <div>
                     <p className="text-xs text-slate-500">Loyer mensuel</p>
-                    <p className="text-lg font-bold text-green-600">{lot.loyer_mensuel.toLocaleString('fr-FR')} €</p>
+                    <p className="text-lg font-bold text-green-600">{formatCurrency(lot.loyer_mensuel)} €</p>
                   </div>
                 )}
                 {lot.rentabilite != null && (
@@ -253,7 +257,7 @@ export default function LotLMNPDetail({ lot, residence, onClose, onEdit, onDelet
                     <div className="p-4 bg-slate-50 rounded-lg">
                       <p className="text-sm text-slate-500 mb-1">Prix net vendeur</p>
                       <p className="text-2xl font-bold text-[#1E40AF]">
-                        {lot.prix_net_vendeur.toLocaleString('fr-FR')} €
+                        {formatCurrency(lot.prix_net_vendeur)} €
                       </p>
                     </div>
                   )}
@@ -262,7 +266,7 @@ export default function LotLMNPDetail({ lot, residence, onClose, onEdit, onDelet
                     <div className="p-4 bg-slate-50 rounded-lg">
                       <p className="text-sm text-slate-500 mb-1">Honoraires</p>
                       <p className="text-2xl font-bold text-slate-700">
-                        {lot.honoraires.toLocaleString('fr-FR')} €
+                        {formatCurrency(lot.honoraires)} €
                       </p>
                       {lot.pourcentage_honoraires && (
                         <p className="text-xs text-slate-500 mt-1">
@@ -276,7 +280,7 @@ export default function LotLMNPDetail({ lot, residence, onClose, onEdit, onDelet
                 {lot.tva_honoraires != null && (
                   <div className="p-3 bg-blue-50 rounded-lg">
                     <p className="text-sm text-slate-600">
-                      TVA sur honoraires : <span className="font-semibold">{lot.tva_honoraires.toLocaleString('fr-FR')} €</span>
+                      TVA sur honoraires : <span className="font-semibold">{formatCurrency(lot.tva_honoraires)} €</span>
                     </p>
                   </div>
                 )}
@@ -284,7 +288,7 @@ export default function LotLMNPDetail({ lot, residence, onClose, onEdit, onDelet
                 <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border-2 border-green-200">
                   <p className="text-sm text-green-700 mb-1">Prix de vente total (net vendeur + honoraires)</p>
                   <p className="text-3xl font-bold text-green-700">
-                    {prixVente.toLocaleString('fr-FR')} €
+                    {formatCurrency(prixVente)} €
                   </p>
                 </div>
 
@@ -294,25 +298,25 @@ export default function LotLMNPDetail({ lot, residence, onClose, onEdit, onDelet
                     {lot.honoraires_acquereur_ht != null && (
                       <div className="p-3 bg-amber-50 rounded-lg">
                         <p className="text-sm text-slate-600">
-                          Honoraires acquéreur HT : <span className="font-semibold">{lot.honoraires_acquereur_ht.toLocaleString('fr-FR')} €</span>
+                          Honoraires acquéreur HT : <span className="font-semibold">{formatCurrency(lot.honoraires_acquereur_ht)} €</span>
                         </p>
                       </div>
                     )}
                     {lot.tva_honoraires_acquereur != null && (
                       <div className="p-3 bg-amber-50 rounded-lg">
                         <p className="text-sm text-slate-600">
-                          TVA honoraires acquéreur : <span className="font-semibold">{lot.tva_honoraires_acquereur.toLocaleString('fr-FR')} €</span>
+                          TVA honoraires acquéreur : <span className="font-semibold">{formatCurrency(lot.tva_honoraires_acquereur)} €</span>
                         </p>
                       </div>
                     )}
                   </div>
                 )}
 
-                {lot.prix_fai != null && (
+                {prixFAI > 0 && (
                   <div className="p-4 bg-indigo-50 rounded-lg">
                     <p className="text-sm text-indigo-700 mb-1">Prix FAI (Frais d'Agence Inclus)</p>
                     <p className="text-2xl font-bold text-indigo-700">
-                      {lot.prix_fai.toLocaleString('fr-FR')} €
+                      {formatCurrency(prixFAI)} €
                     </p>
                   </div>
                 )}
