@@ -211,7 +211,7 @@ export default function SuiviDossierCard({ lot, onEdit, onView, hideVendeur = fa
                   <p className="text-xs text-green-700 font-semibold">Commission à venir</p>
                 </div>
                 <p className="text-xl font-bold text-green-600">
-                  {commission.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+                  {formatCurrency(commission)} €
                 </p>
               </div>
             )}

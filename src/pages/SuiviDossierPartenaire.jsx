@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import SuiviDossierCard from "../components/suivi-dossier/SuiviDossierCard";
 import SuiviDossierListItem from "../components/suivi-dossier/SuiviDossierListItem";
 import AcquereurDetailPartenaire from "../components/acquereurs/AcquereurDetailPartenaire";
+import { calculateRetrocession, formatCurrency } from "@/utils/formHelpers";
 
 export default function SuiviDossierPartenaire() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -70,20 +71,13 @@ export default function SuiviDossierPartenaire() {
 
   const tauxRetrocession = Number(partenaireData?.taux_retrocession) || 0;
 
-  const calculateRetrocession = (lot) => {
-    const prixFai = Number(lot.prix_fai) || 0;
-    const honoraires = Number(lot.honoraires) || 0;
-    const prixNetVendeur = (prixFai - honoraires) / (1 + tauxRetrocession / 100);
-    return prixNetVendeur * (tauxRetrocession / 100);
-  };
-
   const retrocessionAVenir = lotsPartenaire
     .filter(l => ['reserve', 'compromis'].includes(l.statut))
-    .reduce((total, lot) => total + calculateRetrocession(lot), 0);
+    .reduce((total, lot) => total + calculateRetrocession(lot, tauxRetrocession), 0);
 
   const retrocessionActee = lotsPartenaire
     .filter(l => l.statut === 'vendu')
-    .reduce((total, lot) => total + calculateRetrocession(lot), 0);
+    .reduce((total, lot) => total + calculateRetrocession(lot, tauxRetrocession), 0);
 
   const stats = {
     sous_option: lotsPartenaire.filter(l => l.statut === 'sous_option').length,
@@ -159,14 +153,14 @@ export default function SuiviDossierPartenaire() {
             <div>
               <p className="text-xs text-green-700 mb-1">À venir</p>
               <p className="text-xl font-bold text-green-600">
-                {retrocessionAVenir.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+                {formatCurrency(retrocessionAVenir)} €
               </p>
               <p className="text-xs text-green-500 mt-1">Réservé + Compromis</p>
             </div>
             <div>
               <p className="text-xs text-green-700 mb-1">Actée</p>
               <p className="text-xl font-bold text-green-600">
-                {retrocessionActee.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}
+                {formatCurrency(retrocessionActee)} €
               </p>
               <p className="text-xs text-green-500 mt-1">Vendus</p>
             </div>
@@ -261,7 +255,8 @@ export default function SuiviDossierPartenaire() {
                   lot={lot}
                   onView={handleView}
                   hideVendeur={true}
-                  commission={calculateRetrocession(lot)}
+                  commission={calculateRetrocession(lot, tauxRetrocession)}
+                  partenaire={partenaireData}
                 />
               </motion.div>
             ))}
@@ -275,6 +270,7 @@ export default function SuiviDossierPartenaire() {
                   lot={lot}
                   onView={handleView}
                   hideVendeur={true}
+                  partenaire={partenaireData}
                 />
               ))}
             </div>
