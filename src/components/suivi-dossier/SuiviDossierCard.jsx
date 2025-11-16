@@ -69,15 +69,17 @@ export default function SuiviDossierCard({ lot, onEdit, onView, hideVendeur = fa
               >
                 <Eye className="w-4 h-4 text-slate-500" />
               </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onEdit(lot)}
-                className="hover:bg-slate-100"
-                title="Éditer le suivi"
-              >
-                <Edit className="w-4 h-4 text-slate-500" />
-              </Button>
+              {onEdit && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onEdit(lot)}
+                  className="hover:bg-slate-100"
+                  title="Éditer le suivi"
+                >
+                  <Edit className="w-4 h-4 text-slate-500" />
+                </Button>
+              )}
             </div>
           </div>
         </CardHeader>
@@ -195,6 +197,14 @@ export default function SuiviDossierCard({ lot, onEdit, onView, hideVendeur = fa
           </div>
 
           <div className="pb-4 border-b border-slate-100 space-y-3">
+            {lot.prix_net_vendeur > 0 && (
+              <div>
+                <p className="text-xs text-slate-500 mb-1">Prix net vendeur</p>
+                <p className="text-xl font-bold text-slate-700">
+                  {formatCurrency(lot.prix_net_vendeur)} €
+                </p>
+              </div>
+            )}
             {prixFAI > 0 && (
               <div>
                 <p className="text-xs text-slate-500 mb-1">Prix FAI</p>

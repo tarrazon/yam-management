@@ -68,6 +68,13 @@ export default function SuiviDossierListItem({ lot, onEdit, onView, hideVendeur 
           </div>
 
           <div>
+            <p className="text-xs text-slate-500">Prix net vendeur</p>
+            <p className="font-semibold text-slate-700 text-sm">
+              {lot.prix_net_vendeur > 0 ? `${formatCurrency(lot.prix_net_vendeur)} €` : '-'}
+            </p>
+          </div>
+
+          <div>
             <p className="text-xs text-slate-500">Prix FAI</p>
             <p className="font-bold text-[#1E40AF] text-sm">
               {prixFAI > 0 ? `${formatCurrency(prixFAI)} €` : '-'}
@@ -178,15 +185,17 @@ export default function SuiviDossierListItem({ lot, onEdit, onView, hideVendeur 
               >
                 <Eye className="w-4 h-4 text-slate-500" />
               </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onEdit(lot)}
-                className="hover:bg-slate-100 h-8 w-8"
-                title="Éditer"
-              >
-                <Edit className="w-4 h-4 text-slate-500" />
-              </Button>
+              {onEdit && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onEdit(lot)}
+                  className="hover:bg-slate-100 h-8 w-8"
+                  title="Éditer"
+                >
+                  <Edit className="w-4 h-4 text-slate-500" />
+                </Button>
+              )}
             </div>
           </div>
         </div>
