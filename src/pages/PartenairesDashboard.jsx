@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Home, Users, FileCheck, Clock, AlertCircle, Download, Euro, TrendingUp, Building2, Mail, Briefcase } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { formatCurrency } from "@/utils/formHelpers";
+import { formatCurrency, calculateRetrocession } from "@/utils/formHelpers";
 
 export default function PartenairesDashboard() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -87,19 +87,12 @@ export default function PartenairesDashboard() {
   const mesLotsVendus = mesLotsAvecAcquereur.filter(l => l.statut === 'vendu');
   const mesLotsAPayer = mesLotsAvecAcquereur.filter(l => ['reserve', 'compromis'].includes(l.statut));
 
-  const calculateRetrocession = (lot) => {
-    const prixFai = Number(lot.prix_fai) || 0;
-    const honoraires = Number(lot.honoraires) || 0;
-    const prixNetVendeur = (prixFai - honoraires) / (1 + tauxRetrocession / 100);
-    return prixNetVendeur * (tauxRetrocession / 100);
-  };
-
   const chiffreAffaires = mesLotsVendus.reduce((total, lot) => {
     return total + (Number(lot.prix_fai) || 0);
   }, 0);
 
-  const retrocessionActee = mesLotsVendus.reduce((total, lot) => total + calculateRetrocession(lot), 0);
-  const retrocessionAVenir = mesLotsAPayer.reduce((total, lot) => total + calculateRetrocession(lot), 0);
+  const retrocessionActee = mesLotsVendus.reduce((total, lot) => total + calculateRetrocession(lot, tauxRetrocession), 0);
+  const retrocessionAVenir = mesLotsAPayer.reduce((total, lot) => total + calculateRetrocession(lot, tauxRetrocession), 0);
 
   const getTimeRemaining = (dateFin) => {
     const now = new Date();
