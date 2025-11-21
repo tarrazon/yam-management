@@ -8,7 +8,9 @@ import {
   Mail,
   Zap,
   MessageSquare,
-  AlertCircle
+  AlertCircle,
+  FileText,
+  FileCheck
 } from 'lucide-react';
 import { workflowService } from '../../api/workflowService';
 import { Button } from '../ui/button';
@@ -17,12 +19,17 @@ import { Badge } from '../ui/badge';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { base44 } from '@/api/base44Client';
+import { getDocumentsByWorkflowStep } from '@/hooks/useDocumentsManquants';
 
 export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnly = false }) {
   const [progress, setProgress] = useState([]);
   const [steps, setSteps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState({});
+  const [lot, setLot] = useState(null);
+  const [acquereur, setAcquereur] = useState(null);
+  const [vendeur, setVendeur] = useState(null);
 
   useEffect(() => {
     loadWorkflow();
@@ -31,15 +38,28 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
   const loadWorkflow = async () => {
     try {
       setLoading(true);
-      const [progressData, stepsData] = await Promise.all([
+      const [progressData, stepsData, lotData] = await Promise.all([
         workflowService.getLotWorkflowProgress(lotId),
-        workflowService.getWorkflowSteps(workflowType)
+        workflowService.getWorkflowSteps(workflowType),
+        base44.entities.LotLMNP.findOne(lotId)
       ]);
 
       if (!stepsData || stepsData.length === 0) {
         console.warn('No workflow steps found in database');
         toast.error('Aucune étape de dossier trouvée');
         return;
+      }
+
+      setLot(lotData);
+
+      if (lotData?.acquereur_id) {
+        const acquereurData = await base44.entities.Acquereur.findOne(lotData.acquereur_id);
+        setAcquereur(acquereurData);
+      }
+
+      if (lotData?.vendeur_id) {
+        const vendeurData = await base44.entities.Vendeur.findOne(lotData.vendeur_id);
+        setVendeur(vendeurData);
       }
 
       const progressMap = {};
@@ -319,6 +339,42 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
                   </div>
                 </div>
               )}
+
+              {(() => {
+                const stepDocuments = getDocumentsByWorkflowStep(step.code, acquereur, vendeur);
+                const hasDocuments = stepDocuments.manquants.length > 0 || stepDocuments.presents.length > 0;
+
+                return hasDocuments && (
+                  <div className="mt-3 pt-3 border-t border-slate-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <FileText className="w-4 h-4 text-slate-600" />
+                      <span className="text-sm font-medium text-slate-700">Documents requis</span>
+                    </div>
+
+                    {stepDocuments.manquants.length > 0 && (
+                      <div className="space-y-1 mb-2">
+                        {stepDocuments.manquants.map((doc, idx) => (
+                          <div key={idx} className="flex items-center gap-2 text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
+                            <XCircle className="w-3 h-3 flex-shrink-0" />
+                            <span>{doc.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {stepDocuments.presents.length > 0 && (
+                      <div className="space-y-1">
+                        {stepDocuments.presents.map((doc, idx) => (
+                          <div key={idx} className="flex items-center gap-2 text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
+                            <FileCheck className="w-3 h-3 flex-shrink-0" />
+                            <span>{doc.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {!readOnly && !step.is_automatic && isPending && canComplete && (
                 <div className="mt-3 pt-3 border-t border-slate-200">
