@@ -18,7 +18,7 @@ import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
 import { Badge } from '../ui/badge';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { base44 } from '@/api/base44Client';
 import { getDocumentsByWorkflowStep } from '@/hooks/useDocumentsManquants';
@@ -278,6 +278,14 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
                       Complétez l'étape précédente pour débloquer
                     </p>
                   )}
+                  {isPending && canComplete && step.send_email && step.delay_days > 0 && !isBlocked && (
+                    <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded">
+                      <p className="text-xs text-blue-700 flex items-center gap-1">
+                        <Mail className="w-3 h-3" />
+                        Email automatique sera envoyé {step.delay_days} jours après complétion de l'étape
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {!readOnly && !step.is_automatic && isPending && canComplete && (
@@ -367,7 +375,14 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
                         <div className="flex items-center gap-2 text-xs text-blue-600">
                           <Mail className="w-3 h-3" />
                           <span>
-                            Email programmé le {format(new Date(progressItem.completed_at), 'dd MMMM yyyy à HH:mm', { locale: fr })}
+                            {step.delay_days > 0 ? (
+                              <>
+                                Email automatique prévu le {format(addDays(new Date(progressItem.completed_at), step.delay_days), 'dd MMMM yyyy', { locale: fr })}
+                                {step.delay_days > 0 && <span className="text-slate-500"> ({step.delay_days} jours)</span>}
+                              </>
+                            ) : (
+                              <>Email programmé le {format(new Date(progressItem.completed_at), 'dd MMMM yyyy à HH:mm', { locale: fr })}</>
+                            )}
                           </span>
                         </div>
                       )}
