@@ -7,7 +7,8 @@ import {
   User,
   Mail,
   Zap,
-  MessageSquare
+  MessageSquare,
+  AlertCircle
 } from 'lucide-react';
 import { workflowService } from '../../api/workflowService';
 import { Button } from '../ui/button';
@@ -35,10 +36,18 @@ export function WorkflowTimeline({ lotId, onUpdate }) {
         workflowService.getWorkflowSteps()
       ]);
 
+      if (!stepsData || stepsData.length === 0) {
+        console.warn('No workflow steps found in database');
+        toast.error('Aucune étape de workflow trouvée');
+        return;
+      }
+
       const progressMap = {};
-      progressData.forEach(p => {
-        progressMap[p.step_code] = p;
-      });
+      if (progressData && Array.isArray(progressData)) {
+        progressData.forEach(p => {
+          progressMap[p.step_code] = p;
+        });
+      }
 
       const combined = stepsData.map(step => ({
         ...step,
@@ -50,10 +59,10 @@ export function WorkflowTimeline({ lotId, onUpdate }) {
       }));
 
       setSteps(combined);
-      setProgress(progressData);
+      setProgress(progressData || []);
     } catch (error) {
       console.error('Error loading workflow:', error);
-      toast.error('Erreur lors du chargement du workflow');
+      toast.error(`Erreur: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -133,6 +142,18 @@ export function WorkflowTimeline({ lotId, onUpdate }) {
             </div>
           </div>
         ))}
+      </div>
+    );
+  }
+
+  if (!steps || steps.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <AlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-3" />
+        <p className="text-slate-600 font-medium">Aucune étape de workflow configurée</p>
+        <p className="text-sm text-slate-500 mt-1">
+          Les étapes seront créées automatiquement pour ce lot
+        </p>
       </div>
     );
   }

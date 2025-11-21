@@ -16,15 +16,7 @@ export const workflowService = {
       .from('lot_workflow_progress')
       .select(`
         *,
-        step:step_code (
-          code,
-          label,
-          order_index,
-          is_automatic,
-          send_email,
-          description
-        ),
-        completed_by_user:completed_by (
+        completed_by_user:profiles!completed_by (
           nom,
           prenom,
           email
@@ -34,7 +26,7 @@ export const workflowService = {
       .order('created_at');
 
     if (error) throw error;
-    return data;
+    return data || [];
   },
 
   async completeStep(lotId, stepCode, notes = null) {
