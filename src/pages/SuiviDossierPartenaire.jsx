@@ -18,7 +18,7 @@ export default function SuiviDossierPartenaire() {
   const [searchTerm, setSearchTerm] = useState("");
   const [dateDebut, setDateDebut] = useState("");
   const [dateFin, setDateFin] = useState("");
-  const [viewMode, setViewMode] = useState("grid");
+  const [viewMode, setViewMode] = useState("list");
   const [viewingLot, setViewingLot] = useState(null);
 
   useEffect(() => {

@@ -18,7 +18,7 @@ import { viewsTracking } from "@/api/viewsTracking";
 export default function LotsPartenaire() {
   const [currentUser, setCurrentUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState("grid");
+  const [viewMode, setViewMode] = useState("list");
   const [viewingLot, setViewingLot] = useState(null);
   const [lotForOption, setLotForOption] = useState(null);
   const [filters, setFilters] = useState({

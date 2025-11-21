@@ -19,7 +19,7 @@ import { viewsTracking } from "@/api/viewsTracking";
 export default function ResidencesPartenaire() {
   const [filter, setFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState("grid");
+  const [viewMode, setViewMode] = useState("list");
   const [viewingResidence, setViewingResidence] = useState(null);
 
   const { data: currentUser } = useQuery({
