@@ -31,7 +31,35 @@ export default function SuiviOptions() {
   });
 
   useEffect(() => {
+    const checkExpiredOptions = async () => {
+      if (!currentUser?.partenaire_id) return;
+
+      try {
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+        const response = await fetch(
+          `${supabaseUrl}/functions/v1/expire-options-cron`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${supabaseKey}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Options expirées vérifiées:', result);
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification des options expirées:', error);
+      }
+    };
+
     if (currentUser?.partenaire_id) {
+      checkExpiredOptions();
       refetchOptions();
       refetchLots();
     }
