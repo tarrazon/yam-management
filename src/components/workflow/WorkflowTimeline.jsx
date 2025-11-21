@@ -293,10 +293,21 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
                   )}
                   {step.progress?.email_sent_at && (
                     <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded">
-                      <p className="text-xs text-green-700 flex items-center gap-1">
+                      <p className="text-xs text-green-700 flex items-center gap-1 mb-1">
                         <Mail className="w-3 h-3" />
                         Dernier email envoyé le : {format(new Date(step.progress.email_sent_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}
                       </p>
+                      <div className="text-xs text-green-600 ml-4 space-y-0.5">
+                        {acquereur?.email && (
+                          <p>→ Acquéreur : {acquereur.email}</p>
+                        )}
+                        {vendeur?.email && (
+                          <p>→ Vendeur : {vendeur.email}</p>
+                        )}
+                        {!acquereur?.email && !vendeur?.email && (
+                          <p className="text-amber-600">⚠ Aucun email de destinataire disponible</p>
+                        )}
+                      </div>
                     </div>
                   )}
                   {step.send_email && (!step.email_subject || !step.email_body) && (
