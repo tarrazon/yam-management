@@ -330,5 +330,43 @@ export const workflowService = {
       console.error('Error resetting lot workflow:', error);
       throw error;
     }
+  },
+
+  async initializeWorkflowForLot(lotId, workflowType = 'acquereur') {
+    try {
+      const steps = await this.getWorkflowSteps(workflowType);
+
+      if (!steps || steps.length === 0) {
+        console.warn('No workflow steps found for type:', workflowType);
+        return;
+      }
+
+      const existingProgress = await this.getLotWorkflowProgress(lotId);
+      const existingStepCodes = existingProgress.map(p => p.step_code);
+
+      const newEntries = [];
+      for (const step of steps) {
+        if (!existingStepCodes.includes(step.code)) {
+          newEntries.push({
+            lot_id: lotId,
+            step_code: step.code,
+            status: 'pending'
+          });
+        }
+      }
+
+      if (newEntries.length > 0) {
+        const { error } = await supabase
+          .from('lot_workflow_progress')
+          .insert(newEntries);
+
+        if (error) throw error;
+      }
+
+      return { success: true, created: newEntries.length };
+    } catch (error) {
+      console.error('Error initializing workflow:', error);
+      throw error;
+    }
   }
 };

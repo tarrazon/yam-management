@@ -118,15 +118,20 @@ export default function LotsLMNP() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }) => {
-      // Si le statut passe à "disponible", annuler toutes les options actives et réinitialiser le workflow
+      // Si le statut passe à "disponible", annuler toutes les options actives
+      // Le workflow acquéreur sera réinitialisé automatiquement par le trigger SQL
       if (data.statut === 'disponible') {
         const optionsActives = allOptions.filter(o => o.lot_lmnp_id === id && o.statut === 'active');
         for (const option of optionsActives) {
           await base44.entities.OptionLot.update(option.id, { statut: 'annulee' });
         }
-        // Réinitialiser toutes les étapes du workflow
-        await workflowService.resetLotWorkflow(id);
       }
+
+      // Initialiser le workflow si le lot passe à réservé ou sous option
+      if (data.statut === 'reserve' || data.statut === 'sous_option') {
+        await workflowService.initializeWorkflowForLot(id, 'acquereur');
+      }
+
       return base44.entities.LotLMNP.update(id, data);
     },
     onSuccess: () => {
