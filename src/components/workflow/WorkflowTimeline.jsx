@@ -314,13 +314,27 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
                 )}
 
                 {!readOnly && !isPending && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleResetStep(step.code)}
-                  >
-                    Réinitialiser
-                  </Button>
+                  <div className="flex gap-2">
+                    {step.send_email && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleResendEmail(step.code)}
+                        disabled={sendingEmail[step.code]}
+                        className="border-purple-300 text-purple-700 hover:bg-purple-50"
+                      >
+                        <Send className="w-4 h-4 mr-1" />
+                        {sendingEmail[step.code] ? 'Envoi...' : 'Renvoyer'}
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleResetStep(step.code)}
+                    >
+                      Réinitialiser
+                    </Button>
+                  </div>
                 )}
               </div>
 
@@ -340,25 +354,22 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
                       </span>
                     </div>
                   )}
-                  {progressItem.email_sent && progressItem.email_sent_at && (
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-xs text-green-600">
-                        <Mail className="w-3 h-3" />
-                        <span>
-                          Email envoyé le {format(new Date(progressItem.email_sent_at), 'dd MMMM yyyy à HH:mm', { locale: fr })}
-                        </span>
-                      </div>
-                      {!readOnly && step.send_email && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-6 text-xs"
-                          onClick={() => handleResendEmail(step.code)}
-                          disabled={sendingEmail[step.code]}
-                        >
-                          <Send className="w-3 h-3 mr-1" />
-                          {sendingEmail[step.code] ? 'Envoi...' : 'Renvoyer'}
-                        </Button>
+                  {step.send_email && (
+                    <div className="space-y-1">
+                      {progressItem.email_sent && progressItem.email_sent_at ? (
+                        <div className="flex items-center gap-2 text-xs text-green-600">
+                          <Mail className="w-3 h-3" />
+                          <span>
+                            Email envoyé le {format(new Date(progressItem.email_sent_at), 'dd MMMM yyyy à HH:mm', { locale: fr })}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 text-xs text-blue-600">
+                          <Mail className="w-3 h-3" />
+                          <span>
+                            Email programmé le {format(new Date(progressItem.completed_at), 'dd MMMM yyyy à HH:mm', { locale: fr })}
+                          </span>
+                        </div>
                       )}
                     </div>
                   )}

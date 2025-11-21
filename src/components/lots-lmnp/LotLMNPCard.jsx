@@ -3,13 +3,14 @@ import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Home, Edit, MapPin, Maximize2, Euro, TrendingUp, Eye, Building2, Percent, Clock, Trash2 } from "lucide-react";
+import { Home, Edit, MapPin, Maximize2, Euro, TrendingUp, Eye, Building2, Percent, Clock, Trash2, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import StorageImage from "@/components/common/StorageImage";
 import { formatCurrency, calculatePrixFAI } from "@/utils/formHelpers";
 import { WorkflowStepBadge } from "../workflow/WorkflowStepBadge";
+import { useDocumentsManquants } from "@/hooks/useDocumentsManquants";
 
 const statusColors = {
   disponible: "bg-green-100 text-green-800 border-green-200",
@@ -59,6 +60,8 @@ export default function LotLMNPCard({ lot, onEdit, onView, onDelete, onPoserOpti
   const partenaire = partenaires.find(p => p.id === lot.partenaire_id);
   const tauxRetrocession = Number(partenaire?.taux_retrocession) || 0;
   const prixFAI = calculatePrixFAI(lot, tauxRetrocession);
+
+  const { totalManquants, hasDocumentsManquants } = useDocumentsManquants(lot);
 
   return (
     <motion.div
@@ -136,12 +139,18 @@ export default function LotLMNPCard({ lot, onEdit, onView, onDelete, onPoserOpti
         <CardHeader className="border-b border-slate-100 pb-3 pt-3">
           <div className="flex justify-between items-start">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
                 <h3 className="text-base font-bold text-[#1E40AF]">
                   Lot {lot.reference}
                 </h3>
                 {lot.statut !== 'disponible' && (
                   <WorkflowStepBadge lotId={lot.id} compact={true} />
+                )}
+                {lot.statut !== 'disponible' && hasDocumentsManquants && (
+                  <Badge variant="outline" className="bg-red-50 text-red-700 border-red-300 text-xs">
+                    <FileText className="w-3 h-3 mr-1" />
+                    {totalManquants} doc{totalManquants > 1 ? 's' : ''}
+                  </Badge>
                 )}
               </div>
               {!hidePartenaireAcquereur && lot.statut !== 'disponible' && (lot.partenaire_nom || lot.acquereur_nom) && (

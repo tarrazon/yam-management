@@ -2,7 +2,7 @@ import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Users, Eye, Edit, TrendingUp, AlertCircle, ChevronRight, CheckCircle, Euro } from "lucide-react";
+import { Calendar, Users, Eye, Edit, TrendingUp, AlertCircle, ChevronRight, CheckCircle, Euro, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -51,13 +51,19 @@ export default function SuiviDossierCard({ lot, onEdit, onView, hideVendeur = fa
         <CardHeader className="border-b border-slate-100 pb-4">
           <div className="flex justify-between items-start">
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex items-center gap-3 mb-2 flex-wrap">
                 <h3 className="text-lg font-bold text-[#1E40AF]">
                   Lot {lot.reference}
                 </h3>
                 <Badge className={`${statusColors[lot.statut]} border`}>
                   {statusLabels[lot.statut]}
                 </Badge>
+                {hasDocumentsManquants && (
+                  <Badge variant="outline" className="bg-red-50 text-red-700 border-red-300">
+                    <FileText className="w-3 h-3 mr-1" />
+                    {totalManquants} doc{totalManquants > 1 ? 's' : ''} manquant{totalManquants > 1 ? 's' : ''}
+                  </Badge>
+                )}
               </div>
               <p className="text-sm text-slate-500 mb-2">{lot.residence_nom}</p>
               <WorkflowStepBadge lotId={lot.id} />
