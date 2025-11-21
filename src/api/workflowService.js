@@ -257,9 +257,33 @@ export const workflowService = {
 
       await this.sendWorkflowEmail(lotId, stepCode, step);
 
+      await supabase
+        .from('lot_workflow_progress')
+        .update({
+          email_sent: true,
+          email_sent_at: new Date().toISOString()
+        })
+        .eq('lot_id', lotId)
+        .eq('step_code', stepCode);
+
       return { success: true };
     } catch (error) {
       console.error('Error resending workflow email:', error);
+      throw error;
+    }
+  },
+
+  async resetLotWorkflow(lotId) {
+    try {
+      const { error } = await supabase
+        .from('lot_workflow_progress')
+        .delete()
+        .eq('lot_id', lotId);
+
+      if (error) throw error;
+      return { success: true };
+    } catch (error) {
+      console.error('Error resetting lot workflow:', error);
       throw error;
     }
   }
