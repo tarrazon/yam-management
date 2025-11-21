@@ -137,6 +137,16 @@ export function WorkflowTimeline({ lotId, onUpdate }) {
     );
   }
 
+  const canCompleteStep = (stepIndex) => {
+    if (stepIndex === 0) return true;
+
+    const previousStep = steps[stepIndex - 1];
+    if (!previousStep) return true;
+
+    const previousProgress = previousStep.progress;
+    return previousProgress.status === 'completed' || previousProgress.status === 'skipped';
+  };
+
   return (
     <div className="space-y-1 relative">
       {steps.map((step, index) => {
@@ -145,6 +155,8 @@ export function WorkflowTimeline({ lotId, onUpdate }) {
         const isPending = progressItem.status === 'pending';
         const isCompleted = progressItem.status === 'completed';
         const isSkipped = progressItem.status === 'skipped';
+        const canComplete = canCompleteStep(index);
+        const isBlocked = !canComplete && isPending;
 
         return (
           <div key={step.id} className="relative flex gap-4 pb-8">
@@ -158,11 +170,15 @@ export function WorkflowTimeline({ lotId, onUpdate }) {
               {getStatusIcon(progressItem.status, step.is_automatic)}
             </div>
 
-            <div className={`flex-1 border rounded-lg p-4 transition-all ${getStatusColor(progressItem.status)}`}>
+            <div className={`flex-1 border rounded-lg p-4 transition-all ${
+              isBlocked ? 'border-slate-200 bg-slate-50 opacity-60' : getStatusColor(progressItem.status)
+            }`}>
               <div className="flex items-start justify-between gap-4 mb-2">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-semibold text-slate-900">{step.label}</h4>
+                    <h4 className={`font-semibold ${isBlocked ? 'text-slate-500' : 'text-slate-900'}`}>
+                      {step.label}
+                    </h4>
                     {step.is_automatic && (
                       <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                         <Zap className="w-3 h-3 mr-1" />
@@ -175,13 +191,26 @@ export function WorkflowTimeline({ lotId, onUpdate }) {
                         Email
                       </Badge>
                     )}
+                    {isBlocked && (
+                      <Badge variant="outline" className="bg-slate-100 text-slate-600 border-slate-300">
+                        Verrouillé
+                      </Badge>
+                    )}
                   </div>
                   {step.description && (
-                    <p className="text-sm text-slate-600">{step.description}</p>
+                    <p className={`text-sm ${isBlocked ? 'text-slate-500' : 'text-slate-600'}`}>
+                      {step.description}
+                    </p>
+                  )}
+                  {isBlocked && (
+                    <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      Complétez l'étape précédente pour débloquer
+                    </p>
                   )}
                 </div>
 
-                {!step.is_automatic && isPending && (
+                {!step.is_automatic && isPending && canComplete && (
                   <div className="flex gap-2">
                     <Button
                       size="sm"
@@ -257,7 +286,7 @@ export function WorkflowTimeline({ lotId, onUpdate }) {
                 </div>
               )}
 
-              {!step.is_automatic && isPending && (
+              {!step.is_automatic && isPending && canComplete && (
                 <div className="mt-3 pt-3 border-t border-slate-200">
                   <Textarea
                     placeholder="Notes (optionnel)..."
