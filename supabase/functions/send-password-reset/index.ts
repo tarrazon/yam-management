@@ -103,7 +103,7 @@ Deno.serve(async (req: Request) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "YAM Management <onboarding@resend.dev>",
+        from: "YAM Management <noreply@yam-management.fr>",
         to: [email],
         subject: "Réinitialisation de votre mot de passe - YAM Management",
         html: `

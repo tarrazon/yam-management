@@ -178,7 +178,7 @@ Yam Management - Gestion LMNP
           "Authorization": `Bearer ${resendApiKey}`,
         },
         body: JSON.stringify({
-          from: "Yam Management <onboarding@resend.dev>",
+          from: "YAM Management <noreply@yam-management.fr>",
           to: [item.email],
           subject: `Nouvelle option - ${payload.residence_nom} - Lot ${payload.lot_numero}`,
           html: emailHtml,

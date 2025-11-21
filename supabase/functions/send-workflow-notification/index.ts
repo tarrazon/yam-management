@@ -141,7 +141,7 @@ YAM Management - Gestion LMNP
           "Authorization": `Bearer ${resendApiKey}`,
         },
         body: JSON.stringify({
-          from: "YAM Management <onboarding@resend.dev>",
+          from: "YAM Management <noreply@yam-management.fr>",
           to: [recipient],
           subject: subject,
           html: emailHtml,
