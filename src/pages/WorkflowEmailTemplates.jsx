@@ -51,11 +51,178 @@ export default function WorkflowEmailTemplates() {
     }
   };
 
+  const getDefaultTemplate = (stepCode) => {
+    const templates = {
+      signature_mission: {
+        subject: 'Signature lettre de mission - Lot {{lot_reference}}',
+        body: `Bonjour,
+
+Nous vous confirmons la signature de la lettre de mission pour le lot {{lot_reference}} de la résidence {{residence_nom}}.
+
+Prochaines étapes :
+- Collecte des documents nécessaires
+- Lancement du processus de vente
+
+{{notes}}
+
+Cordialement,
+L'équipe YAM Immobilier`
+      },
+      relance_docs_vendeurs: {
+        subject: 'Relance documents vendeur - Lot {{lot_reference}}',
+        body: `Bonjour {{vendeur_nom}},
+
+Nous vous rappelons qu'il nous manque encore certains documents pour finaliser le dossier de vente du lot {{lot_reference}} ({{residence_nom}}).
+
+Documents manquants :
+{{documents_manquants}}
+
+Merci de nous les transmettre dans les meilleurs délais afin de ne pas retarder le processus.
+
+{{notes}}
+
+Cordialement,
+L'équipe YAM Immobilier`
+      },
+      option: {
+        subject: 'Option posée sur le lot {{lot_reference}}',
+        body: `Bonjour,
+
+Une option a été posée sur le lot {{lot_reference}} de la résidence {{residence_nom}}.
+
+Acquéreur : {{acquereur_nom}}
+Date d'option : {{date}}
+
+{{notes}}
+
+Cordialement,
+L'équipe YAM Immobilier`
+      },
+      reservation: {
+        subject: 'Réservation confirmée - Lot {{lot_reference}}',
+        body: `Bonjour {{acquereur_nom}},
+
+Nous avons le plaisir de vous confirmer la réservation du lot {{lot_reference}} de la résidence {{residence_nom}}.
+
+Prochaines étapes :
+- Réception des documents requis
+- Préparation du compromis de vente
+- Signature du compromis
+
+Documents à nous fournir :
+{{documents_manquants}}
+
+{{notes}}
+
+Nous vous contacterons prochainement pour la suite des démarches.
+
+Cordialement,
+L'équipe YAM Immobilier`
+      },
+      relance_syndic: {
+        subject: 'Relance syndic - Lot {{lot_reference}}',
+        body: `Bonjour,
+
+Nous vous relançons concernant les documents nécessaires du syndic pour le lot {{lot_reference}} ({{residence_nom}}).
+
+Documents en attente :
+- Procès-verbaux d'assemblée générale
+- État des charges
+- Carnet d'entretien
+
+{{notes}}
+
+Merci de nous transmettre ces éléments dans les plus brefs délais.
+
+Cordialement,
+L'équipe YAM Immobilier`
+      },
+      relance_service_proprio: {
+        subject: 'Relance service propriétaire - Lot {{lot_reference}}',
+        body: `Bonjour,
+
+Nous vous relançons concernant les informations nécessaires du service propriétaire pour le lot {{lot_reference}} ({{residence_nom}}).
+
+{{notes}}
+
+Merci de nous transmettre ces éléments rapidement.
+
+Cordialement,
+L'équipe YAM Immobilier`
+      },
+      relance_cgp: {
+        subject: 'Relance CGP - Lot {{lot_reference}}',
+        body: `Bonjour,
+
+Nous vous relançons concernant le dossier de financement pour le lot {{lot_reference}} ({{residence_nom}}).
+
+Acquéreur : {{acquereur_nom}}
+
+{{notes}}
+
+Merci de nous tenir informés de l'avancement.
+
+Cordialement,
+L'équipe YAM Immobilier`
+      },
+      compromis_signe: {
+        subject: 'Compromis de vente signé - Lot {{lot_reference}}',
+        body: `Bonjour,
+
+Nous avons le plaisir de vous informer que le compromis de vente pour le lot {{lot_reference}} ({{residence_nom}}) a été signé.
+
+Acquéreur : {{acquereur_nom}}
+Date de signature : {{date}}
+
+Prochaines étapes :
+- Délai de rétractation (10 jours)
+- Obtention du financement
+- Préparation de l'acte authentique
+
+{{notes}}
+
+Cordialement,
+L'équipe YAM Immobilier`
+      },
+      acte_authentique: {
+        subject: 'Acte authentique signé - Lot {{lot_reference}}',
+        body: `Bonjour,
+
+Nous avons le plaisir de vous informer que l'acte authentique pour le lot {{lot_reference}} ({{residence_nom}}) a été signé.
+
+Acquéreur : {{acquereur_nom}}
+Date de signature : {{date}}
+
+Félicitations pour cette acquisition !
+
+{{notes}}
+
+Nous vous remercions pour votre confiance.
+
+Cordialement,
+L'équipe YAM Immobilier`
+      }
+    };
+
+    return templates[stepCode] || {
+      subject: 'Étape {{step_label}} complétée - Lot {{lot_reference}}',
+      body: `Bonjour,
+
+L'étape {{step_label}} a été complétée pour le lot {{lot_reference}} de la résidence {{residence_nom}}.
+
+{{notes}}
+
+Cordialement,
+L'équipe YAM Immobilier`
+    };
+  };
+
   const handleEdit = (step) => {
     setEditingStep(step);
+    const defaultTemplate = getDefaultTemplate(step.code);
     setFormData({
-      email_subject: step.email_subject || '',
-      email_body: step.email_body || '',
+      email_subject: step.email_subject || defaultTemplate.subject,
+      email_body: step.email_body || defaultTemplate.body,
       send_email: step.send_email || false,
     });
   };
@@ -195,7 +362,7 @@ export default function WorkflowEmailTemplates() {
       </div>
 
       <Dialog open={!!editingStep} onOpenChange={() => setEditingStep(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white">
           <DialogHeader>
             <DialogTitle className="text-xl">
               Configurer l'email - {editingStep?.label}
@@ -229,6 +396,7 @@ export default function WorkflowEmailTemplates() {
                     onChange={(e) => setFormData({ ...formData, email_subject: e.target.value })}
                     placeholder="Ex: Étape {{step_label}} complétée pour le lot {{lot_reference}}"
                     required={formData.send_email}
+                    className="bg-white"
                   />
                 </div>
 
