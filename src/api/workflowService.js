@@ -304,26 +304,43 @@ export const workflowService = {
       const body = replaceVariables(step.email_body);
 
       const recipients = [];
+      const emailRecipients = step.email_recipients || ['acquereur', 'vendeur'];
 
-      console.log('Lot data for email:', {
-        acquereur: lot.acquereur,
-        vendeur: lot.vendeur,
+      console.log('[workflowService] Email recipients config:', {
+        step_code: stepCode,
+        email_recipients: emailRecipients,
         acquereur_email: acquereurEmail,
         vendeur_email: vendeurEmail
       });
 
-      if (acquereurEmail) {
-        console.log('Adding acquereur email:', acquereurEmail);
+      if (emailRecipients.includes('acquereur') && acquereurEmail) {
+        console.log('[workflowService] Adding acquereur email:', acquereurEmail);
         recipients.push(acquereurEmail);
-      } else {
-        console.warn('No acquereur email found');
+      } else if (emailRecipients.includes('acquereur')) {
+        console.warn('[workflowService] Acquereur should receive email but no email found');
       }
 
-      if (vendeurEmail) {
-        console.log('Adding vendeur email:', vendeurEmail);
+      if (emailRecipients.includes('vendeur') && vendeurEmail) {
+        console.log('[workflowService] Adding vendeur email:', vendeurEmail);
         recipients.push(vendeurEmail);
-      } else {
-        console.warn('No vendeur email found');
+      } else if (emailRecipients.includes('vendeur')) {
+        console.warn('[workflowService] Vendeur should receive email but no email found');
+      }
+
+      if (emailRecipients.includes('bo')) {
+        const { data: notificationEmails } = await supabase
+          .from('notification_emails')
+          .select('email')
+          .eq('active', true);
+
+        if (notificationEmails && notificationEmails.length > 0) {
+          notificationEmails.forEach(item => {
+            console.log('[workflowService] Adding BO email:', item.email);
+            recipients.push(item.email);
+          });
+        } else {
+          console.warn('[workflowService] BO should receive email but no notification emails configured');
+        }
       }
 
       console.log('Final recipients:', recipients);
@@ -415,7 +432,8 @@ export const workflowService = {
         stepCode,
         lotId,
         has_subject: !!step.email_subject,
-        has_body: !!step.email_body
+        has_body: !!step.email_body,
+        email_recipients: step.email_recipients
       });
 
       await this.sendWorkflowEmail(lotId, stepCode, step);
