@@ -517,7 +517,7 @@ export default function LotsPartenaire() {
                     commission={lot.commission_calculee}
                     hidePartenaireAcquereur={true}
                     partenaires={partenaire ? [partenaire] : []}
-                    showExtendedView={true}
+                    showExtendedView={false}
                   />
                 );
               })}
