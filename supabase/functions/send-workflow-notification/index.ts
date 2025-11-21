@@ -132,8 +132,9 @@ ${body}
 YAM Immobilier - Gestion LMNP
     `;
 
-    const emailPromises = recipients.map((recipient) =>
-      fetch("https://api.resend.com/emails", {
+    const emailPromises = recipients.map(async (recipient) => {
+      console.log(`[send-workflow-notification] Sending to ${recipient}...`);
+      const resendResponse = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -146,8 +147,22 @@ YAM Immobilier - Gestion LMNP
           html: emailHtml,
           text: emailText,
         }),
-      })
-    );
+      });
+
+      const resendResult = await resendResponse.json();
+      console.log(`[send-workflow-notification] Resend API response for ${recipient}:`, {
+        status: resendResponse.status,
+        statusText: resendResponse.statusText,
+        result: resendResult
+      });
+
+      if (!resendResponse.ok) {
+        console.error(`[send-workflow-notification] Resend API error for ${recipient}:`, resendResult);
+        throw new Error(`Failed to send to ${recipient}: ${JSON.stringify(resendResult)}`);
+      }
+
+      return { recipient, result: resendResult };
+    });
 
     const results = await Promise.allSettled(emailPromises);
 

@@ -361,7 +361,8 @@ export const workflowService = {
         residence_nom: lot.residence?.nom
       };
 
-      console.log('Calling edge function with data:', JSON.stringify(emailData, null, 2));
+      console.log('[workflowService] Calling edge function with data:', JSON.stringify(emailData, null, 2));
+      console.log('[workflowService] Edge function URL:', `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-workflow-notification`);
 
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-workflow-notification`,
@@ -375,11 +376,21 @@ export const workflowService = {
         }
       );
 
-      console.log('Edge function response status:', response.status);
+      console.log('[workflowService] Edge function response status:', response.status, response.statusText);
+
+      const responseText = await response.text();
+      console.log('[workflowService] Edge function raw response:', responseText);
+
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (e) {
+        console.error('[workflowService] Failed to parse response as JSON:', e);
+        throw new Error(`Invalid response from server: ${responseText.substring(0, 100)}`);
+      }
 
       if (response.ok) {
-        const result = await response.json();
-        console.log('Email sent successfully:', result);
+        console.log('[workflowService] Email sent successfully:', result);
 
         await supabase
           .from('lot_workflow_progress')
@@ -392,10 +403,9 @@ export const workflowService = {
 
         toast.success(`Email envoyé avec succès à ${result.recipients?.join(', ')}`);
       } else {
-        const error = await response.json();
-        console.error('Error from email function:', error);
-        toast.error(`Erreur d'envoi: ${error.error || 'Échec de l\'envoi'}`);
-        throw new Error(error.error || 'Failed to send email');
+        console.error('[workflowService] Error from email function:', result);
+        toast.error(`Erreur d'envoi: ${result.error || 'Échec de l\'envoi'}`);
+        throw new Error(result.error || 'Failed to send email');
       }
     } catch (error) {
       console.error('Error sending workflow email:', error);
