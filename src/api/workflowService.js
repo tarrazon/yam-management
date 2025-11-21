@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { toast } from 'sonner';
 
 export const workflowService = {
   async getWorkflowSteps(workflowType = null) {
@@ -176,12 +177,24 @@ export const workflowService = {
 
   async sendWorkflowEmail(lotId, stepCode, step) {
     try {
+      console.log('Sending workflow email:', {
+        lotId,
+        stepCode,
+        step_send_email: step.send_email,
+        has_subject: !!step.email_subject,
+        has_body: !!step.email_body
+      });
+
       if (!step.email_subject || !step.email_body) {
-        console.warn('Step has no email template configured');
+        console.warn('Step has no email template configured:', {
+          has_subject: !!step.email_subject,
+          has_body: !!step.email_body
+        });
+        toast.error('Cette étape n\'a pas de template d\'email configuré');
         return;
       }
 
-      const { data: lot } = await supabase
+      const { data: lot, error: lotError } = await supabase
         .from('lots_lmnp')
         .select(`
           *,
@@ -205,9 +218,17 @@ export const workflowService = {
           )
         `)
         .eq('id', lotId)
-        .single();
+        .maybeSingle();
 
-      if (!lot) return;
+      if (lotError) {
+        console.error('Error fetching lot:', lotError);
+        throw lotError;
+      }
+
+      if (!lot) {
+        console.warn('Lot not found:', lotId);
+        return;
+      }
 
       const { getDocumentsByWorkflowStep } = await import('../hooks/useDocumentsManquants');
       const stepDocuments = getDocumentsByWorkflowStep(stepCode, lot.acquereur, lot.vendeur);
@@ -233,15 +254,33 @@ export const workflowService = {
       const body = replaceVariables(step.email_body);
 
       const recipients = [];
+
+      console.log('Lot data for email:', {
+        acquereur: lot.acquereur,
+        vendeur: lot.vendeur,
+        acquereur_email: lot.acquereur?.email,
+        vendeur_email: lot.vendeur?.email
+      });
+
       if (lot.acquereur?.email) {
+        console.log('Adding acquereur email:', lot.acquereur.email);
         recipients.push(lot.acquereur.email);
-      }
-      if (lot.vendeur?.email) {
-        recipients.push(lot.vendeur.email);
+      } else {
+        console.warn('No acquereur email found');
       }
 
+      if (lot.vendeur?.email) {
+        console.log('Adding vendeur email:', lot.vendeur.email);
+        recipients.push(lot.vendeur.email);
+      } else {
+        console.warn('No vendeur email found');
+      }
+
+      console.log('Final recipients:', recipients);
+
       if (recipients.length === 0) {
-        console.warn('No recipients found for email');
+        console.error('No recipients found for email - cannot send notification');
+        toast.error('Aucun destinataire trouvé (acquéreur ou vendeur sans email)');
         return;
       }
 
