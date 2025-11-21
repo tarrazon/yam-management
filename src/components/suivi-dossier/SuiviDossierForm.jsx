@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X, Save } from "lucide-react";
 import { motion } from "framer-motion";
+import { WorkflowTimeline } from "../workflow/WorkflowTimeline";
 
 export default function SuiviDossierForm({ lot, onSubmit, onCancel, isLoading }) {
   const [formData, setFormData] = useState({
@@ -222,6 +223,13 @@ export default function SuiviDossierForm({ lot, onSubmit, onCancel, isLoading })
                   onChange={(e) => setFormData({ ...formData, date_signature_acte: e.target.value })}
                 />
               </div>
+                </div>
+              </div>
+
+              <div className="border-t pt-6">
+                <h3 className="text-sm font-semibold text-slate-700 mb-4">Étapes du workflow</h3>
+                <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                  <WorkflowTimeline lotId={lot.id} onUpdate={() => {}} />
                 </div>
               </div>
 

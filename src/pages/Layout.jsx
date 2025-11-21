@@ -108,6 +108,12 @@ const getNavigationItems = (userRole) => {
       roles: ['admin'],
     },
     {
+      title: "Templates d'emails",
+      url: createPageUrl("WorkflowEmailTemplates"),
+      icon: FileCode,
+      roles: ['admin'],
+    },
+    {
       title: "API Documentation",
       url: createPageUrl("APIDocumentation"),
       icon: Code,

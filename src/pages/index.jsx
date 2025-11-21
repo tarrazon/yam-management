@@ -58,6 +58,8 @@ import OnboardingPartenaire from "./OnboardingPartenaire";
 
 import NotificationEmails from "./NotificationEmails";
 
+import WorkflowEmailTemplates from "./WorkflowEmailTemplates";
+
 import APIDocumentation from "./APIDocumentation";
 
 import ForgotPassword from "./ForgotPassword";
@@ -146,6 +148,8 @@ const PAGES = {
     SuiviDossierPartenaire: SuiviDossierPartenaire,
 
     NotificationEmails: NotificationEmails,
+
+    WorkflowEmailTemplates: WorkflowEmailTemplates,
 
     APIDocumentation: APIDocumentation,
 
@@ -257,6 +261,8 @@ function PagesContent() {
             <Route path="/OnboardingPartenaire" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['partenaire']}><OnboardingPartenaire /></ProtectedRoute></Layout>} />
 
             <Route path="/NotificationEmails" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['admin']}><NotificationEmails /></ProtectedRoute></Layout>} />
+
+            <Route path="/WorkflowEmailTemplates" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['admin']}><WorkflowEmailTemplates /></ProtectedRoute></Layout>} />
 
             <Route path="/APIDocumentation" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['admin']}><APIDocumentation /></ProtectedRoute></Layout>} />
 
