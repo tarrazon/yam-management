@@ -66,7 +66,7 @@ Deno.serve(async (req: Request) => {
               margin: 0 auto;
             }
             .header {
-              background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+              background: linear-gradient(135deg, #1E40AF 0%, #1E3A8A 100%);
               color: white;
               padding: 30px;
               text-align: center;
@@ -104,7 +104,7 @@ Deno.serve(async (req: Request) => {
         </head>
         <body>
           <div class="header">
-            <h1 style="margin: 0;">🏢 YAM Immobilier</h1>
+            <h1 style="margin: 0;">🏢 YAM Management</h1>
             <p style="margin: 10px 0 0 0; opacity: 0.9;">${residence_nom}</p>
           </div>
           <div class="content">
@@ -116,7 +116,7 @@ Deno.serve(async (req: Request) => {
             </div>
           </div>
           <div class="footer">
-            <p style="margin: 0;">YAM Immobilier - Gestion LMNP</p>
+            <p style="margin: 0;">YAM Management - Gestion LMNP</p>
             <p style="margin: 5px 0 0 0;">Cette notification a été générée automatiquement</p>
           </div>
         </body>
@@ -129,7 +129,7 @@ Lot ${lot_reference}
 
 ${body}
 
-YAM Immobilier - Gestion LMNP
+YAM Management - Gestion LMNP
     `;
 
     const emailPromises = recipients.map(async (recipient) => {
@@ -141,7 +141,7 @@ YAM Immobilier - Gestion LMNP
           "Authorization": `Bearer ${resendApiKey}`,
         },
         body: JSON.stringify({
-          from: "YAM Immobilier <onboarding@resend.dev>",
+          from: "YAM Management <onboarding@resend.dev>",
           to: [recipient],
           subject: subject,
           html: emailHtml,

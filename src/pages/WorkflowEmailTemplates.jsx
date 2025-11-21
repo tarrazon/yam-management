@@ -66,7 +66,7 @@ Prochaines étapes :
 {{notes}}
 
 Cordialement,
-L'équipe YAM Immobilier`
+L'équipe YAM Management`
       },
       relance_docs_vendeurs: {
         subject: 'Relance documents vendeur - Lot {{lot_reference}}',
@@ -82,7 +82,7 @@ Merci de nous les transmettre dans les meilleurs délais afin de ne pas retarder
 {{notes}}
 
 Cordialement,
-L'équipe YAM Immobilier`
+L'équipe YAM Management`
       },
       option: {
         subject: 'Option posée sur le lot {{lot_reference}}',
@@ -96,7 +96,7 @@ Date d'option : {{date}}
 {{notes}}
 
 Cordialement,
-L'équipe YAM Immobilier`
+L'équipe YAM Management`
       },
       reservation: {
         subject: 'Réservation confirmée - Lot {{lot_reference}}',
@@ -117,7 +117,7 @@ Documents à nous fournir :
 Nous vous contacterons prochainement pour la suite des démarches.
 
 Cordialement,
-L'équipe YAM Immobilier`
+L'équipe YAM Management`
       },
       relance_syndic: {
         subject: 'Relance syndic - Lot {{lot_reference}}',
@@ -135,7 +135,7 @@ Documents en attente :
 Merci de nous transmettre ces éléments dans les plus brefs délais.
 
 Cordialement,
-L'équipe YAM Immobilier`
+L'équipe YAM Management`
       },
       relance_service_proprio: {
         subject: 'Relance service propriétaire - Lot {{lot_reference}}',
@@ -148,7 +148,7 @@ Nous vous relançons concernant les informations nécessaires du service propri�
 Merci de nous transmettre ces éléments rapidement.
 
 Cordialement,
-L'équipe YAM Immobilier`
+L'équipe YAM Management`
       },
       relance_cgp: {
         subject: 'Relance CGP - Lot {{lot_reference}}',
@@ -163,7 +163,7 @@ Acquéreur : {{acquereur_nom}}
 Merci de nous tenir informés de l'avancement.
 
 Cordialement,
-L'équipe YAM Immobilier`
+L'équipe YAM Management`
       },
       compromis_signe: {
         subject: 'Compromis de vente signé - Lot {{lot_reference}}',
@@ -182,7 +182,7 @@ Prochaines étapes :
 {{notes}}
 
 Cordialement,
-L'équipe YAM Immobilier`
+L'équipe YAM Management`
       },
       acte_authentique: {
         subject: 'Acte authentique signé - Lot {{lot_reference}}',
@@ -200,7 +200,7 @@ Félicitations pour cette acquisition !
 Nous vous remercions pour votre confiance.
 
 Cordialement,
-L'équipe YAM Immobilier`
+L'équipe YAM Management`
       }
     };
 
@@ -213,7 +213,7 @@ L'étape {{step_label}} a été complétée pour le lot {{lot_reference}} de la 
 {{notes}}
 
 Cordialement,
-L'équipe YAM Immobilier`
+L'équipe YAM Management`
     };
   };
 
