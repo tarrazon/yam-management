@@ -283,9 +283,9 @@ export default function LotLMNPListItem({ lot, onEdit, onView, onDelete, onPoser
           )}
         </div>
 
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-            <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 overflow-x-auto">
+          <div className="flex items-start gap-3 min-w-max">
+            <div className="flex-shrink-0 w-48">
               <h3 className="font-bold text-[#1E40AF] text-base mb-1">Lot {lot.reference}</h3>
               <p className="text-sm text-slate-600 truncate mb-2">{lot.residence_nom || 'Résidence'}</p>
               <Badge className={`${statusColors[lot.statut]} text-xs`}>
@@ -307,28 +307,105 @@ export default function LotLMNPListItem({ lot, onEdit, onView, onDelete, onPoser
               )}
             </div>
 
-            <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 sm:gap-6">
-              <div className="text-center">
+            <div className="flex items-center gap-4 flex-shrink-0">
+              <div className="text-center w-28">
+                <p className="text-xs text-slate-500 mb-1">Type résidence</p>
+                <p className="font-semibold text-slate-700 text-sm whitespace-nowrap">
+                  {lot.type_residence || '-'}
+                </p>
+              </div>
+
+              <div className="text-center w-24">
+                <p className="text-xs text-slate-500 mb-1">Ville</p>
+                <p className="font-semibold text-slate-700 text-sm truncate w-24">
+                  {lot.ville || residence?.ville || '-'}
+                </p>
+              </div>
+
+              <div className="text-center w-24">
+                <p className="text-xs text-slate-500 mb-1">Région</p>
+                <p className="font-semibold text-slate-700 text-sm truncate w-24">
+                  {lot.region || residence?.region || '-'}
+                </p>
+              </div>
+
+              <div className="text-center w-24">
                 <p className="text-xs text-slate-500 mb-1">Type / Surface</p>
                 <p className="font-semibold text-slate-700 text-sm whitespace-nowrap">
                   {lot.typologie || '-'} • {lot.surface ? `${lot.surface}m²` : '-'}
                 </p>
               </div>
 
-              <div className="text-center">
+              <div className="text-center w-24">
+                <p className="text-xs text-slate-500 mb-1">Surface ext.</p>
+                <p className="font-semibold text-slate-700 text-sm whitespace-nowrap">
+                  {lot.surface_exterieure ? `${lot.surface_exterieure}m²` : '-'}
+                </p>
+              </div>
+
+              <div className="text-center w-20">
+                <p className="text-xs text-slate-500 mb-1">Parking</p>
+                <p className="font-semibold text-slate-700 text-sm">
+                  {lot.parking ? 'Oui' : 'Non'}
+                </p>
+              </div>
+
+              <div className="text-center w-28">
+                <p className="text-xs text-slate-500 mb-1">Prix mobilier</p>
+                <p className="font-semibold text-slate-700 text-sm whitespace-nowrap">
+                  {lot.prix_mobilier ? `${formatCurrency(lot.prix_mobilier)} €` : '-'}
+                </p>
+              </div>
+
+              <div className="text-center w-32">
+                <p className="text-xs text-slate-500 mb-1">Prix total HT</p>
+                <p className="font-bold text-[#1E40AF] text-sm whitespace-nowrap">
+                  {lot.prix_total_ht ? `${formatCurrency(lot.prix_total_ht)} €` : '-'}
+                </p>
+              </div>
+
+              <div className="text-center w-32">
+                <p className="text-xs text-slate-500 mb-1">TVA récupérable</p>
+                <p className="font-semibold text-slate-700 text-sm whitespace-nowrap">
+                  {lot.tva_recuperable ? `${formatCurrency(lot.tva_recuperable)} €` : '-'}
+                </p>
+              </div>
+
+              <div className="text-center w-32">
+                <p className="text-xs text-slate-500 mb-1">Prix total TTC</p>
+                <p className="font-bold text-[#1E40AF] text-sm whitespace-nowrap">
+                  {lot.prix_total_ttc ? `${formatCurrency(lot.prix_total_ttc)} €` : '-'}
+                </p>
+              </div>
+
+              <div className="text-center w-28">
+                <p className="text-xs text-slate-500 mb-1">Exploitant</p>
+                <p className="font-semibold text-slate-700 text-sm truncate w-28">
+                  {lot.exploitant || '-'}
+                </p>
+              </div>
+
+              <div className="text-center w-28">
+                <p className="text-xs text-slate-500 mb-1">Loyer annuel HT</p>
+                <p className="font-semibold text-slate-700 text-sm whitespace-nowrap">
+                  {lot.loyer_annuel_ht ? `${formatCurrency(lot.loyer_annuel_ht)} €` : '-'}
+                </p>
+              </div>
+
+              <div className="text-center w-28">
                 <p className="text-xs text-slate-500 mb-1">Prix FAI</p>
                 <p className="font-bold text-[#1E40AF] text-base whitespace-nowrap">
                   {prixFAI > 0 ? `${formatCurrency(prixFAI)} €` : '-'}
                 </p>
                 {showCommission && commission > 0 && (
                   <p className="text-xs text-amber-700 font-semibold mt-0.5">
-                    Commission: {formatCurrency(commission)} €
+                    Comm: {formatCurrency(commission)} €
                   </p>
                 )}
               </div>
 
               {lot.rentabilite != null && (
-                <div className="text-center">
+                <div className="text-center w-24">
                   <p className="text-xs text-slate-500 mb-1">Rentabilité</p>
                   <div className="flex items-center gap-1 justify-center">
                     <TrendingUp className="w-3.5 h-3.5 text-green-600" />
@@ -336,52 +413,52 @@ export default function LotLMNPListItem({ lot, onEdit, onView, onDelete, onPoser
                   </div>
                 </div>
               )}
+            </div>
 
-              <div className="flex gap-1 ml-auto">
-                {onPoserOption && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onPoserOption}
-                    className="hover:bg-green-100 text-green-700 hover:text-green-800 h-8 px-2"
-                    title="Poser une option"
-                  >
-                    <Clock className="w-3.5 h-3.5 sm:mr-1" />
-                    <span className="text-xs hidden sm:inline">Option</span>
-                  </Button>
-                )}
+            <div className="flex gap-1 flex-shrink-0 ml-auto">
+              {onPoserOption && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onPoserOption}
+                  className="hover:bg-green-100 text-green-700 hover:text-green-800 h-8 px-2"
+                  title="Poser une option"
+                >
+                  <Clock className="w-3.5 h-3.5 sm:mr-1" />
+                  <span className="text-xs hidden sm:inline">Option</span>
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onView(lot)}
+                className="hover:bg-slate-100 h-8 w-8"
+                title="Voir"
+              >
+                <Eye className="w-4 h-4 text-slate-500" />
+              </Button>
+              {onEdit && (
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => onView(lot)}
+                  onClick={() => onEdit(lot)}
                   className="hover:bg-slate-100 h-8 w-8"
-                  title="Voir"
+                  title="Modifier"
                 >
-                  <Eye className="w-4 h-4 text-slate-500" />
+                  <Edit className="w-4 h-4 text-slate-500" />
                 </Button>
-                {onEdit && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onEdit(lot)}
-                    className="hover:bg-slate-100 h-8 w-8"
-                    title="Modifier"
-                  >
-                    <Edit className="w-4 h-4 text-slate-500" />
-                  </Button>
-                )}
-                {onDelete && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onDelete(lot)}
-                    className="hover:bg-red-50 h-8 w-8"
-                    title="Supprimer"
-                  >
-                    <Trash2 className="w-4 h-4 text-red-500" />
-                  </Button>
-                )}
-              </div>
+              )}
+              {onDelete && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onDelete(lot)}
+                  className="hover:bg-red-50 h-8 w-8"
+                  title="Supprimer"
+                >
+                  <Trash2 className="w-4 h-4 text-red-500" />
+                </Button>
+              )}
             </div>
           </div>
         </div>
