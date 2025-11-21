@@ -176,6 +176,11 @@ export const workflowService = {
 
   async sendWorkflowEmail(lotId, stepCode, step) {
     try {
+      if (!step.email_subject || !step.email_body) {
+        console.warn('Step has no email template configured');
+        return;
+      }
+
       const { data: lot } = await supabase
         .from('lots_lmnp')
         .select(`
@@ -193,6 +198,10 @@ export const workflowService = {
             nom,
             prenom,
             email
+          ),
+          partenaire:partenaire_id (
+            nom,
+            email
           )
         `)
         .eq('id', lotId)
@@ -201,18 +210,49 @@ export const workflowService = {
       if (!lot) return;
 
       const { getDocumentsByWorkflowStep } = await import('../hooks/useDocumentsManquants');
-      const documentsManquants = await getDocumentsByWorkflowStep(stepCode, lot);
+      const stepDocuments = getDocumentsByWorkflowStep(stepCode, lot.acquereur, lot.vendeur);
+
+      const documentsManquantsText = stepDocuments.manquants
+        .map(doc => `- ${doc.label}`)
+        .join('\n');
+
+      const replaceVariables = (text) => {
+        return text
+          .replace(/\{\{lot_reference\}\}/g, lot.reference || '')
+          .replace(/\{\{residence_nom\}\}/g, lot.residence?.nom || '')
+          .replace(/\{\{acquereur_nom\}\}/g, lot.acquereur ? `${lot.acquereur.prenom} ${lot.acquereur.nom}` : '')
+          .replace(/\{\{vendeur_nom\}\}/g, lot.vendeur ? `${lot.vendeur.prenom} ${lot.vendeur.nom}` : '')
+          .replace(/\{\{partenaire_nom\}\}/g, lot.partenaire?.nom || '')
+          .replace(/\{\{date\}\}/g, new Date().toLocaleDateString('fr-FR'))
+          .replace(/\{\{step_label\}\}/g, step.label)
+          .replace(/\{\{notes\}\}/g, '')
+          .replace(/\{\{documents_manquants\}\}/g, documentsManquantsText || 'Aucun document manquant');
+      };
+
+      const subject = replaceVariables(step.email_subject);
+      const body = replaceVariables(step.email_body);
+
+      const recipients = [];
+      if (lot.acquereur?.email) {
+        recipients.push(lot.acquereur.email);
+      }
+      if (lot.vendeur?.email) {
+        recipients.push(lot.vendeur.email);
+      }
+
+      if (recipients.length === 0) {
+        console.warn('No recipients found for email');
+        return;
+      }
 
       const emailData = {
         lot_id: lotId,
         step_code: stepCode,
-        template: step.email_template,
-        recipients: step.email_recipients,
+        subject,
+        body,
+        recipients,
         lot_reference: lot.reference,
-        residence_nom: lot.residence?.nom,
-        acquereur_email: lot.acquereur?.email,
-        vendeur_email: lot.vendeur?.email,
-        documents_manquants: documentsManquants
+        residence_nom: lot.residence?.nom
       };
 
       const response = await fetch(
@@ -236,6 +276,10 @@ export const workflowService = {
           })
           .eq('lot_id', lotId)
           .eq('step_code', stepCode);
+      } else {
+        const error = await response.json();
+        console.error('Error from email function:', error);
+        throw new Error(error.error || 'Failed to send email');
       }
     } catch (error) {
       console.error('Error sending workflow email:', error);

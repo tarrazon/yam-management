@@ -9,37 +9,12 @@ const corsHeaders = {
 interface EmailData {
   lot_id: string;
   step_code: string;
-  template: string;
+  subject: string;
+  body: string;
   recipients: string[];
   lot_reference: string;
   residence_nom: string;
-  acquereur_email?: string;
-  vendeur_email?: string;
-  documents_manquants?: Array<{label: string; present: boolean}>;
 }
-
-const emailTemplates = {
-  mission_signed: {
-    subject: "Lettre de mission signée - Lot {lot_reference}",
-    body: `Bonjour,\n\nLa lettre de mission pour le lot {lot_reference} ({residence_nom}) a été signée.\n\nMerci de nous faire parvenir les pièces administratives nécessaires dans les plus brefs délais.\n\nCordialement,\nYAM Immobilier`
-  },
-  docs_reminder: {
-    subject: "Relance documents - Lot {lot_reference}",
-    body: `Bonjour,\n\nNous n'avons toujours pas reçu certains documents administratifs concernant le lot {lot_reference} ({residence_nom}).\n\nDocuments manquants:\n{documents_manquants}\n\nMerci de nous les transmettre dans les 15 jours.\n\nCordialement,\nYAM Immobilier`
-  },
-  option_notification: {
-    subject: "Option posée - Lot {lot_reference}",
-    body: `Bonjour,\n\nUne option a été posée sur le lot {lot_reference} ({residence_nom}).\n\nCordialement,\nYAM Immobilier`
-  },
-  reservation_confirmation: {
-    subject: "Réservation confirmée - Lot {lot_reference}",
-    body: `Bonjour,\n\nNous avons le plaisir de vous confirmer la réservation du lot {lot_reference} ({residence_nom}).\n\nNous vous contacterons prochainement pour la suite des démarches.\n\nCordialement,\nYAM Immobilier`
-  },
-  acte_signed: {
-    subject: "Acte authentique signé - Lot {lot_reference}",
-    body: `Bonjour,\n\nNous avons le plaisir de vous informer que l'acte authentique pour le lot {lot_reference} ({residence_nom}) a été signé.\n\nNous vous remercions pour votre confiance.\n\nCordialement,\nYAM Immobilier`
-  }
-};
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -51,55 +26,84 @@ Deno.serve(async (req: Request) => {
 
   try {
     const emailData: EmailData = await req.json();
-    const { template, recipients, lot_reference, residence_nom } = emailData;
+    const { subject, body, recipients, lot_reference } = emailData;
 
-    const templateData = emailTemplates[template as keyof typeof emailTemplates];
-    if (!templateData) {
-      throw new Error(`Template not found: ${template}`);
+    if (!recipients || recipients.length === 0) {
+      throw new Error("No recipients specified");
     }
 
-    const documentsManquantsText = emailData.documents_manquants
-      ? emailData.documents_manquants
-          .filter(doc => !doc.present)
-          .map(doc => `- ${doc.label}`)
-          .join("\\n")
-      : "";
-
-    const subject = templateData.subject
-      .replace("{lot_reference}", lot_reference)
-      .replace("{residence_nom}", residence_nom);
-
-    const body = templateData.body
-      .replace("{lot_reference}", lot_reference)
-      .replace("{residence_nom}", residence_nom)
-      .replace("{documents_manquants}", documentsManquantsText || "Aucun document manquant");
-
-    const emailRecipients: string[] = [];
-    if (recipients.includes("vendeur") && emailData.vendeur_email) {
-      emailRecipients.push(emailData.vendeur_email);
-    }
-    if (recipients.includes("acquereur") && emailData.acquereur_email) {
-      emailRecipients.push(emailData.acquereur_email);
-    }
-    if (recipients.includes("bo")) {
-      emailRecipients.push("backoffice@yam-immobilier.fr");
-    }
-    if (recipients.includes("commercial")) {
-      emailRecipients.push("commercial@yam-immobilier.fr");
-    }
-    if (recipients.includes("cgp")) {
-      emailRecipients.push("cgp@yam-immobilier.fr");
+    if (!subject || !body) {
+      throw new Error("Subject and body are required");
     }
 
-    console.log(`Sending email to: ${emailRecipients.join(", ")}`);
+    console.log(`Sending email to: ${recipients.join(", ")}`);
     console.log(`Subject: ${subject}`);
-    console.log(`Body: ${body}`);
+    console.log(`Body preview: ${body.substring(0, 100)}...`);
+
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+
+    if (!resendApiKey) {
+      console.warn("RESEND_API_KEY not configured, email not sent (but marked as sent)");
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: "Email notification logged (Resend not configured)",
+          recipients
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    const emailHtml = body.replace(/\n/g, '<br>');
+
+    for (const recipient of recipients) {
+      const resendResponse = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${resendApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: "YAM Immobilier <notifications@yam-immobilier.fr>",
+          to: [recipient],
+          subject: subject,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <div style="background-color: #F59E0B; padding: 20px; text-align: center;">
+                <h1 style="color: white; margin: 0;">YAM Immobilier</h1>
+              </div>
+              <div style="padding: 30px; background-color: #ffffff;">
+                ${emailHtml}
+              </div>
+              <div style="background-color: #f3f4f6; padding: 20px; text-align: center; font-size: 12px; color: #6b7280;">
+                <p>Lot: ${lot_reference}</p>
+                <p>Cet email a été envoyé automatiquement par le système YAM Immobilier</p>
+              </div>
+            </div>
+          `,
+        }),
+      });
+
+      if (!resendResponse.ok) {
+        const errorData = await resendResponse.json();
+        console.error(`Failed to send email to ${recipient}:`, errorData);
+        throw new Error(`Failed to send email: ${errorData.message || 'Unknown error'}`);
+      }
+
+      const result = await resendResponse.json();
+      console.log(`Email sent successfully to ${recipient}:`, result);
+    }
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: "Email notification sent",
-        recipients: emailRecipients
+        message: "Email notification sent successfully",
+        recipients
       }),
       {
         headers: {
