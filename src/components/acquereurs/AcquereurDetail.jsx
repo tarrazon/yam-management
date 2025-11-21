@@ -1,15 +1,24 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { X, Edit, Mail, Phone, MapPin, User, Euro, Building2, FileText, Download, Trash2, Users } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { X, Edit, Mail, Phone, MapPin, User, Euro, Building2, FileText, Download, Trash2, Users, MessageSquare, HelpCircle, Image as ImageIcon, Send } from "lucide-react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useSignedUrls } from "@/hooks/useSignedUrl";
 import { supabase } from "@/lib/supabase";
 import AppelsDeFondSection from "./AppelsDeFondSection";
+import { messagesAdminService } from "@/api/messagesAdmin";
+import { faqService } from "@/api/faq";
+import { galeriePhotosService } from "@/api/galeriePhotos";
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const statusColors = {
   prospect: "bg-blue-100 text-blue-800 border-blue-200",
@@ -41,6 +50,10 @@ const documentsConfig = [
 export default function AcquereurDetail({ acquereur, onClose, onEdit, onDelete }) {
   const documents = acquereur.documents || {};
   const { urls: signedUrls, loading: urlsLoading } = useSignedUrls(documents);
+  const [messages, setMessages] = useState([]);
+  const [nouveauMessage, setNouveauMessage] = useState('');
+  const [photos, setPhotos] = useState([]);
+  const [faq, setFaq] = useState([]);
 
   // Récupérer le partenaire associé
   const { data: partenaire } = useQuery({
@@ -62,6 +75,49 @@ export default function AcquereurDetail({ acquereur, onClose, onEdit, onDelete }
       return data;
     },
   });
+
+  // Charger les messages, photos et FAQ
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [messagesData, faqData] = await Promise.all([
+          messagesAdminService.list(acquereur.id),
+          faqService.listActive(),
+        ]);
+        setMessages(messagesData);
+        setFaq(faqData);
+
+        if (lotLmnp?.id) {
+          const photosData = await galeriePhotosService.list(lotLmnp.id);
+          setPhotos(photosData);
+        }
+      } catch (error) {
+        console.error('Erreur chargement données:', error);
+      }
+    };
+
+    loadData();
+  }, [acquereur.id, lotLmnp?.id]);
+
+  const handleSendMessage = async () => {
+    if (!nouveauMessage.trim()) return;
+
+    try {
+      await messagesAdminService.create({
+        acquereur_id: acquereur.id,
+        expediteur_type: 'admin',
+        expediteur_id: null,
+        message: nouveauMessage,
+        lu: false
+      });
+
+      setNouveauMessage('');
+      const messagesData = await messagesAdminService.list(acquereur.id);
+      setMessages(messagesData);
+    } catch (error) {
+      console.error('Erreur envoi message:', error);
+    }
+  };
   
   const groupedDocuments = documentsConfig.reduce((acc, doc) => {
     if (!acc[doc.category]) acc[doc.category] = [];
@@ -374,6 +430,144 @@ export default function AcquereurDetail({ acquereur, onClose, onEdit, onDelete }
             acquereurId={acquereur.id}
             lotId={lotLmnp?.id}
           />
+
+          {/* Espace client - Messagerie, Photos, FAQ */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-[#1E40AF]" />
+                Espace client
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="messages">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="messages">Messages</TabsTrigger>
+                  <TabsTrigger value="photos">Photos</TabsTrigger>
+                  <TabsTrigger value="faq">FAQ</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="messages" className="space-y-4">
+                  <div className="space-y-4 mb-6 max-h-[400px] overflow-y-auto">
+                    {messages.length > 0 ? (
+                      messages.map(msg => (
+                        <motion.div
+                          key={msg.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className={`flex ${msg.expediteur_type === 'admin' ? 'justify-start' : 'justify-end'}`}
+                        >
+                          <div className={`max-w-md p-4 rounded-lg ${
+                            msg.expediteur_type === 'admin'
+                              ? 'bg-slate-100 text-slate-700'
+                              : 'bg-[#1E40AF] text-white'
+                          }`}>
+                            <p className="text-sm font-medium mb-1">
+                              {msg.expediteur_type === 'admin' ? 'Vous (Admin)' : 'Acquéreur'}
+                            </p>
+                            <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                            <p className={`text-xs mt-2 ${
+                              msg.expediteur_type === 'admin' ? 'text-slate-500' : 'text-blue-200'
+                            }`}>
+                              {format(new Date(msg.created_at), 'dd MMM yyyy à HH:mm', { locale: fr })}
+                            </p>
+                          </div>
+                        </motion.div>
+                      ))
+                    ) : (
+                      <p className="text-slate-500 text-center py-8">Aucun message pour le moment</p>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Textarea
+                      placeholder="Écrivez votre message à l'acquéreur..."
+                      value={nouveauMessage}
+                      onChange={(e) => setNouveauMessage(e.target.value)}
+                      className="flex-1"
+                      rows={3}
+                    />
+                    <Button
+                      onClick={handleSendMessage}
+                      className="bg-[#1E40AF] hover:bg-[#1E3A8A]"
+                      disabled={!nouveauMessage.trim()}
+                    >
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="photos">
+                  {photos.length > 0 ? (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {photos.map(photo => (
+                        <Dialog key={photo.id}>
+                          <DialogTrigger asChild>
+                            <div className="cursor-pointer group relative aspect-square overflow-hidden rounded-lg border border-slate-200">
+                              <img
+                                src={photo.photo_url}
+                                alt={photo.titre}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                              />
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all" />
+                            </div>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-4xl">
+                            <DialogHeader>
+                              <DialogTitle>{photo.titre}</DialogTitle>
+                            </DialogHeader>
+                            <img
+                              src={photo.photo_url}
+                              alt={photo.titre}
+                              className="w-full rounded-lg"
+                            />
+                            {photo.description && (
+                              <p className="text-sm text-slate-600">{photo.description}</p>
+                            )}
+                          </DialogContent>
+                        </Dialog>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-slate-500 text-center py-8">Aucune photo disponible pour le moment</p>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="faq">
+                  {faq.length > 0 ? (
+                    <div className="space-y-6">
+                      {Object.entries(
+                        faq.reduce((acc, item) => {
+                          const cat = item.categorie || 'Général';
+                          if (!acc[cat]) acc[cat] = [];
+                          acc[cat].push(item);
+                          return acc;
+                        }, {})
+                      ).map(([categorie, questions]) => (
+                        <div key={categorie}>
+                          <h3 className="font-semibold text-slate-700 mb-3 text-lg">{categorie}</h3>
+                          <Accordion type="single" collapsible className="w-full">
+                            {questions.map(item => (
+                              <AccordionItem key={item.id} value={item.id}>
+                                <AccordionTrigger className="text-left">
+                                  {item.question}
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                  <p className="text-slate-600 whitespace-pre-wrap">{item.reponse}</p>
+                                </AccordionContent>
+                              </AccordionItem>
+                            ))}
+                          </Accordion>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-slate-500 text-center py-8">Aucune FAQ disponible pour le moment</p>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
 
           {/* Notes */}
           {acquereur.notes && (

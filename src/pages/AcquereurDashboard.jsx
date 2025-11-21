@@ -45,6 +45,10 @@ export default function AcquereurDashboard() {
       if (acquereurError) throw acquereurError;
       setAcquereur(acquereurData);
 
+      // Charger les FAQs (disponibles pour tous)
+      const faqData = await faqService.listActive();
+      setFaq(faqData);
+
       if (acquereurData) {
         const { data: lotData, error: lotError } = await supabase
           .from('lots_lmnp')
@@ -66,9 +70,6 @@ export default function AcquereurDashboard() {
         const messagesData = await messagesAdminService.list(acquereurData.id);
         setMessages(messagesData);
       }
-
-      const faqData = await faqService.listActive();
-      setFaq(faqData);
 
     } catch (error) {
       console.error('Erreur chargement données:', error);
