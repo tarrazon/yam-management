@@ -25,7 +25,12 @@ const statusLabels = {
 };
 
 export default function SuiviDossierDetail({ lot, onClose, onEdit }) {
+  const [refreshKey, setRefreshKey] = useState(0);
   const { documentsManquantsAcquereur, documentsManquantsVendeur } = useDocumentsManquants(lot);
+
+  const handleWorkflowUpdate = () => {
+    setRefreshKey(prev => prev + 1);
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';
@@ -108,7 +113,7 @@ export default function SuiviDossierDetail({ lot, onClose, onEdit }) {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-              <WorkflowTimeline lotId={lot.id} onUpdate={() => {}} />
+              <WorkflowTimeline key={refreshKey} lotId={lot.id} onUpdate={handleWorkflowUpdate} />
             </CardContent>
           </Card>
 

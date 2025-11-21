@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useDocumentsManquants } from "@/hooks/useDocumentsManquants";
 import { formatCurrency, calculatePrixFAI } from "@/utils/formHelpers";
+import { WorkflowProgressBar } from "../workflow/WorkflowProgressBar";
 
 const statusColors = {
   sous_option: "bg-blue-100 text-blue-800 border-blue-200",
@@ -85,9 +86,14 @@ export default function SuiviDossierCard({ lot, onEdit, onView, hideVendeur = fa
         </CardHeader>
 
         <CardContent className="p-6 space-y-4">
-          {/* Mini pipeline de progression */}
+          {/* Progression workflow détaillée */}
           <div className="pb-4 border-b border-slate-100">
-            <p className="text-xs text-slate-500 mb-3 font-semibold">Progression du dossier</p>
+            <WorkflowProgressBar lotId={lot.id} compact={false} />
+          </div>
+
+          {/* Mini pipeline de statut */}
+          <div className="pb-4 border-b border-slate-100">
+            <p className="text-xs text-slate-500 mb-3 font-semibold">Statut du dossier</p>
             <div className="flex items-start justify-between">
               {['sous_option', 'reserve', 'compromis', 'vendu'].map((status, idx) => {
                 const statusLabelsShort = {
