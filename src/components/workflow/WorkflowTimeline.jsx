@@ -284,13 +284,34 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
                         <Mail className="w-3 h-3" />
                         Email automatique sera envoyé {step.delay_days} jours après complétion de l'étape
                       </p>
+                      {step.progress?.email_scheduled_at && (
+                        <p className="text-xs text-blue-600 mt-1">
+                          📅 Programmé le : {format(new Date(step.progress.email_scheduled_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  {step.progress?.email_sent_at && (
+                    <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded">
+                      <p className="text-xs text-green-700 flex items-center gap-1">
+                        <Mail className="w-3 h-3" />
+                        Dernier email envoyé le : {format(new Date(step.progress.email_sent_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}
+                      </p>
+                    </div>
+                  )}
+                  {step.send_email && (!step.email_subject || !step.email_body) && (
+                    <div className="mt-2 p-2 bg-amber-50 border border-amber-300 rounded">
+                      <p className="text-xs text-amber-700 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        Template d'email non configuré. Configurez-le dans Admin &gt; Templates d'emails
+                      </p>
                     </div>
                   )}
                 </div>
 
                 {!readOnly && !step.is_automatic && isPending && canComplete && (
                   <div className="flex gap-2">
-                    {step.send_email && (
+                    {step.send_email && step.email_subject && step.email_body && (
                       <Button
                         size="sm"
                         variant="outline"
@@ -323,7 +344,7 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
 
                 {!readOnly && !isPending && (
                   <div className="flex gap-2">
-                    {step.send_email && (
+                    {step.send_email && step.email_subject && step.email_body && (
                       <Button
                         size="sm"
                         variant="outline"

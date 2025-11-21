@@ -328,15 +328,35 @@ export const workflowService = {
 
   async resendWorkflowEmail(lotId, stepCode) {
     try {
-      const { data: step } = await supabase
+      const { data: step, error: stepError } = await supabase
         .from('workflow_steps')
         .select('*')
         .eq('code', stepCode)
-        .single();
+        .maybeSingle();
 
-      if (!step || !step.send_email) {
-        throw new Error('Cette étape ne nécessite pas d\'envoi d\'email');
+      if (stepError) {
+        console.error('Error fetching step:', stepError);
+        throw stepError;
       }
+
+      if (!step) {
+        throw new Error('Étape introuvable');
+      }
+
+      if (!step.send_email) {
+        throw new Error('Cette étape n\'a pas l\'envoi d\'email activé');
+      }
+
+      if (!step.email_subject || !step.email_body) {
+        throw new Error('Cette étape n\'a pas de template d\'email configuré. Veuillez d\'abord configurer le template dans Admin > Templates d\'emails');
+      }
+
+      console.log('Resending email for step:', {
+        stepCode,
+        lotId,
+        has_subject: !!step.email_subject,
+        has_body: !!step.email_body
+      });
 
       await this.sendWorkflowEmail(lotId, stepCode, step);
 
