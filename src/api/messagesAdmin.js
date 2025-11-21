@@ -6,9 +6,9 @@ export const messagesAdminService = {
       .from('messages_admin')
       .select('*')
       .eq('acquereur_id', acquereurId)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: true });
     if (error) throw error;
-    return data;
+    return data || [];
   },
 
   async create(messageData) {

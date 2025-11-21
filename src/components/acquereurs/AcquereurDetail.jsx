@@ -62,34 +62,43 @@ export default function AcquereurDetail({ acquereur, onClose, onEdit, onDelete }
     enabled: !!acquereur.partenaire_id,
   });
 
-  // Récupérer le lot LMNP associé à l'acquéreur
-  const { data: lotLmnp } = useQuery({
-    queryKey: ['lot-lmnp-acquereur', acquereur.id],
+  // Récupérer les lots LMNP associés à l'acquéreur
+  const { data: lotsLmnp = [] } = useQuery({
+    queryKey: ['lots-lmnp-acquereur', acquereur.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('lots_lmnp')
-        .select('id')
-        .eq('acquereur_id', acquereur.id)
-        .maybeSingle();
+        .select('id, numero, statut')
+        .eq('acquereur_id', acquereur.id);
       if (error) throw error;
-      return data;
+      return data || [];
     },
   });
+
+  // Prendre le premier lot s'il y en a plusieurs
+  const lotLmnp = lotsLmnp.length > 0 ? lotsLmnp[0] : null;
 
   // Charger les messages, photos et FAQ
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [messagesData, faqData] = await Promise.all([
-          messagesAdminService.list(acquereur.id),
-          faqService.listActive(),
-        ]);
+        console.log('Chargement données pour acquéreur:', acquereur.id);
+
+        const messagesData = await messagesAdminService.list(acquereur.id);
+        console.log('Messages chargés:', messagesData);
         setMessages(messagesData);
+
+        const faqData = await faqService.listActive();
+        console.log('FAQ chargées:', faqData);
         setFaq(faqData);
 
         if (lotLmnp?.id) {
+          console.log('Chargement photos pour lot:', lotLmnp.id);
           const photosData = await galeriePhotosService.list(lotLmnp.id);
+          console.log('Photos chargées:', photosData);
           setPhotos(photosData);
+        } else {
+          console.log('Aucun lot associé, photos non chargées');
         }
       } catch (error) {
         console.error('Erreur chargement données:', error);
