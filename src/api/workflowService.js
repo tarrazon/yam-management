@@ -235,6 +235,28 @@ export const workflowService = {
       }
     } catch (error) {
       console.error('Error sending workflow email:', error);
+      throw error;
+    }
+  },
+
+  async resendWorkflowEmail(lotId, stepCode) {
+    try {
+      const { data: step } = await supabase
+        .from('workflow_steps')
+        .select('*')
+        .eq('code', stepCode)
+        .single();
+
+      if (!step || !step.send_email) {
+        throw new Error('Cette étape ne nécessite pas d\'envoi d\'email');
+      }
+
+      await this.sendWorkflowEmail(lotId, stepCode, step);
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error resending workflow email:', error);
+      throw error;
     }
   }
 };

@@ -10,7 +10,8 @@ import {
   MessageSquare,
   AlertCircle,
   FileText,
-  FileCheck
+  FileCheck,
+  Send
 } from 'lucide-react';
 import { workflowService } from '../../api/workflowService';
 import { Button } from '../ui/button';
@@ -30,6 +31,7 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
   const [lot, setLot] = useState(null);
   const [acquereur, setAcquereur] = useState(null);
   const [vendeur, setVendeur] = useState(null);
+  const [sendingEmail, setSendingEmail] = useState({});
 
   useEffect(() => {
     loadWorkflow();
@@ -123,6 +125,20 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
     } catch (error) {
       console.error('Error resetting step:', error);
       toast.error('Erreur lors de la réinitialisation');
+    }
+  };
+
+  const handleResendEmail = async (stepCode) => {
+    try {
+      setSendingEmail(prev => ({ ...prev, [stepCode]: true }));
+      await workflowService.resendWorkflowEmail(lotId, stepCode);
+      toast.success('Email de relance envoyé avec succès');
+      await loadWorkflow();
+    } catch (error) {
+      console.error('Error resending email:', error);
+      toast.error(error.message || 'Erreur lors de l\'envoi de l\'email');
+    } finally {
+      setSendingEmail(prev => ({ ...prev, [stepCode]: false }));
     }
   };
 
@@ -266,6 +282,18 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
 
                 {!readOnly && !step.is_automatic && isPending && canComplete && (
                   <div className="flex gap-2">
+                    {step.send_email && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleResendEmail(step.code)}
+                        disabled={sendingEmail[step.code]}
+                        className="border-purple-300 text-purple-700 hover:bg-purple-50"
+                      >
+                        <Send className="w-4 h-4 mr-1" />
+                        {sendingEmail[step.code] ? 'Envoi...' : 'Envoyer relance'}
+                      </Button>
+                    )}
                     <Button
                       size="sm"
                       onClick={() => handleCompleteStep(step.code)}
@@ -312,10 +340,26 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
                       </span>
                     </div>
                   )}
-                  {progressItem.email_sent && (
-                    <div className="flex items-center gap-2 text-xs text-green-600">
-                      <Mail className="w-3 h-3" />
-                      <span>Email envoyé</span>
+                  {progressItem.email_sent && progressItem.email_sent_at && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-xs text-green-600">
+                        <Mail className="w-3 h-3" />
+                        <span>
+                          Email envoyé le {format(new Date(progressItem.email_sent_at), 'dd MMMM yyyy à HH:mm', { locale: fr })}
+                        </span>
+                      </div>
+                      {!readOnly && step.send_email && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 text-xs"
+                          onClick={() => handleResendEmail(step.code)}
+                          disabled={sendingEmail[step.code]}
+                        >
+                          <Send className="w-3 h-3 mr-1" />
+                          {sendingEmail[step.code] ? 'Envoi...' : 'Renvoyer'}
+                        </Button>
+                      )}
                     </div>
                   )}
                   {progressItem.notes && (
