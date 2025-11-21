@@ -27,7 +27,7 @@ Deno.serve(async (req: Request) => {
       }
     );
 
-    const { email, password, nom, prenom, role_custom, partenaire_id } = await req.json();
+    const { email, password, nom, prenom, role_custom, partenaire_id, acquereur_id } = await req.json();
 
     // Créer l'utilisateur avec Supabase Auth Admin
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
@@ -55,6 +55,16 @@ Deno.serve(async (req: Request) => {
       });
 
     if (profileError) throw profileError;
+
+    // Si c'est un acquéreur, lier le user_id à l'acquéreur
+    if (role_custom === 'acquereur' && acquereur_id) {
+      const { error: acquereurError } = await supabaseAdmin
+        .from('acquereurs')
+        .update({ user_id: authData.user.id })
+        .eq('id', acquereur_id);
+
+      if (acquereurError) throw acquereurError;
+    }
 
     return new Response(
       JSON.stringify({ success: true, user: authData.user }),

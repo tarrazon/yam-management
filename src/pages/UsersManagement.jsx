@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Shield, UserCheck, Search, Edit, Handshake, Save, X, Mail, Send, Clock, CheckCircle, AlertCircle, UserPlus, Trash2, Copy, Check, Link as LinkIcon } from "lucide-react";
+import { Users, Shield, UserCheck, Search, Edit, Handshake, Save, X, Mail, Send, Clock, CheckCircle, AlertCircle, UserPlus, Trash2, Copy, Check, Link as LinkIcon, ShoppingCart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function UsersManagement() {
@@ -30,18 +30,16 @@ export default function UsersManagement() {
     prenom: "",
     role_custom: "commercial",
     partenaire_id: "",
+    acquereur_id: "",
   });
   const [isCreating, setIsCreating] = useState(false);
   const queryClient = useQueryClient();
-
-  console.log('UsersManagement - currentUser from AuthContext:', currentUser);
 
   const { data: users = [], isLoading, error: usersError } = useQuery({
     queryKey: ['users'],
     queryFn: async () => {
       try {
         const result = await base44.entities.User.list('-created_at');
-        console.log('User.list() result:', result);
         return result;
       } catch (err) {
         console.error('Error loading users:', err);
@@ -50,11 +48,14 @@ export default function UsersManagement() {
     },
   });
 
-  console.log('UsersManagement - loaded users:', users, 'isLoading:', isLoading, 'error:', usersError);
-
   const { data: partenaires = [] } = useQuery({
     queryKey: ['partenaires_list'],
     queryFn: () => base44.entities.Partenaire.list(),
+  });
+
+  const { data: acquereurs = [] } = useQuery({
+    queryKey: ['acquereurs_list'],
+    queryFn: () => base44.entities.Acquereur.list(),
   });
 
   const updateUserMutation = useMutation({
@@ -104,6 +105,7 @@ export default function UsersManagement() {
         prenom: "",
         role_custom: "commercial",
         partenaire_id: "",
+        acquereur_id: "",
       });
     },
   });
@@ -119,8 +121,8 @@ export default function UsersManagement() {
   };
 
   const handleSaveUser = () => {
-    updateUserMutation.mutate({ 
-      id: editingUser.id, 
+    updateUserMutation.mutate({
+      id: editingUser.id,
       data: editFormData
     });
   };
@@ -156,9 +158,9 @@ export default function UsersManagement() {
     admins: users.filter(u => (u.role_custom || 'admin') === 'admin').length,
     commerciaux: users.filter(u => u.role_custom === 'commercial').length,
     partenaires: users.filter(u => u.role_custom === 'partenaire').length,
+    acquereurs: users.filter(u => u.role_custom === 'acquereur').length,
   };
 
-  // Vérifier que l'utilisateur actuel est admin
   if (!currentUser || currentUser?.role_custom !== 'admin') {
     return (
       <div className="p-6 md:p-8 bg-[#F9FAFB] min-h-screen">
@@ -185,7 +187,7 @@ export default function UsersManagement() {
               <h1 className="text-3xl font-bold text-[#1E40AF] tracking-tight">Gestion des utilisateurs</h1>
             </div>
             <p className="text-slate-500">
-              {stats.total} utilisateurs · {stats.admins} admins · {stats.commerciaux} commerciaux · {stats.partenaires} partenaires
+              {stats.total} utilisateurs · {stats.admins} admins · {stats.commerciaux} commerciaux · {stats.partenaires} partenaires · {stats.acquereurs} acquéreurs
             </p>
           </div>
           <Button
@@ -198,8 +200,7 @@ export default function UsersManagement() {
         </div>
 
         <div className="w-full">
-            {/* Statistiques */}
-            <div className="grid md:grid-cols-4 gap-6 mb-8">
+            <div className="grid md:grid-cols-5 gap-6 mb-8">
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium text-slate-500">Total utilisateurs</CardTitle>
@@ -247,9 +248,20 @@ export default function UsersManagement() {
                   </div>
                 </CardContent>
               </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-slate-500">Acquéreurs</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-2">
+                    <ShoppingCart className="w-5 h-5 text-blue-600" />
+                    <p className="text-3xl font-bold text-blue-600">{stats.acquereurs}</p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
-            {/* Barre de recherche */}
             <div className="mb-6">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -262,7 +274,6 @@ export default function UsersManagement() {
               </div>
             </div>
 
-            {/* Liste des utilisateurs */}
             <Card>
               <CardHeader>
                 <CardTitle>Utilisateurs du système</CardTitle>
@@ -282,7 +293,6 @@ export default function UsersManagement() {
                 ) : filteredUsers.length === 0 ? (
                   <div className="text-center py-12">
                     <p className="text-slate-400">Aucun utilisateur trouvé</p>
-                    <p className="text-xs text-slate-400 mt-2">Total users: {users.length}</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -290,6 +300,7 @@ export default function UsersManagement() {
                       {filteredUsers.map((user) => {
                         const userRole = user.role_custom || 'admin';
                         const partenaireNom = partenaires.find(p => p.id === user.partenaire_id)?.nom;
+                        const acquereurNom = acquereurs.find(a => a.user_id === user.id);
                         const isCurrentUser = user.id === currentUser?.id;
 
                         return (
@@ -302,14 +313,17 @@ export default function UsersManagement() {
                           >
                             <div className="flex items-center gap-4 flex-1">
                               <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                                userRole === 'admin' ? 'bg-purple-100' : 
-                                userRole === 'commercial' ? 'bg-green-100' : 
+                                userRole === 'admin' ? 'bg-purple-100' :
+                                userRole === 'commercial' ? 'bg-green-100' :
+                                userRole === 'acquereur' ? 'bg-blue-100' :
                                 'bg-amber-100'
                               }`}>
                                 {userRole === 'admin' ? (
                                   <Shield className="w-6 h-6 text-purple-600" />
                                 ) : userRole === 'commercial' ? (
                                   <UserCheck className="w-6 h-6 text-green-600" />
+                                ) : userRole === 'acquereur' ? (
+                                  <ShoppingCart className="w-6 h-6 text-blue-600" />
                                 ) : (
                                   <Handshake className="w-6 h-6 text-amber-600" />
                                 )}
@@ -320,6 +334,9 @@ export default function UsersManagement() {
                                 {userRole === 'partenaire' && partenaireNom && (
                                   <p className="text-xs text-amber-600 truncate">→ {partenaireNom}</p>
                                 )}
+                                {userRole === 'acquereur' && acquereurNom && (
+                                  <p className="text-xs text-blue-600 truncate">→ {acquereurNom.nom} {acquereurNom.prenom}</p>
+                                )}
                               </div>
                             </div>
 
@@ -329,13 +346,15 @@ export default function UsersManagement() {
                               ) : (
                                 <>
                                   <Badge className={
-                                    userRole === 'admin' 
-                                      ? 'bg-purple-100 text-purple-800' 
+                                    userRole === 'admin'
+                                      ? 'bg-purple-100 text-purple-800'
                                       : userRole === 'commercial'
                                       ? 'bg-green-100 text-green-800'
+                                      : userRole === 'acquereur'
+                                      ? 'bg-blue-100 text-blue-800'
                                       : 'bg-amber-100 text-amber-800'
                                   }>
-                                    {userRole === 'admin' ? 'Administrateur' : userRole === 'commercial' ? 'Commercial' : 'Partenaire'}
+                                    {userRole === 'admin' ? 'Administrateur' : userRole === 'commercial' ? 'Commercial' : userRole === 'acquereur' ? 'Acquéreur' : 'Partenaire'}
                                   </Badge>
                                   <Button
                                     variant="ghost"
@@ -366,7 +385,6 @@ export default function UsersManagement() {
               </CardContent>
             </Card>
 
-            {/* Légende */}
             <Card className="mt-6">
               <CardHeader>
                 <CardTitle className="text-sm">Rôles et permissions</CardTitle>
@@ -390,16 +408,22 @@ export default function UsersManagement() {
                   <Handshake className="w-5 h-5 text-amber-600 mt-0.5" />
                   <div>
                     <p className="font-semibold text-slate-700">Partenaire</p>
-                    <p className="text-sm text-slate-500">Accès aux lots disponibles, ses acquéreurs, et système d'options (durée et nombre configurables)</p>
+                    <p className="text-sm text-slate-500">Accès aux lots disponibles, ses acquéreurs, et système d'options</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <ShoppingCart className="w-5 h-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <p className="font-semibold text-slate-700">Acquéreur</p>
+                    <p className="text-sm text-slate-500">Accès restreint à son espace client : suivi du dossier, documents, appels de fond, messagerie et FAQ</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
         </div>
 
-        {/* Dialog de création d'utilisateur */}
         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-          <DialogContent className="sm:max-w-xl bg-white">
+          <DialogContent className="sm:max-w-xl bg-white max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-slate-900 flex items-center gap-2">
                 <UserPlus className="w-5 h-5 text-[#1E40AF]" />
@@ -478,13 +502,19 @@ export default function UsersManagement() {
                         <span>Partenaire</span>
                       </div>
                     </SelectItem>
+                    <SelectItem value="acquereur">
+                      <div className="flex items-center gap-2">
+                        <ShoppingCart className="w-4 h-4" />
+                        <span>Acquéreur</span>
+                      </div>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               {createFormData.role_custom === 'partenaire' && (
                 <div className="space-y-2">
-                  <Label>Partenaire associé</Label>
+                  <Label>Partenaire associé <span className="text-red-500">*</span></Label>
                   <Select
                     value={createFormData.partenaire_id}
                     onValueChange={(value) => setCreateFormData({...createFormData, partenaire_id: value})}
@@ -500,6 +530,26 @@ export default function UsersManagement() {
                   </Select>
                 </div>
               )}
+
+              {createFormData.role_custom === 'acquereur' && (
+                <div className="space-y-2">
+                  <Label>Acquéreur associé <span className="text-red-500">*</span></Label>
+                  <Select
+                    value={createFormData.acquereur_id}
+                    onValueChange={(value) => setCreateFormData({...createFormData, acquereur_id: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner un acquéreur" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white">
+                      {acquereurs.map(a => (
+                        <SelectItem key={a.id} value={a.id}>{a.nom} {a.prenom} - {a.email}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-slate-500">L'acquéreur pourra accéder à son espace client pour suivre son dossier</p>
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCreateDialog(false)} disabled={isCreating}>
@@ -509,7 +559,7 @@ export default function UsersManagement() {
               <Button
                 onClick={handleCreateUser}
                 className="bg-[#1E40AF] hover:bg-[#1E3A8A]"
-                disabled={!createFormData.email || !createFormData.password || !createFormData.nom || !createFormData.prenom || isCreating}
+                disabled={!createFormData.email || !createFormData.password || !createFormData.nom || !createFormData.prenom || isCreating || (createFormData.role_custom === 'acquereur' && !createFormData.acquereur_id)}
               >
                 {isCreating ? (
                   <>
@@ -527,8 +577,6 @@ export default function UsersManagement() {
           </DialogContent>
         </Dialog>
 
-
-        {/* Dialog d'édition */}
         <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
           <DialogContent className="sm:max-w-md bg-white">
             <DialogHeader>
@@ -562,6 +610,12 @@ export default function UsersManagement() {
                         <div className="flex items-center gap-2">
                           <Handshake className="w-4 h-4" />
                           <span>Partenaire</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="acquereur">
+                        <div className="flex items-center gap-2">
+                          <ShoppingCart className="w-4 h-4" />
+                          <span>Acquéreur</span>
                         </div>
                       </SelectItem>
                     </SelectContent>
@@ -617,7 +671,7 @@ export default function UsersManagement() {
                 <X className="w-4 h-4 mr-2" />
                 Annuler
               </Button>
-              <Button 
+              <Button
                 onClick={handleSaveUser}
                 className="bg-[#1E40AF] hover:bg-[#1E3A8A]"
                 disabled={editFormData?.role_custom === 'partenaire' && !editFormData?.partenaire_id}
@@ -629,7 +683,6 @@ export default function UsersManagement() {
           </DialogContent>
         </Dialog>
 
-        {/* Dialog de confirmation de suppression */}
         <Dialog open={!!deletingUser} onOpenChange={(open) => !open && setDeletingUser(null)}>
           <DialogContent className="sm:max-w-md bg-white">
             <DialogHeader>
@@ -647,7 +700,7 @@ export default function UsersManagement() {
                   <p className="font-semibold text-slate-700 mb-1">{deletingUser.prenom} {deletingUser.nom}</p>
                   <p className="text-sm text-slate-600">{deletingUser.email}</p>
                   <p className="text-xs text-red-600 mt-3">
-                    ⚠️ Cette action est irréversible. L'utilisateur perdra immédiatement l'accès à la plateforme.
+                    Cette action est irréversible. L'utilisateur perdra immédiatement l'accès à la plateforme.
                   </p>
                 </div>
               </div>
@@ -657,7 +710,7 @@ export default function UsersManagement() {
                 <X className="w-4 h-4 mr-2" />
                 Annuler
               </Button>
-              <Button 
+              <Button
                 onClick={handleDeleteUser}
                 className="bg-red-600 hover:bg-red-700 text-white"
               >
