@@ -26,20 +26,25 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
+    console.log('[send-workflow-notification] Received request');
     const emailData: EmailData = await req.json();
+    console.log('[send-workflow-notification] Parsed email data:', JSON.stringify(emailData, null, 2));
+
     const { subject, body, recipients, lot_reference, residence_nom } = emailData;
 
     if (!recipients || recipients.length === 0) {
+      console.error('[send-workflow-notification] No recipients specified');
       throw new Error("No recipients specified");
     }
 
     if (!subject || !body) {
+      console.error('[send-workflow-notification] Subject or body missing', { subject: !!subject, body: !!body });
       throw new Error("Subject and body are required");
     }
 
-    console.log(`Sending email to: ${recipients.join(", ")}`);
-    console.log(`Subject: ${subject}`);
-    console.log(`Body preview: ${body.substring(0, 100)}...`);
+    console.log(`[send-workflow-notification] Sending email to: ${recipients.join(", ")}`);
+    console.log(`[send-workflow-notification] Subject: ${subject}`);
+    console.log(`[send-workflow-notification] Body preview: ${body.substring(0, 100)}...`);
 
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
 
@@ -146,12 +151,21 @@ YAM Immobilier - Gestion LMNP
 
     const results = await Promise.allSettled(emailPromises);
 
+    console.log('[send-workflow-notification] Email promises results:', results);
+
     const successful = results.filter(r => r.status === "fulfilled").length;
     const failed = results.filter(r => r.status === "rejected").length;
 
     if (failed > 0) {
-      console.error(`Some emails failed to send: ${failed} failed out of ${recipients.length}`);
+      console.error(`[send-workflow-notification] Some emails failed to send: ${failed} failed out of ${recipients.length}`);
+      results.forEach((result, index) => {
+        if (result.status === "rejected") {
+          console.error(`[send-workflow-notification] Email ${index} to ${recipients[index]} failed:`, result.reason);
+        }
+      });
     }
+
+    console.log(`[send-workflow-notification] Success: ${successful} emails sent, ${failed} failed`);
 
     return new Response(
       JSON.stringify({
@@ -168,7 +182,7 @@ YAM Immobilier - Gestion LMNP
       }
     );
   } catch (error) {
-    console.error("Error:", error);
+    console.error("[send-workflow-notification] Error:", error);
     return new Response(
       JSON.stringify({
         success: false,

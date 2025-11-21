@@ -294,6 +294,8 @@ export const workflowService = {
         residence_nom: lot.residence?.nom
       };
 
+      console.log('Calling edge function with data:', JSON.stringify(emailData, null, 2));
+
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-workflow-notification`,
         {
@@ -306,7 +308,12 @@ export const workflowService = {
         }
       );
 
+      console.log('Edge function response status:', response.status);
+
       if (response.ok) {
+        const result = await response.json();
+        console.log('Email sent successfully:', result);
+
         await supabase
           .from('lot_workflow_progress')
           .update({
@@ -315,9 +322,12 @@ export const workflowService = {
           })
           .eq('lot_id', lotId)
           .eq('step_code', stepCode);
+
+        toast.success(`Email envoyé avec succès à ${result.recipients?.join(', ')}`);
       } else {
         const error = await response.json();
         console.error('Error from email function:', error);
+        toast.error(`Erreur d'envoi: ${error.error || 'Échec de l\'envoi'}`);
         throw new Error(error.error || 'Failed to send email');
       }
     } catch (error) {
