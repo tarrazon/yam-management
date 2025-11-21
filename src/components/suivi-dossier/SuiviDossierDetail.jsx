@@ -1,13 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { X, Edit, Calendar, Users, FileText, Euro, CheckCircle, Building2, AlertCircle } from "lucide-react";
+import { X, Edit, Calendar, Users, FileText, Euro, CheckCircle, Building2, AlertCircle, ListChecks } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useDocumentsManquants } from "@/hooks/useDocumentsManquants";
 import SuiviPipeline from "./SuiviPipeline";
+import { WorkflowTimeline } from "../workflow/WorkflowTimeline";
 
 const statusColors = {
   sous_option: "bg-blue-100 text-blue-800 border-blue-200",
@@ -95,6 +96,19 @@ export default function SuiviDossierDetail({ lot, onClose, onEdit }) {
             </CardHeader>
             <CardContent className="pt-4">
               <SuiviPipeline lot={lot} />
+            </CardContent>
+          </Card>
+
+          {/* Workflow détaillé */}
+          <Card className="border-2 border-slate-200 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-slate-50 to-white">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <ListChecks className="w-5 h-5 text-[#F59E0B]" />
+                Étapes du workflow
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <WorkflowTimeline lotId={lot.id} onUpdate={() => {}} />
             </CardContent>
           </Card>
 
