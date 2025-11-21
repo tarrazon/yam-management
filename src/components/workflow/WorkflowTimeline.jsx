@@ -362,30 +362,21 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
                       </span>
                     </div>
                   )}
-                  {step.send_email && (
-                    <div className="space-y-1">
-                      {progressItem.email_sent && progressItem.email_sent_at ? (
-                        <div className="flex items-center gap-2 text-xs text-green-600">
-                          <Mail className="w-3 h-3" />
-                          <span>
-                            Email envoyé le {format(new Date(progressItem.email_sent_at), 'dd MMMM yyyy à HH:mm', { locale: fr })}
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2 text-xs text-blue-600">
-                          <Mail className="w-3 h-3" />
-                          <span>
-                            {step.delay_days > 0 ? (
-                              <>
-                                Email automatique prévu le {format(addDays(new Date(progressItem.completed_at), step.delay_days), 'dd MMMM yyyy', { locale: fr })}
-                                {step.delay_days > 0 && <span className="text-slate-500"> ({step.delay_days} jours)</span>}
-                              </>
-                            ) : (
-                              <>Email programmé le {format(new Date(progressItem.completed_at), 'dd MMMM yyyy à HH:mm', { locale: fr })}</>
-                            )}
-                          </span>
-                        </div>
-                      )}
+                  {step.send_email && progressItem.email_sent && progressItem.email_sent_at && (
+                    <div className="flex items-center gap-2 text-xs text-green-600">
+                      <Mail className="w-3 h-3" />
+                      <span>
+                        Email envoyé le {format(new Date(progressItem.email_sent_at), 'dd MMMM yyyy à HH:mm', { locale: fr })}
+                      </span>
+                    </div>
+                  )}
+                  {step.send_email && !progressItem.email_sent && step.delay_days > 0 && (
+                    <div className="flex items-center gap-2 text-xs text-blue-600">
+                      <Mail className="w-3 h-3" />
+                      <span>
+                        Email automatique prévu le {format(addDays(new Date(progressItem.completed_at), step.delay_days), 'dd MMMM yyyy', { locale: fr })}
+                        <span className="text-slate-500"> ({step.delay_days} jours)</span>
+                      </span>
                     </div>
                   )}
                   {progressItem.notes && (

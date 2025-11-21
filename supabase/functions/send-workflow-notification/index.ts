@@ -30,6 +30,10 @@ const emailTemplates = {
     subject: "Option posée - Lot {lot_reference}",
     body: `Bonjour,\n\nUne option a été posée sur le lot {lot_reference} ({residence_nom}).\n\nCordialement,\nYAM Immobilier`
   },
+  reservation_confirmation: {
+    subject: "Réservation confirmée - Lot {lot_reference}",
+    body: `Bonjour,\n\nNous avons le plaisir de vous confirmer la réservation du lot {lot_reference} ({residence_nom}).\n\nNous vous contacterons prochainement pour la suite des démarches.\n\nCordialement,\nYAM Immobilier`
+  },
   acte_signed: {
     subject: "Acte authentique signé - Lot {lot_reference}",
     body: `Bonjour,\n\nNous avons le plaisir de vous informer que l'acte authentique pour le lot {lot_reference} ({residence_nom}) a été signé.\n\nNous vous remercions pour votre confiance.\n\nCordialement,\nYAM Immobilier`
