@@ -68,6 +68,10 @@ import ResetPassword from "./ResetPassword";
 
 import SuiviDossierPartenaire from "./SuiviDossierPartenaire";
 
+import AcquereurDashboard from "./AcquereurDashboard";
+
+import FAQManagement from "./FAQManagement";
+
 import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -78,6 +82,10 @@ function HomeRedirect() {
 
     if (profile?.role_custom === 'partenaire') {
         return <Navigate to="/partenairesdashboard" replace />;
+    }
+
+    if (profile?.role_custom === 'acquereur') {
+        return <Navigate to="/acquereur-dashboard" replace />;
     }
 
     return <Navigate to="/dashboardcrm" replace />;
@@ -152,6 +160,10 @@ const PAGES = {
     WorkflowEmailTemplates: WorkflowEmailTemplates,
 
     APIDocumentation: APIDocumentation,
+
+    AcquereurDashboard: AcquereurDashboard,
+
+    FAQManagement: FAQManagement,
 
 }
 
@@ -265,6 +277,10 @@ function PagesContent() {
             <Route path="/WorkflowEmailTemplates" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['admin']}><WorkflowEmailTemplates /></ProtectedRoute></Layout>} />
 
             <Route path="/APIDocumentation" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['admin']}><APIDocumentation /></ProtectedRoute></Layout>} />
+
+            <Route path="/acquereur-dashboard" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['acquereur']}><AcquereurDashboard /></ProtectedRoute></Layout>} />
+
+            <Route path="/faq-management" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['admin']}><FAQManagement /></ProtectedRoute></Layout>} />
 
         </Routes>
     );

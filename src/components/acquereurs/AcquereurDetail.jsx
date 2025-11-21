@@ -8,6 +8,8 @@ import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useSignedUrls } from "@/hooks/useSignedUrl";
+import { supabase } from "@/lib/supabase";
+import AppelsDeFondSection from "./AppelsDeFondSection";
 
 const statusColors = {
   prospect: "bg-blue-100 text-blue-800 border-blue-200",
@@ -45,6 +47,20 @@ export default function AcquereurDetail({ acquereur, onClose, onEdit, onDelete }
     queryKey: ['partenaire', acquereur.partenaire_id],
     queryFn: () => base44.entities.Partenaire.findOne(acquereur.partenaire_id),
     enabled: !!acquereur.partenaire_id,
+  });
+
+  // Récupérer le lot LMNP associé à l'acquéreur
+  const { data: lotLmnp } = useQuery({
+    queryKey: ['lot-lmnp-acquereur', acquereur.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('lots_lmnp')
+        .select('id')
+        .eq('acquereur_id', acquereur.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
   });
   
   const groupedDocuments = documentsConfig.reduce((acc, doc) => {
@@ -352,6 +368,12 @@ export default function AcquereurDetail({ acquereur, onClose, onEdit, onDelete }
               ))}
             </CardContent>
           </Card>
+
+          {/* Appels de fond */}
+          <AppelsDeFondSection
+            acquereurId={acquereur.id}
+            lotId={lotLmnp?.id}
+          />
 
           {/* Notes */}
           {acquereur.notes && (
