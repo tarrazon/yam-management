@@ -238,6 +238,36 @@ export default function LotLMNPDetail({ lot, residence, onClose, onEdit, onDelet
                     <p className="text-lg font-bold text-green-600">{lot.rentabilite}%</p>
                   </div>
                 )}
+                {lot.surface_exterieure != null && lot.surface_exterieure > 0 && (
+                  <div>
+                    <p className="text-xs text-slate-500">Surface extérieure</p>
+                    <p className="text-lg font-bold text-slate-700">{lot.surface_exterieure} m²</p>
+                  </div>
+                )}
+                {lot.parking != null && (
+                  <div>
+                    <p className="text-xs text-slate-500">Parking</p>
+                    <p className="text-lg font-bold text-slate-700">{lot.parking ? 'Oui' : 'Non'}</p>
+                  </div>
+                )}
+                {lot.exploitant && (
+                  <div>
+                    <p className="text-xs text-slate-500">Exploitant</p>
+                    <p className="text-lg font-bold text-slate-700">{lot.exploitant}</p>
+                  </div>
+                )}
+                {lot.region && (
+                  <div>
+                    <p className="text-xs text-slate-500">Région</p>
+                    <p className="text-lg font-bold text-slate-700">{lot.region}</p>
+                  </div>
+                )}
+                {lot.loyer_annuel_ht != null && (
+                  <div>
+                    <p className="text-xs text-slate-500">Loyer annuel HT</p>
+                    <p className="text-lg font-bold text-green-600">{formatCurrency(lot.loyer_annuel_ht)} €</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -318,6 +348,48 @@ export default function LotLMNPDetail({ lot, residence, onClose, onEdit, onDelet
                     <p className="text-2xl font-bold text-indigo-700">
                       {formatCurrency(prixFAI)} €
                     </p>
+                  </div>
+                )}
+
+                {(lot.prix_mobilier != null || lot.prix_total_ht != null || lot.tva_recuperable != null || lot.prix_total_ttc != null) && (
+                  <div className="pt-4 border-t space-y-3">
+                    <h4 className="font-semibold text-slate-700">Détails financiers complémentaires</h4>
+                    <div className="grid md:grid-cols-2 gap-3">
+                      {lot.prix_mobilier != null && (
+                        <div className="p-3 bg-slate-50 rounded-lg">
+                          <p className="text-sm text-slate-600">
+                            Prix mobilier : <span className="font-semibold">{formatCurrency(lot.prix_mobilier)} €</span>
+                          </p>
+                        </div>
+                      )}
+                      {lot.prix_total_ht != null && (
+                        <div className="p-3 bg-blue-50 rounded-lg">
+                          <p className="text-sm text-blue-700">
+                            Prix total HT : <span className="font-bold">{formatCurrency(lot.prix_total_ht)} €</span>
+                          </p>
+                          <p className="text-xs text-slate-500 mt-1">
+                            Immobilier + mobilier + honoraires HT
+                          </p>
+                        </div>
+                      )}
+                      {lot.tva_recuperable != null && (
+                        <div className="p-3 bg-green-50 rounded-lg">
+                          <p className="text-sm text-green-700">
+                            TVA récupérable : <span className="font-semibold">{formatCurrency(lot.tva_recuperable)} €</span>
+                          </p>
+                        </div>
+                      )}
+                      {lot.prix_total_ttc != null && (
+                        <div className="p-3 bg-indigo-50 rounded-lg">
+                          <p className="text-sm text-indigo-700">
+                            Prix total TTC : <span className="font-bold">{formatCurrency(lot.prix_total_ttc)} €</span>
+                          </p>
+                          <p className="text-xs text-slate-500 mt-1">
+                            Immobilier + meubles + honoraires TTC
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>

@@ -29,21 +29,30 @@ export default function LotLMNPForm({ lot, residences, vendeurs, onSubmit, onCan
     gestionnaire_contact: "",
     statut_juridique: "lmnp_existant",
     surface: "",
+    surface_exterieure: "",
+    parking: false,
     typologie: "",
     mobilier_inclus: true,
     etage: "",
     orientation: "",
     prix_net_vendeur: "",
+    prix_mobilier: "",
     honoraires: "",
     tva_honoraires: "",
     pourcentage_honoraires: "",
     honoraires_acquereur_ht: "",
     tva_honoraires_acquereur: "",
     prix_fai: "",
+    prix_total_ht: "",
+    tva_recuperable: "",
+    prix_total_ttc: "",
     statut: "disponible",
     description: "",
     rentabilite: "",
     loyer_mensuel: "",
+    loyer_annuel_ht: "",
+    exploitant: "",
+    region: "",
     en_ligne_wordpress: false,
     date_mise_en_ligne: "",
     notes: "",
@@ -396,7 +405,48 @@ export default function LotLMNPForm({ lot, residences, vendeurs, onSubmit, onCan
                     />
                   </div>
 
-                  <div className="flex items-center space-x-2 md:col-span-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="surface_exterieure">Surface extérieure (m²)</Label>
+                    <Input
+                      id="surface_exterieure"
+                      type="number"
+                      step="0.01"
+                      placeholder="Balcon, terrasse, jardin..."
+                      value={formData.surface_exterieure}
+                      onChange={(e) => setFormData({ ...formData, surface_exterieure: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="exploitant">Exploitant</Label>
+                    <Input
+                      id="exploitant"
+                      placeholder="Nom de l'exploitant"
+                      value={formData.exploitant}
+                      onChange={(e) => setFormData({ ...formData, exploitant: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="region">Région</Label>
+                    <Input
+                      id="region"
+                      placeholder="Région"
+                      value={formData.region}
+                      onChange={(e) => setFormData({ ...formData, region: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="parking"
+                      checked={formData.parking}
+                      onCheckedChange={(checked) => setFormData({ ...formData, parking: checked })}
+                    />
+                    <Label htmlFor="parking">Parking</Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
                     <Checkbox
                       id="mobilier_inclus"
                       checked={formData.mobilier_inclus}
@@ -472,6 +522,61 @@ export default function LotLMNPForm({ lot, residences, vendeurs, onSubmit, onCan
                       type="number"
                       value={formData.tva_honoraires_acquereur}
                       onChange={(e) => setFormData({ ...formData, tva_honoraires_acquereur: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="prix_mobilier">Prix mobilier (€)</Label>
+                    <Input
+                      id="prix_mobilier"
+                      type="number"
+                      placeholder="Prix du mobilier"
+                      value={formData.prix_mobilier}
+                      onChange={(e) => setFormData({ ...formData, prix_mobilier: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="loyer_annuel_ht">Loyer annuel HT (€)</Label>
+                    <Input
+                      id="loyer_annuel_ht"
+                      type="number"
+                      placeholder="Calculé automatiquement si loyer mensuel renseigné"
+                      value={formData.loyer_annuel_ht}
+                      onChange={(e) => setFormData({ ...formData, loyer_annuel_ht: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="prix_total_ht">Prix total HT (€)</Label>
+                    <Input
+                      id="prix_total_ht"
+                      type="number"
+                      placeholder="Immobilier + mobilier + honoraires HT"
+                      value={formData.prix_total_ht}
+                      onChange={(e) => setFormData({ ...formData, prix_total_ht: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="tva_recuperable">TVA récupérable (€)</Label>
+                    <Input
+                      id="tva_recuperable"
+                      type="number"
+                      placeholder="TVA récupérable par l'acquéreur"
+                      value={formData.tva_recuperable}
+                      onChange={(e) => setFormData({ ...formData, tva_recuperable: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="prix_total_ttc">Prix total TTC (€)</Label>
+                    <Input
+                      id="prix_total_ttc"
+                      type="number"
+                      placeholder="Immobilier + meubles + honoraires TTC"
+                      value={formData.prix_total_ttc}
+                      onChange={(e) => setFormData({ ...formData, prix_total_ttc: e.target.value })}
                     />
                   </div>
                 </div>
