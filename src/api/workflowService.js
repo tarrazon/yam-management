@@ -230,6 +230,56 @@ export const workflowService = {
         return;
       }
 
+      let acquereurEmail = null;
+      let vendeurEmail = null;
+
+      if (lot.acquereur_id) {
+        console.log('[workflowService] Fetching CURRENT acquereur email from DB...');
+        const { data: acquereurData, error: acqError } = await supabase
+          .from('acquereurs')
+          .select('email, nom, prenom')
+          .eq('id', lot.acquereur_id)
+          .maybeSingle();
+
+        if (acqError) {
+          console.error('[workflowService] Error fetching acquereur:', acqError);
+        } else if (acquereurData) {
+          acquereurEmail = acquereurData.email;
+          console.log('[workflowService] Acquereur email from DB:', {
+            nom: acquereurData.nom,
+            prenom: acquereurData.prenom,
+            email: acquereurEmail
+          });
+        }
+      }
+
+      if (lot.vendeur_id) {
+        console.log('[workflowService] Fetching CURRENT vendeur email from DB...');
+        const { data: vendeurData, error: vendError } = await supabase
+          .from('vendeurs')
+          .select('email, nom, prenom')
+          .eq('id', lot.vendeur_id)
+          .maybeSingle();
+
+        if (vendError) {
+          console.error('[workflowService] Error fetching vendeur:', vendError);
+        } else if (vendeurData) {
+          vendeurEmail = vendeurData.email;
+          console.log('[workflowService] Vendeur email from DB:', {
+            nom: vendeurData.nom,
+            prenom: vendeurData.prenom,
+            email: vendeurEmail
+          });
+        }
+      }
+
+      console.log('[workflowService] Final emails to use for sending:', {
+        acquereur_id: lot.acquereur_id,
+        acquereur_email: acquereurEmail,
+        vendeur_id: lot.vendeur_id,
+        vendeur_email: vendeurEmail
+      });
+
       const { getDocumentsByWorkflowStep } = await import('../hooks/useDocumentsManquants');
       const stepDocuments = getDocumentsByWorkflowStep(stepCode, lot.acquereur, lot.vendeur);
 
@@ -258,20 +308,20 @@ export const workflowService = {
       console.log('Lot data for email:', {
         acquereur: lot.acquereur,
         vendeur: lot.vendeur,
-        acquereur_email: lot.acquereur?.email,
-        vendeur_email: lot.vendeur?.email
+        acquereur_email: acquereurEmail,
+        vendeur_email: vendeurEmail
       });
 
-      if (lot.acquereur?.email) {
-        console.log('Adding acquereur email:', lot.acquereur.email);
-        recipients.push(lot.acquereur.email);
+      if (acquereurEmail) {
+        console.log('Adding acquereur email:', acquereurEmail);
+        recipients.push(acquereurEmail);
       } else {
         console.warn('No acquereur email found');
       }
 
-      if (lot.vendeur?.email) {
-        console.log('Adding vendeur email:', lot.vendeur.email);
-        recipients.push(lot.vendeur.email);
+      if (vendeurEmail) {
+        console.log('Adding vendeur email:', vendeurEmail);
+        recipients.push(vendeurEmail);
       } else {
         console.warn('No vendeur email found');
       }
