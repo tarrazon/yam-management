@@ -18,7 +18,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
-export function WorkflowTimeline({ lotId, onUpdate, workflowType = null }) {
+export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnly = false }) {
   const [progress, setProgress] = useState([]);
   const [steps, setSteps] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -244,7 +244,7 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null }) {
                   )}
                 </div>
 
-                {!step.is_automatic && isPending && canComplete && (
+                {!readOnly && !step.is_automatic && isPending && canComplete && (
                   <div className="flex gap-2">
                     <Button
                       size="sm"
@@ -265,7 +265,7 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null }) {
                   </div>
                 )}
 
-                {!isPending && (
+                {!readOnly && !isPending && (
                   <Button
                     size="sm"
                     variant="ghost"
@@ -320,7 +320,7 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null }) {
                 </div>
               )}
 
-              {!step.is_automatic && isPending && canComplete && (
+              {!readOnly && !step.is_automatic && isPending && canComplete && (
                 <div className="mt-3 pt-3 border-t border-slate-200">
                   <Textarea
                     placeholder="Notes (optionnel)..."

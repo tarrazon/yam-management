@@ -24,6 +24,7 @@ import {
 import { motion } from "framer-motion";
 import { useDocumentsManquants } from "@/hooks/useDocumentsManquants";
 import { useSignedUrls } from "@/hooks/useSignedUrl";
+import { WorkflowTimeline } from "../workflow/WorkflowTimeline";
 
 const statusColors = {
   sous_option: "bg-blue-100 text-blue-800",
@@ -322,6 +323,24 @@ export default function AcquereurDetailPartenaire({ acquereur, lot, onClose, onE
                       </div>
                     </div>
                   ))}
+                </CardContent>
+              </Card>
+
+              {/* Workflow détaillé */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-[#1E40AF]" />
+                    Suivi détaillé du dossier
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-xs text-slate-500 mb-4">
+                    Voici le suivi complet des étapes du dossier. Les étapes sont gérées par l'équipe commerciale.
+                  </p>
+                  <div className="bg-slate-50 rounded-lg p-4 border border-slate-200 max-h-[600px] overflow-y-auto">
+                    <WorkflowTimeline lotId={lot.id} onUpdate={() => {}} workflowType="acquereur" readOnly={true} />
+                  </div>
                 </CardContent>
               </Card>
 
