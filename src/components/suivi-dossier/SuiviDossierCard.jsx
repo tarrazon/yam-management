@@ -9,6 +9,7 @@ import { fr } from "date-fns/locale";
 import { useDocumentsManquants } from "@/hooks/useDocumentsManquants";
 import { formatCurrency, calculatePrixFAI } from "@/utils/formHelpers";
 import { WorkflowProgressBar } from "../workflow/WorkflowProgressBar";
+import { WorkflowStepBadge } from "../workflow/WorkflowStepBadge";
 
 const statusColors = {
   sous_option: "bg-blue-100 text-blue-800 border-blue-200",
@@ -58,7 +59,8 @@ export default function SuiviDossierCard({ lot, onEdit, onView, hideVendeur = fa
                   {statusLabels[lot.statut]}
                 </Badge>
               </div>
-              <p className="text-sm text-slate-500">{lot.residence_nom}</p>
+              <p className="text-sm text-slate-500 mb-2">{lot.residence_nom}</p>
+              <WorkflowStepBadge lotId={lot.id} />
             </div>
             <div className="flex gap-1 flex-shrink-0 ml-2">
               <Button

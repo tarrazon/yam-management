@@ -8,6 +8,7 @@ import { fr } from "date-fns/locale";
 import { useDocumentsManquants } from "@/hooks/useDocumentsManquants";
 import { formatCurrency, calculatePrixFAI } from "@/utils/formHelpers";
 import { WorkflowProgressBar } from "../workflow/WorkflowProgressBar";
+import { WorkflowStepBadge } from "../workflow/WorkflowStepBadge";
 
 const statusColors = {
   sous_option: "bg-blue-100 text-blue-800",
@@ -62,10 +63,13 @@ export default function SuiviDossierListItem({ lot, onEdit, onView, hideVendeur 
         <div className="flex-1 min-w-0 grid md:grid-cols-7 gap-4 items-center">
           <div className="md:col-span-2">
             <h3 className="font-bold text-[#1E40AF] text-sm mb-1">Lot {lot.reference}</h3>
-            <p className="text-xs text-slate-500 truncate">{lot.residence_nom}</p>
-            <Badge className={`${statusColors[lot.statut]} text-xs mt-1`}>
-              {statusLabels[lot.statut]}
-            </Badge>
+            <p className="text-xs text-slate-500 truncate mb-1">{lot.residence_nom}</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge className={`${statusColors[lot.statut]} text-xs`}>
+                {statusLabels[lot.statut]}
+              </Badge>
+              <WorkflowStepBadge lotId={lot.id} compact={true} />
+            </div>
           </div>
 
           <div>

@@ -43,36 +43,34 @@ export function WorkflowStepBadge({ lotId, compact = false }) {
         variant="outline"
         className={`
           ${isCompleted ? 'bg-green-50 text-green-700 border-green-200' : 'bg-blue-50 text-blue-700 border-blue-200'}
+          text-[10px] py-0.5 px-1.5
         `}
+        title={currentStep.label}
       >
         {isCompleted ? (
-          <CheckCircle2 className="w-3 h-3 mr-1" />
+          <CheckCircle2 className="w-2.5 h-2.5 mr-0.5" />
         ) : (
-          <Circle className="w-3 h-3 mr-1" />
+          <Circle className="w-2.5 h-2.5 mr-0.5" />
         )}
-        Étape {currentStep.order_index}
+        {currentStep.label}
       </Badge>
     );
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <Badge
-        variant="outline"
-        className={`
-          ${isCompleted ? 'bg-green-50 text-green-700 border-green-200' : 'bg-blue-50 text-blue-700 border-blue-200'}
-        `}
-      >
-        {isCompleted ? (
-          <CheckCircle2 className="w-3 h-3 mr-1" />
-        ) : (
-          <Circle className="w-3 h-3 mr-1" />
-        )}
-        Étape {currentStep.order_index}/{15}
-      </Badge>
-      <span className="text-xs text-slate-600 truncate max-w-[200px]">
-        {currentStep.label}
-      </span>
-    </div>
+    <Badge
+      variant="outline"
+      className={`
+        ${isCompleted ? 'bg-green-50 text-green-700 border-green-200' : 'bg-blue-50 text-blue-700 border-blue-200'}
+      `}
+    >
+      {isCompleted ? (
+        <CheckCircle2 className="w-3 h-3 mr-1.5" />
+      ) : (
+        <Circle className="w-3 h-3 mr-1.5" />
+      )}
+      <span className="font-medium">{currentStep.order_index}.</span>
+      <span className="ml-1">{currentStep.label}</span>
+    </Badge>
   );
 }
