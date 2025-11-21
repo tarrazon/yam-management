@@ -161,11 +161,24 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null }) {
   const canCompleteStep = (stepIndex) => {
     if (stepIndex === 0) return true;
 
-    const previousStep = steps[stepIndex - 1];
-    if (!previousStep) return true;
+    const currentStep = steps[stepIndex];
 
-    const previousProgress = previousStep.progress;
-    return previousProgress.status === 'completed' || previousProgress.status === 'skipped';
+    if (currentStep.is_automatic) {
+      const previousStep = steps[stepIndex - 1];
+      if (!previousStep) return true;
+      const previousProgress = previousStep.progress;
+      return previousProgress.status === 'completed' || previousProgress.status === 'skipped';
+    }
+
+    for (let i = stepIndex - 1; i >= 0; i--) {
+      const step = steps[i];
+      if (step.is_automatic) {
+        const stepProgress = step.progress;
+        return stepProgress.status === 'completed' || stepProgress.status === 'skipped';
+      }
+    }
+
+    return true;
   };
 
   return (
