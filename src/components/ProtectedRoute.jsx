@@ -21,7 +21,12 @@ export default function ProtectedRoute({ children, allowedRoles = [] }) {
 
   if (allowedRoles.length > 0 && profile && !allowedRoles.includes(profile.role_custom)) {
     // Rediriger vers le dashboard approprié selon le rôle
-    const redirectTo = profile.role_custom === 'partenaire' ? '/partenairesdashboard' : '/dashboardcrm';
+    let redirectTo = '/dashboardcrm';
+    if (profile.role_custom === 'partenaire') {
+      redirectTo = '/partenairesdashboard';
+    } else if (profile.role_custom === 'acquereur') {
+      redirectTo = '/acquereur-dashboard';
+    }
     return <Navigate to={redirectTo} replace />;
   }
 

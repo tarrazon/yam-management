@@ -121,9 +121,18 @@ const getNavigationItems = (userRole) => {
     },
     {
       title: "Gestion FAQ",
-      url: createPageUrl("FAQManagement"),
+      url: "/faq-management",
       icon: HelpCircle,
       roles: ['admin'],
+    },
+  ];
+
+  const acquereurItems = [
+    {
+      title: "Mon Espace Client",
+      url: "/acquereur-dashboard",
+      icon: LayoutDashboard,
+      roles: ['acquereur'],
     },
   ];
 
@@ -166,7 +175,7 @@ const getNavigationItems = (userRole) => {
     },
   ];
 
-  const allItems = [...adminItems, ...partenaireItems];
+  const allItems = [...adminItems, ...partenaireItems, ...acquereurItems];
   return allItems.filter(item => item.roles.includes(userRole || 'admin'));
 };
 
