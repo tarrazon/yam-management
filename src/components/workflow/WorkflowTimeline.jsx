@@ -32,10 +32,11 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
   const [acquereur, setAcquereur] = useState(null);
   const [vendeur, setVendeur] = useState(null);
   const [sendingEmail, setSendingEmail] = useState({});
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     loadWorkflow();
-  }, [lotId, workflowType]);
+  }, [lotId, workflowType, refreshKey]);
 
   const loadWorkflow = async () => {
     try {
@@ -56,12 +57,28 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
 
       if (lotData?.acquereur_id) {
         const acquereurData = await base44.entities.Acquereur.findOne(lotData.acquereur_id);
+        console.log('[WorkflowTimeline] Loaded acquereur:', {
+          id: acquereurData?.id,
+          nom: acquereurData?.nom,
+          prenom: acquereurData?.prenom,
+          email: acquereurData?.email
+        });
         setAcquereur(acquereurData);
+      } else {
+        setAcquereur(null);
       }
 
       if (lotData?.vendeur_id) {
         const vendeurData = await base44.entities.Vendeur.findOne(lotData.vendeur_id);
+        console.log('[WorkflowTimeline] Loaded vendeur:', {
+          id: vendeurData?.id,
+          nom: vendeurData?.nom,
+          prenom: vendeurData?.prenom,
+          email: vendeurData?.email
+        });
         setVendeur(vendeurData);
+      } else {
+        setVendeur(null);
       }
 
       const progressMap = {};
@@ -133,7 +150,7 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
       setSendingEmail(prev => ({ ...prev, [stepCode]: true }));
       await workflowService.resendWorkflowEmail(lotId, stepCode);
       toast.success('Email de relance envoyé avec succès');
-      await loadWorkflow();
+      setRefreshKey(prev => prev + 1);
     } catch (error) {
       console.error('Error resending email:', error);
       toast.error(error.message || 'Erreur lors de l\'envoi de l\'email');
