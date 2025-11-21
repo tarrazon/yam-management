@@ -27,7 +27,7 @@ const statusLabels = {
   vendu: "Vendu",
 };
 
-export default function LotLMNPListItem({ lot, onEdit, onView, onDelete, onPoserOption, showCommission = false, commission = 0, hidePartenaireAcquereur = false, partenaires = [] }) {
+export default function LotLMNPListItem({ lot, onEdit, onView, onDelete, onPoserOption, showCommission = false, commission = 0, hidePartenaireAcquereur = false, partenaires = [], showExtendedView = false }) {
   const firstPhoto = lot.photos?.[0];
 
   const partenaire = partenaires.find(p => p.id === lot.partenaire_id);
@@ -42,6 +42,198 @@ export default function LotLMNPListItem({ lot, onEdit, onView, onDelete, onPoser
   const residence = residences.find(r => r.id === lot.residence_id);
   const residencePhoto = residence?.documents?.photos?.[0];
 
+  if (showExtendedView) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        className="bg-white rounded-lg shadow hover:shadow-lg transition-all border border-slate-100 overflow-hidden"
+      >
+        <div className="overflow-x-auto">
+          <div className="inline-flex min-w-full">
+            <div className="flex items-center gap-2 p-3 sticky left-0 bg-white z-10 border-r border-slate-200 min-w-[280px]">
+              <div className="w-16 h-16 rounded-lg overflow-hidden bg-slate-200 flex-shrink-0">
+                {firstPhoto ? (
+                  <StorageImage
+                    src={firstPhoto}
+                    alt={`Lot ${lot.numero || lot.reference}`}
+                    className="w-full h-full object-cover"
+                    fallback={residencePhoto ? (
+                      <StorageImage
+                        src={residencePhoto}
+                        alt={lot.residence_nom || 'Résidence'}
+                        className="w-full h-full object-cover opacity-70"
+                        fallback={
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Building2 className="w-6 h-6 text-slate-400" />
+                          </div>
+                        }
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Building2 className="w-6 h-6 text-slate-400" />
+                      </div>
+                    )}
+                  />
+                ) : residencePhoto ? (
+                  <StorageImage
+                    src={residencePhoto}
+                    alt={lot.residence_nom || 'Résidence'}
+                    className="w-full h-full object-cover opacity-70"
+                    fallback={
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Building2 className="w-6 h-6 text-slate-400" />
+                      </div>
+                    }
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Building2 className="w-6 h-6 text-slate-400" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-[#1E40AF] text-xs mb-0.5 truncate">Lot {lot.reference}</h3>
+                <p className="text-[10px] text-slate-500 truncate">{lot.residence_nom || 'Résidence'}</p>
+                <Badge className={`${statusColors[lot.statut]} text-[10px] mt-0.5`}>
+                  {statusLabels[lot.statut]}
+                </Badge>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 px-4 py-3">
+              <div className="min-w-[120px]">
+                <p className="text-[10px] text-slate-500 mb-0.5">Type résidence</p>
+                <p className="font-semibold text-slate-700 text-xs">{lot.type_residence || '-'}</p>
+              </div>
+
+              <div className="min-w-[100px]">
+                <p className="text-[10px] text-slate-500 mb-0.5">Ville</p>
+                <p className="font-semibold text-slate-700 text-xs">{lot.ville || residence?.ville || '-'}</p>
+              </div>
+
+              <div className="min-w-[100px]">
+                <p className="text-[10px] text-slate-500 mb-0.5">Région</p>
+                <p className="font-semibold text-slate-700 text-xs">{lot.region || residence?.region || '-'}</p>
+              </div>
+
+              <div className="min-w-[80px]">
+                <p className="text-[10px] text-slate-500 mb-0.5">Typologie</p>
+                <p className="font-semibold text-slate-700 text-xs">{lot.typologie || '-'}</p>
+              </div>
+
+              <div className="min-w-[80px]">
+                <p className="text-[10px] text-slate-500 mb-0.5">Surface int.</p>
+                <p className="font-semibold text-slate-700 text-xs">{lot.surface ? `${lot.surface}m²` : '-'}</p>
+              </div>
+
+              <div className="min-w-[80px]">
+                <p className="text-[10px] text-slate-500 mb-0.5">Surface ext.</p>
+                <p className="font-semibold text-slate-700 text-xs">{lot.surface_exterieure ? `${lot.surface_exterieure}m²` : '-'}</p>
+              </div>
+
+              <div className="min-w-[70px]">
+                <p className="text-[10px] text-slate-500 mb-0.5">Parking</p>
+                <p className="font-semibold text-slate-700 text-xs">{lot.parking ? 'Oui' : 'Non'}</p>
+              </div>
+
+              <div className="min-w-[110px]">
+                <p className="text-[10px] text-slate-500 mb-0.5">Prix mobilier</p>
+                <p className="font-semibold text-slate-700 text-xs">{lot.prix_mobilier ? `${formatCurrency(lot.prix_mobilier)} €` : '-'}</p>
+              </div>
+
+              <div className="min-w-[130px]">
+                <p className="text-[10px] text-slate-500 mb-0.5">Prix total HT</p>
+                <p className="font-bold text-[#1E40AF] text-xs">{lot.prix_total_ht ? `${formatCurrency(lot.prix_total_ht)} €` : '-'}</p>
+              </div>
+
+              <div className="min-w-[120px]">
+                <p className="text-[10px] text-slate-500 mb-0.5">TVA récupérable</p>
+                <p className="font-semibold text-slate-700 text-xs">{lot.tva_recuperable ? `${formatCurrency(lot.tva_recuperable)} €` : '-'}</p>
+              </div>
+
+              <div className="min-w-[130px]">
+                <p className="text-[10px] text-slate-500 mb-0.5">Prix total TTC</p>
+                <p className="font-bold text-[#1E40AF] text-xs">{lot.prix_total_ttc ? `${formatCurrency(lot.prix_total_ttc)} €` : '-'}</p>
+              </div>
+
+              <div className="min-w-[120px]">
+                <p className="text-[10px] text-slate-500 mb-0.5">Exploitant</p>
+                <p className="font-semibold text-slate-700 text-xs truncate max-w-[120px]">{lot.exploitant || '-'}</p>
+              </div>
+
+              <div className="min-w-[110px]">
+                <p className="text-[10px] text-slate-500 mb-0.5">Loyer annuel HT</p>
+                <p className="font-semibold text-slate-700 text-xs">{lot.loyer_annuel_ht ? `${formatCurrency(lot.loyer_annuel_ht)} €` : '-'}</p>
+              </div>
+
+              <div className="min-w-[80px]">
+                <p className="text-[10px] text-slate-500 mb-0.5">Rentabilité</p>
+                <div className="flex items-center gap-1">
+                  {lot.rentabilite != null ? (
+                    <>
+                      <TrendingUp className="w-3 h-3 text-green-600" />
+                      <p className="font-bold text-green-600 text-xs">{lot.rentabilite}%</p>
+                    </>
+                  ) : (
+                    <span className="text-xs text-slate-400">-</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex gap-1 min-w-[180px] justify-end sticky right-0 bg-white pl-2 border-l border-slate-200">
+                {onPoserOption && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={onPoserOption}
+                    className="hover:bg-green-100 text-green-700 hover:text-green-800 h-7 px-2"
+                    title="Poser une option"
+                  >
+                    <Clock className="w-3 h-3 mr-1" />
+                    <span className="text-[10px]">Option</span>
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onView(lot)}
+                  className="hover:bg-slate-100 h-7 w-7"
+                  title="Voir"
+                >
+                  <Eye className="w-3.5 h-3.5 text-slate-500" />
+                </Button>
+                {onEdit && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onEdit(lot)}
+                    className="hover:bg-slate-100 h-7 w-7"
+                    title="Modifier"
+                  >
+                    <Edit className="w-3.5 h-3.5 text-slate-500" />
+                  </Button>
+                )}
+                {onDelete && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onDelete(lot)}
+                    className="hover:bg-red-50 h-7 w-7"
+                    title="Supprimer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
@@ -50,7 +242,6 @@ export default function LotLMNPListItem({ lot, onEdit, onView, onDelete, onPoser
       className="bg-white rounded-lg shadow hover:shadow-lg transition-all p-4 border border-slate-100"
     >
       <div className="flex items-center gap-4">
-        {/* Miniature du lot ou de la résidence */}
         <div className="w-20 h-20 rounded-lg overflow-hidden bg-slate-200 flex-shrink-0">
           {firstPhoto ? (
             <StorageImage
@@ -92,7 +283,6 @@ export default function LotLMNPListItem({ lot, onEdit, onView, onDelete, onPoser
           )}
         </div>
 
-        {/* Informations principales */}
         <div className="flex-1 min-w-0 grid md:grid-cols-6 gap-4 items-center">
           <div className="md:col-span-2">
             <h3 className="font-bold text-[#1E40AF] text-sm mb-1">Lot {lot.reference}</h3>

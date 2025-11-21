@@ -503,7 +503,6 @@ export default function LotsPartenaire() {
           <div className="space-y-3">
             <AnimatePresence>
               {lotsWithCommission.map((lot) => {
-                // Tous les lots disponibles peuvent avoir une option posée
                 const canPoserOption = lot.statut === 'disponible';
                 return (
                   <LotLMNPListItem
@@ -518,6 +517,7 @@ export default function LotsPartenaire() {
                     commission={lot.commission_calculee}
                     hidePartenaireAcquereur={true}
                     partenaires={partenaire ? [partenaire] : []}
+                    showExtendedView={true}
                   />
                 );
               })}
