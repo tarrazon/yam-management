@@ -38,7 +38,7 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
 
       if (!stepsData || stepsData.length === 0) {
         console.warn('No workflow steps found in database');
-        toast.error('Aucune étape de workflow trouvée');
+        toast.error('Aucune étape de dossier trouvée');
         return;
       }
 
@@ -150,7 +150,7 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
     return (
       <div className="text-center py-8">
         <AlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-3" />
-        <p className="text-slate-600 font-medium">Aucune étape de workflow configurée</p>
+        <p className="text-slate-600 font-medium">Aucune étape de dossier configurée</p>
         <p className="text-sm text-slate-500 mt-1">
           Les étapes seront créées automatiquement pour ce lot
         </p>

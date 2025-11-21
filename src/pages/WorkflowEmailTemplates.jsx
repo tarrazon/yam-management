@@ -131,10 +131,10 @@ export default function WorkflowEmailTemplates() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-[#1E40AF] flex items-center gap-3">
             <Mail className="w-8 h-8" />
-            Templates d'emails du workflow
+            Templates d'emails du dossier
           </h1>
           <p className="text-slate-500 mt-2">
-            Configurez les emails automatiques envoyés lors de la complétion des étapes
+            Configurez les emails automatiques envoyés lors de la complétion des étapes du dossier
           </p>
         </div>
 

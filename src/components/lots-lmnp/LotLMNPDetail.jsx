@@ -3,11 +3,12 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { X, Edit, MapPin, Home, Euro, TrendingUp, Building2, FileText, Download, Image, User, Handshake, Trash2, ExternalLink } from "lucide-react";
+import { X, Edit, MapPin, Home, Euro, TrendingUp, Building2, FileText, Download, Image, User, Handshake, Trash2, ExternalLink, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { formatCurrency, calculatePrixFAI } from "@/utils/formHelpers";
+import { WorkflowTimeline } from "../workflow/WorkflowTimeline";
 
 const statusColors = {
   disponible: "bg-green-100 text-green-800 border-green-200",
@@ -497,6 +498,26 @@ export default function LotLMNPDetail({ lot, residence, onClose, onEdit, onDelet
                       <Download className="w-4 h-4 text-green-600" />
                     </a>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Workflow vendeur */}
+          {lot.vendeur_id && onEdit && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-[#F59E0B]" />
+                  Suivi du dossier vendeur
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-slate-500 mb-4">
+                  Suivi des étapes liées au vendeur et aux documents de la résidence.
+                </p>
+                <div className="bg-slate-50 rounded-lg p-4 border border-slate-200 max-h-[600px] overflow-y-auto">
+                  <WorkflowTimeline lotId={lot.id} onUpdate={() => {}} workflowType="vendeur" />
                 </div>
               </CardContent>
             </Card>

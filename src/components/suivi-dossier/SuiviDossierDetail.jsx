@@ -104,18 +104,33 @@ export default function SuiviDossierDetail({ lot, onClose, onEdit }) {
             </CardContent>
           </Card>
 
-          {/* Workflow détaillé */}
+          {/* Workflow acquéreur */}
           <Card className="border-2 border-slate-200 shadow-lg">
             <CardHeader className="bg-gradient-to-r from-slate-50 to-white">
               <CardTitle className="text-lg flex items-center gap-2">
                 <ListChecks className="w-5 h-5 text-[#F59E0B]" />
-                Étapes du workflow
+                Étapes du dossier acquéreur
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-              <WorkflowTimeline key={refreshKey} lotId={lot.id} onUpdate={handleWorkflowUpdate} />
+              <WorkflowTimeline key={refreshKey} lotId={lot.id} onUpdate={handleWorkflowUpdate} workflowType="acquereur" />
             </CardContent>
           </Card>
+
+          {/* Workflow vendeur */}
+          {lot.vendeur_id && (
+            <Card className="border-2 border-slate-200 shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-slate-50 to-white">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <ListChecks className="w-5 h-5 text-[#F59E0B]" />
+                  Étapes du dossier vendeur
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <WorkflowTimeline key={refreshKey} lotId={lot.id} onUpdate={handleWorkflowUpdate} workflowType="vendeur" />
+              </CardContent>
+            </Card>
+          )}
 
           {/* Informations du lot */}
           <Card>

@@ -336,7 +336,7 @@ export default function AcquereurDetailPartenaire({ acquereur, lot, onClose, onE
                 </CardHeader>
                 <CardContent>
                   <p className="text-xs text-slate-500 mb-4">
-                    Voici le suivi complet des étapes du dossier. Les étapes sont gérées par l'équipe commerciale.
+                    Suivi complet des étapes du dossier, géré par l'équipe commerciale.
                   </p>
                   <div className="bg-slate-50 rounded-lg p-4 border border-slate-200 max-h-[600px] overflow-y-auto">
                     <WorkflowTimeline lotId={lot.id} onUpdate={() => {}} workflowType="acquereur" readOnly={true} />
