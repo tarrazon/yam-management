@@ -278,7 +278,7 @@ function PagesContent() {
 
             <Route path="/APIDocumentation" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['admin']}><APIDocumentation /></ProtectedRoute></Layout>} />
 
-            <Route path="/acquereur-dashboard" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['acquereur']}><AcquereurDashboard /></ProtectedRoute></Layout>} />
+            <Route path="/acquereur-dashboard" element={<ProtectedRoute allowedRoles={['acquereur']}><AcquereurDashboard /></ProtectedRoute>} />
 
             <Route path="/faq-management" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['admin']}><FAQManagement /></ProtectedRoute></Layout>} />
 
