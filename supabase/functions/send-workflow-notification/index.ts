@@ -15,6 +15,7 @@ interface EmailData {
   residence_nom: string;
   acquereur_email?: string;
   vendeur_email?: string;
+  documents_manquants?: Array<{label: string; present: boolean}>;
 }
 
 const emailTemplates = {
@@ -24,7 +25,7 @@ const emailTemplates = {
   },
   docs_reminder: {
     subject: "Relance documents - Lot {lot_reference}",
-    body: `Bonjour,\n\nNous n'avons toujours pas reçu certains documents administratifs concernant le lot {lot_reference} ({residence_nom}).\n\nMerci de nous les transmettre dans les 15 jours.\n\nCordialement,\nYAM Immobilier`
+    body: `Bonjour,\n\nNous n'avons toujours pas reçu certains documents administratifs concernant le lot {lot_reference} ({residence_nom}).\n\nDocuments manquants:\n{documents_manquants}\n\nMerci de nous les transmettre dans les 15 jours.\n\nCordialement,\nYAM Immobilier`
   },
   option_notification: {
     subject: "Option posée - Lot {lot_reference}",
@@ -57,13 +58,21 @@ Deno.serve(async (req: Request) => {
       throw new Error(`Template not found: ${template}`);
     }
 
+    const documentsManquantsText = emailData.documents_manquants
+      ? emailData.documents_manquants
+          .filter(doc => !doc.present)
+          .map(doc => `- ${doc.label}`)
+          .join("\\n")
+      : "";
+
     const subject = templateData.subject
       .replace("{lot_reference}", lot_reference)
       .replace("{residence_nom}", residence_nom);
 
     const body = templateData.body
       .replace("{lot_reference}", lot_reference)
-      .replace("{residence_nom}", residence_nom);
+      .replace("{residence_nom}", residence_nom)
+      .replace("{documents_manquants}", documentsManquantsText || "Aucun document manquant");
 
     const emailRecipients: string[] = [];
     if (recipients.includes("vendeur") && emailData.vendeur_email) {

@@ -370,12 +370,12 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
                       </span>
                     </div>
                   )}
-                  {step.send_email && !progressItem.email_sent && step.delay_days > 0 && (
+                  {step.send_email && !progressItem.email_sent && step.delay_days > 0 && progressItem.created_at && (
                     <div className="flex items-center gap-2 text-xs text-blue-600">
                       <Mail className="w-3 h-3" />
                       <span>
-                        Email automatique prévu le {format(addDays(new Date(progressItem.completed_at), step.delay_days), 'dd MMMM yyyy', { locale: fr })}
-                        <span className="text-slate-500"> ({step.delay_days} jours)</span>
+                        Email automatique prévu le {format(addDays(new Date(progressItem.created_at), step.delay_days), 'dd MMMM yyyy', { locale: fr })}
+                        <span className="text-slate-500"> ({step.delay_days} jours après création)</span>
                       </span>
                     </div>
                   )}

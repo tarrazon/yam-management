@@ -200,6 +200,9 @@ export const workflowService = {
 
       if (!lot) return;
 
+      const { getDocumentsByWorkflowStep } = await import('../hooks/useDocumentsManquants');
+      const documentsManquants = await getDocumentsByWorkflowStep(stepCode, lot);
+
       const emailData = {
         lot_id: lotId,
         step_code: stepCode,
@@ -208,7 +211,8 @@ export const workflowService = {
         lot_reference: lot.reference,
         residence_nom: lot.residence?.nom,
         acquereur_email: lot.acquereur?.email,
-        vendeur_email: lot.vendeur?.email
+        vendeur_email: lot.vendeur?.email,
+        documents_manquants: documentsManquants
       };
 
       const response = await fetch(

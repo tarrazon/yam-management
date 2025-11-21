@@ -109,6 +109,7 @@ export default function WorkflowEmailTemplates() {
           <p><code className="bg-blue-100 px-1 rounded">{'{{date}}'}</code> - Date actuelle</p>
           <p><code className="bg-blue-100 px-1 rounded">{'{{step_label}}'}</code> - Libellé de l'étape</p>
           <p><code className="bg-blue-100 px-1 rounded">{'{{notes}}'}</code> - Notes de l'étape</p>
+          <p><code className="bg-blue-100 px-1 rounded">{'{{documents_manquants}}'}</code> - Liste des documents manquants (pour relances)</p>
         </div>
       </div>
     );
@@ -180,7 +181,7 @@ export default function WorkflowEmailTemplates() {
               </CardHeader>
               {step.send_email && step.email_body && (
                 <CardContent>
-                  <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                  <div className="bg-white rounded-lg p-4 border border-slate-200">
                     <p className="text-xs font-semibold text-slate-600 mb-2">Aperçu du message:</p>
                     <p className="text-sm text-slate-700 whitespace-pre-wrap line-clamp-3">
                       {step.email_body}
@@ -240,7 +241,7 @@ export default function WorkflowEmailTemplates() {
                     rows={10}
                     placeholder="Bonjour,&#10;&#10;L'étape {{step_label}} a été complétée pour le lot {{lot_reference}} de la résidence {{residence_nom}}.&#10;&#10;Notes: {{notes}}&#10;&#10;Cordialement"
                     required={formData.send_email}
-                    className="font-mono text-sm"
+                    className="font-mono text-sm bg-white"
                   />
                 </div>
 
