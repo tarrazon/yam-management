@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { autoCleanFormData } from "@/utils/formHelpers";
+import { WorkflowTimeline } from "../workflow/WorkflowTimeline";
 
 export default function LotLMNPForm({ lot, residences, vendeurs, onSubmit, onCancel, isLoading }) {
   const [formData, setFormData] = useState(lot || {
@@ -583,6 +584,18 @@ export default function LotLMNPForm({ lot, residences, vendeurs, onSubmit, onCan
               </TabsContent>
 
               <TabsContent value="suivi" className="space-y-6 mt-6">
+                {lot?.id && (
+                  <div className="mb-6 border border-slate-200 rounded-lg p-4 bg-slate-50">
+                    <h3 className="text-sm font-semibold text-slate-700 mb-3">Étapes workflow vendeur</h3>
+                    <p className="text-xs text-slate-500 mb-3">
+                      Ces étapes concernent la relation avec le vendeur, avant la mise en vente du lot.
+                    </p>
+                    <div className="bg-white rounded-lg p-4 border border-slate-200 max-h-[400px] overflow-y-auto">
+                      <WorkflowTimeline lotId={lot.id} onUpdate={() => {}} workflowType="vendeur" />
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="date_premier_contact">Date du premier contact</Label>

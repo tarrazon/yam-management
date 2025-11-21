@@ -1,11 +1,16 @@
 import { supabase } from '../lib/supabase';
 
 export const workflowService = {
-  async getWorkflowSteps() {
-    const { data, error } = await supabase
+  async getWorkflowSteps(workflowType = null) {
+    let query = supabase
       .from('workflow_steps')
-      .select('*')
-      .order('order_index');
+      .select('*');
+
+    if (workflowType) {
+      query = query.eq('workflow_type', workflowType);
+    }
+
+    const { data, error } = await query.order('order_index');
 
     if (error) throw error;
     return data;
@@ -116,6 +121,35 @@ export const workflowService = {
       if (error) throw error;
       return data;
     }
+  },
+
+  async getCurrentStep(lotId) {
+    const [allSteps, progressData] = await Promise.all([
+      this.getWorkflowSteps(),
+      this.getLotWorkflowProgress(lotId)
+    ]);
+
+    if (!allSteps || allSteps.length === 0) return null;
+
+    const progressMap = {};
+    progressData.forEach(p => {
+      progressMap[p.step_code] = p.status;
+    });
+
+    for (const step of allSteps) {
+      const status = progressMap[step.code];
+      if (status === 'pending' || !status) {
+        return {
+          ...step,
+          status: status || 'pending'
+        };
+      }
+    }
+
+    return {
+      ...allSteps[allSteps.length - 1],
+      status: 'completed'
+    };
   },
 
   async getWorkflowSummary(lotId) {

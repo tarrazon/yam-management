@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import StorageImage from "@/components/common/StorageImage";
 import { formatCurrency, calculatePrixFAI } from "@/utils/formHelpers";
+import { WorkflowStepBadge } from "../workflow/WorkflowStepBadge";
 
 const statusColors = {
   disponible: "bg-green-100 text-green-800 border-green-200",
@@ -135,11 +136,16 @@ export default function LotLMNPCard({ lot, onEdit, onView, onDelete, onPoserOpti
         <CardHeader className="border-b border-slate-100 pb-3 pt-3">
           <div className="flex justify-between items-start">
             <div className="flex-1 min-w-0">
-              <h3 className="text-base font-bold text-[#1E40AF]">
-                Lot {lot.reference}
-              </h3>
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="text-base font-bold text-[#1E40AF]">
+                  Lot {lot.reference}
+                </h3>
+                {lot.statut !== 'disponible' && (
+                  <WorkflowStepBadge lotId={lot.id} compact={true} />
+                )}
+              </div>
               {!hidePartenaireAcquereur && lot.statut !== 'disponible' && (lot.partenaire_nom || lot.acquereur_nom) && (
-                <div className="mt-2 space-y-1">
+                <div className="mt-1 space-y-1">
                   {lot.partenaire_nom && (
                     <p className="text-xs text-slate-600">
                       <span className="font-medium">Partenaire:</span> {lot.partenaire_nom}

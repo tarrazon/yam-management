@@ -18,7 +18,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
-export function WorkflowTimeline({ lotId, onUpdate }) {
+export function WorkflowTimeline({ lotId, onUpdate, workflowType = null }) {
   const [progress, setProgress] = useState([]);
   const [steps, setSteps] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,14 +26,14 @@ export function WorkflowTimeline({ lotId, onUpdate }) {
 
   useEffect(() => {
     loadWorkflow();
-  }, [lotId]);
+  }, [lotId, workflowType]);
 
   const loadWorkflow = async () => {
     try {
       setLoading(true);
       const [progressData, stepsData] = await Promise.all([
         workflowService.getLotWorkflowProgress(lotId),
-        workflowService.getWorkflowSteps()
+        workflowService.getWorkflowSteps(workflowType)
       ]);
 
       if (!stepsData || stepsData.length === 0) {
