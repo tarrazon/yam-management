@@ -1,15 +1,31 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, CheckCircle, XCircle, AlertCircle, Filter, ShoppingBag } from "lucide-react";
+import { Clock, CheckCircle, XCircle, AlertCircle, Filter, ShoppingBag, ChevronRight } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
 
 export default function SuiviOptions() {
   const [currentUser, setCurrentUser] = useState(null);
   const [filter, setFilter] = useState("all");
+  const queryClient = useQueryClient();
+
+  const updateLotMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.LotLMNP.update(id, data),
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ['lots_suivi'] });
+      queryClient.refetchQueries({ queryKey: ['toutes_mes_options'] });
+      toast.success('Statut mis à jour avec succès');
+    },
+    onError: (error) => {
+      console.error('Erreur lors de la mise à jour:', error);
+      toast.error('Erreur lors de la mise à jour du statut');
+    },
+  });
 
   useEffect(() => {
     base44.auth.me().then(setCurrentUser);
@@ -202,6 +218,58 @@ export default function SuiviOptions() {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Actions rapides pour changer le statut */}
+          <div className="mt-4 pt-4 border-t border-slate-100">
+            <p className="text-xs font-semibold text-slate-600 mb-2">Actions rapides</p>
+            <div className="flex gap-2 flex-wrap">
+              {lotStatut === 'sous_option' && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs"
+                  onClick={() => updateLotMutation.mutate({
+                    id: lot.id,
+                    data: { statut: 'reserve' }
+                  })}
+                  disabled={updateLotMutation.isLoading}
+                >
+                  <ChevronRight className="w-3 h-3 mr-1" />
+                  Passer en réservé
+                </Button>
+              )}
+              {lotStatut === 'reserve' && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs"
+                  onClick={() => updateLotMutation.mutate({
+                    id: lot.id,
+                    data: { statut: 'compromis' }
+                  })}
+                  disabled={updateLotMutation.isLoading}
+                >
+                  <ChevronRight className="w-3 h-3 mr-1" />
+                  Passer en compromis
+                </Button>
+              )}
+              {lotStatut === 'compromis' && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs"
+                  onClick={() => updateLotMutation.mutate({
+                    id: lot.id,
+                    data: { statut: 'vendu' }
+                  })}
+                  disabled={updateLotMutation.isLoading}
+                >
+                  <ChevronRight className="w-3 h-3 mr-1" />
+                  Passer en vendu
+                </Button>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>

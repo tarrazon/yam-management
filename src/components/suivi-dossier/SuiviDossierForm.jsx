@@ -10,6 +10,9 @@ import { motion } from "framer-motion";
 
 export default function SuiviDossierForm({ lot, onSubmit, onCancel, isLoading }) {
   const [formData, setFormData] = useState({
+    statut: lot.statut || 'sous_option',
+    date_prise_option: lot.date_prise_option || '',
+    date_signature_compromis: lot.date_signature_compromis || '',
     date_premier_contact: lot.date_premier_contact || '',
     date_signature_acte: lot.date_signature_acte || '',
     statut_suivi: lot.statut_suivi || 'en_cours',
@@ -74,6 +77,30 @@ export default function SuiviDossierForm({ lot, onSubmit, onCancel, isLoading })
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto flex flex-col">
           <CardContent className="p-6 space-y-6 flex-1">
             <div className="space-y-6">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-700 mb-4">Statut principal du lot</h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="statut">Statut</Label>
+                    <Select
+                      value={formData.statut}
+                      onValueChange={(value) => setFormData({ ...formData, statut: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sous_option">Sous option</SelectItem>
+                        <SelectItem value="reserve">Réservé</SelectItem>
+                        <SelectItem value="compromis">Compromis</SelectItem>
+                        <SelectItem value="vendu">Vendu</SelectItem>
+                        <SelectItem value="disponible">Disponible</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <h3 className="text-sm font-semibold text-slate-700 mb-4">Statut du suivi</h3>
                 <div className="grid md:grid-cols-3 gap-4">
