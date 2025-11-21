@@ -146,15 +146,19 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
   };
 
   const handleResendEmail = async (stepCode) => {
+    console.log('[WorkflowTimeline] 🚀 handleResendEmail called', { stepCode, lotId });
     try {
       setSendingEmail(prev => ({ ...prev, [stepCode]: true }));
+      console.log('[WorkflowTimeline] 📧 Calling workflowService.resendWorkflowEmail...');
       await workflowService.resendWorkflowEmail(lotId, stepCode);
+      console.log('[WorkflowTimeline] ✅ Email sent successfully');
       toast.success('Email de relance envoyé avec succès');
       setRefreshKey(prev => prev + 1);
     } catch (error) {
-      console.error('Error resending email:', error);
+      console.error('[WorkflowTimeline] ❌ Error resending email:', error);
       toast.error(error.message || 'Erreur lors de l\'envoi de l\'email');
     } finally {
+      console.log('[WorkflowTimeline] 🏁 handleResendEmail finished');
       setSendingEmail(prev => ({ ...prev, [stepCode]: false }));
     }
   };
@@ -315,15 +319,31 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
                         Dernier email envoyé le : {format(new Date(step.progress.email_sent_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}
                       </p>
                       <div className="text-xs text-green-600 ml-4 space-y-0.5">
-                        {acquereur?.email && (
-                          <p>→ Acquéreur : {acquereur.email}</p>
-                        )}
-                        {vendeur?.email && (
-                          <p>→ Vendeur : {vendeur.email}</p>
-                        )}
-                        {!acquereur?.email && !vendeur?.email && (
-                          <p className="text-amber-600">⚠ Aucun email de destinataire disponible</p>
-                        )}
+                        {(() => {
+                          const emailRecipients = step.email_recipients || ['acquereur', 'vendeur'];
+                          const hasRecipients =
+                            (emailRecipients.includes('acquereur') && acquereur?.email) ||
+                            (emailRecipients.includes('vendeur') && vendeur?.email) ||
+                            emailRecipients.includes('bo');
+
+                          if (!hasRecipients) {
+                            return <p className="text-amber-600">⚠ Aucun email de destinataire disponible</p>;
+                          }
+
+                          return (
+                            <>
+                              {emailRecipients.includes('acquereur') && acquereur?.email && (
+                                <p>→ Acquéreur : {acquereur.email}</p>
+                              )}
+                              {emailRecipients.includes('vendeur') && vendeur?.email && (
+                                <p>→ Vendeur : {vendeur.email}</p>
+                              )}
+                              {emailRecipients.includes('bo') && (
+                                <p>→ Back Office</p>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
                     </div>
                   )}
