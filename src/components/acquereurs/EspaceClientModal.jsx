@@ -42,18 +42,22 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
 
 
   // Récupérer les lots associés avec les infos de résidence
-  const { data: lotsLmnp = [] } = useQuery({
-    queryKey: ['lots-lmnp-acquereur', acquereur.id],
+  const { data: lotsLmnp = [], isLoading: loadingLots } = useQuery({
+    queryKey: ['lots-lmnp-acquereur', acquereur?.id],
     queryFn: async () => {
+      if (!acquereur?.id) return [];
       const { data, error } = await supabase
         .from('lots_lmnp')
         .select('id, numero, statut, residence:residences_gestion(nom, ville)')
         .eq('acquereur_id', acquereur.id)
         .order('numero');
-      if (error) throw error;
+      if (error) {
+        console.error('Erreur chargement lots:', error);
+        throw error;
+      }
       return data || [];
     },
-    enabled: isOpen && !!acquereur.id,
+    enabled: isOpen && !!acquereur?.id,
   });
 
   // Sélectionner automatiquement le premier lot
@@ -323,9 +327,17 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
 
               {/* Photos Tab */}
               <TabsContent value="photos" className="space-y-4">
-                {!lotLmnp?.id ? (
+                {loadingLots ? (
                   <div className="text-center py-8 text-slate-500">
-                    Aucun lot associé. Les photos seront disponibles une fois un lot attribué.
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1E40AF] mx-auto mb-2"></div>
+                    Chargement des lots...
+                  </div>
+                ) : !lotLmnp?.id ? (
+                  <div className="text-center py-8 text-slate-500">
+                    <p className="mb-2">Aucun lot associé. Les photos seront disponibles une fois un lot attribué.</p>
+                    <p className="text-xs text-slate-400">
+                      Acquéreur ID: {acquereur?.id || 'non défini'} - Lots trouvés: {lotsLmnp.length}
+                    </p>
                   </div>
                 ) : (
                   <>
@@ -420,9 +432,17 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
 
               {/* Appels de fond Tab */}
               <TabsContent value="appels-fond" className="space-y-4">
-                {!lotLmnp?.id ? (
+                {loadingLots ? (
                   <div className="text-center py-8 text-slate-500">
-                    Aucun lot associé. Les appels de fond seront disponibles une fois un lot attribué.
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1E40AF] mx-auto mb-2"></div>
+                    Chargement des lots...
+                  </div>
+                ) : !lotLmnp?.id ? (
+                  <div className="text-center py-8 text-slate-500">
+                    <p className="mb-2">Aucun lot associé. Les appels de fond seront disponibles une fois un lot attribué.</p>
+                    <p className="text-xs text-slate-400">
+                      Acquéreur ID: {acquereur?.id || 'non défini'} - Lots trouvés: {lotsLmnp.length}
+                    </p>
                   </div>
                 ) : (
                   <>
