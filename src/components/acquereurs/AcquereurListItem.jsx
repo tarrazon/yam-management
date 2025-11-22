@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, Eye, Mail, Phone, Euro, Trash2 } from "lucide-react";
+import { Edit, Eye, Mail, Phone, Euro, Trash2, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
+import EspaceClientModal from "./EspaceClientModal";
 
 const statusColors = {
   prospect: "bg-blue-100 text-blue-800",
@@ -23,7 +24,10 @@ const statusLabels = {
 };
 
 export default function AcquereurListItem({ acquereur, onEdit, onView, onDelete }) {
+  const [showEspaceClient, setShowEspaceClient] = useState(false);
+
   return (
+    <>
     <motion.div
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
@@ -65,6 +69,15 @@ export default function AcquereurListItem({ acquereur, onEdit, onView, onDelete 
             <Button
               variant="ghost"
               size="icon"
+              onClick={() => setShowEspaceClient(true)}
+              className="hover:bg-blue-50 h-8 w-8"
+              title="Espace Client"
+            >
+              <MessageSquare className="w-4 h-4 text-blue-600" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => onView(acquereur)}
               className="hover:bg-slate-100 h-8 w-8"
               title="Voir"
@@ -95,5 +108,12 @@ export default function AcquereurListItem({ acquereur, onEdit, onView, onDelete 
         </div>
       </div>
     </motion.div>
+
+    <EspaceClientModal
+      acquereur={acquereur}
+      isOpen={showEspaceClient}
+      onClose={() => setShowEspaceClient(false)}
+    />
+    </>
   );
 }

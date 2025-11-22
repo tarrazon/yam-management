@@ -1,12 +1,13 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { User, Edit, Mail, Phone, Euro, TrendingUp, Eye, FileCheck, Trash2, Users } from "lucide-react";
+import { User, Edit, Mail, Phone, Euro, TrendingUp, Eye, FileCheck, Trash2, Users, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import EspaceClientModal from "./EspaceClientModal";
 
 const statusColors = {
   prospect: "bg-blue-100 text-blue-800 border-blue-200",
@@ -39,6 +40,7 @@ const accordBancaireLabels = {
 };
 
 export default function AcquereurCard({ acquereur, onEdit, onView, onDelete }) {
+  const [showEspaceClient, setShowEspaceClient] = useState(false);
   const documents = acquereur.documents || {};
   const documentsCount = Object.values(documents).filter(doc => doc && doc !== "").length;
   const totalDocuments = 5;
@@ -74,6 +76,15 @@ export default function AcquereurCard({ acquereur, onEdit, onView, onDelete }) {
               </div>
             </div>
             <div className="flex gap-1 flex-shrink-0">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowEspaceClient(true)}
+                className="hover:bg-blue-50"
+                title="Espace Client"
+              >
+                <MessageSquare className="w-4 h-4 text-blue-600" />
+              </Button>
               <Button
                 variant="ghost"
                 size="icon"
@@ -188,6 +199,12 @@ export default function AcquereurCard({ acquereur, onEdit, onView, onDelete }) {
           </div>
         </CardContent>
       </Card>
+
+      <EspaceClientModal
+        acquereur={acquereur}
+        isOpen={showEspaceClient}
+        onClose={() => setShowEspaceClient(false)}
+      />
     </motion.div>
   );
 }
