@@ -235,7 +235,7 @@ export default function AppelsDeFondTimeline({ lotId, acquereurId, isAdmin = fal
                           </div>
                         )}
 
-                        {etape.date_validation_admin && (
+                        {etape.date_validation_admin && etape.statut !== 'en_attente' && (
                           <p className="text-xs text-slate-500 mt-2">
                             Validé le{" "}
                             {format(
@@ -246,10 +246,11 @@ export default function AppelsDeFondTimeline({ lotId, acquereurId, isAdmin = fal
                           </p>
                         )}
 
-                        {etape.notes_admin && (
-                          <div className="mt-2 p-3 bg-slate-50 rounded-md border border-slate-200">
-                            <p className="text-sm text-slate-700">
-                              <strong>Notes:</strong> {etape.notes_admin}
+                        {etape.notes_admin && etape.statut !== 'en_attente' && (
+                          <div className="mt-2 p-3 bg-blue-50 rounded-md border border-blue-200">
+                            <p className="text-sm text-blue-900 font-medium mb-1">Notes de suivi:</p>
+                            <p className="text-sm text-blue-800">
+                              {etape.notes_admin}
                             </p>
                           </div>
                         )}

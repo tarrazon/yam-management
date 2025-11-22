@@ -102,7 +102,7 @@ export default function AcquereurDashboard() {
     switch (statut) {
       case 'complete':
         return <Check className="w-6 h-6 text-white" />;
-      case 'valide_admin':
+      case 'valide':
         return <Check className="w-6 h-6 text-white" />;
       case 'en_attente':
         return <Clock className="w-6 h-6 text-slate-400" />;
@@ -115,7 +115,7 @@ export default function AcquereurDashboard() {
     switch (statut) {
       case 'complete':
         return 'bg-green-500';
-      case 'valide_admin':
+      case 'valide':
         return 'bg-blue-500';
       case 'en_attente':
         return 'bg-slate-300';
@@ -127,7 +127,7 @@ export default function AcquereurDashboard() {
   const getCurrentStep = () => {
     if (!appelsDeFond.length) return null;
     const completed = appelsDeFond.filter(a => a.statut === 'complete').length;
-    const validated = appelsDeFond.filter(a => a.statut === 'valide_admin').length;
+    const validated = appelsDeFond.filter(a => a.statut === 'valide').length;
     return {
       current: completed + validated,
       total: appelsDeFond.length,
@@ -376,7 +376,7 @@ export default function AcquereurDashboard() {
                                 <p className="font-medium text-slate-700 text-sm">{appel.etape}</p>
                                 <p className="text-xs text-slate-500">
                                   {appel.statut === 'complete' && 'Terminé'}
-                                  {appel.statut === 'valide_admin' && 'Validé'}
+                                  {appel.statut === 'valide' && 'Validé'}
                                   {appel.statut === 'en_attente' && 'En attente'}
                                 </p>
                               </div>
@@ -385,7 +385,7 @@ export default function AcquereurDashboard() {
                           <Button
                             variant="link"
                             className="text-[#1E40AF] p-0 h-auto"
-                            onClick={() => setActiveSection('appels-fond')}
+                            onClick={() => setActiveSection('avancement-travaux')}
                           >
                             Voir tous les appels de fond →
                           </Button>
@@ -590,18 +590,18 @@ export default function AcquereurDashboard() {
                                   <h3 className="font-semibold text-slate-700">{appel.etape}</h3>
                                   <Badge className={
                                     appel.statut === 'complete' ? 'bg-green-100 text-green-800' :
-                                    appel.statut === 'valide_admin' ? 'bg-blue-100 text-blue-800' :
+                                    appel.statut === 'valide' ? 'bg-blue-100 text-blue-800' :
                                     'bg-slate-100 text-slate-600'
                                   }>
                                     {appel.statut === 'complete' && 'Terminé'}
-                                    {appel.statut === 'valide_admin' && 'Validé'}
+                                    {appel.statut === 'valide' && 'Validé'}
                                     {appel.statut === 'en_attente' && 'En attente'}
                                   </Badge>
                                 </div>
                                 {appel.description && (
                                   <p className="text-sm text-slate-600 mb-3">{appel.description}</p>
                                 )}
-                                {appel.statut === 'valide_admin' && appel.date_validation_admin && (
+                                {appel.statut === 'valide' && appel.date_validation_admin && (
                                   <p className="text-xs text-blue-600">
                                     Validé le {format(new Date(appel.date_validation_admin), 'dd MMM yyyy', { locale: fr })}
                                   </p>

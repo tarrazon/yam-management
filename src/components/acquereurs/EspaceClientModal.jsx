@@ -193,6 +193,7 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
       >
         <div
           className="bg-white rounded-xl shadow-2xl max-w-5xl w-full my-8 overflow-hidden flex flex-col max-h-[90vh]"
+          onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
           <div className="bg-gradient-to-r from-[#1E40AF] to-[#1E3A8A] text-white p-6">
