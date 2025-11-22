@@ -52,6 +52,24 @@ export default function AcquereurCard({ acquereur, onEdit, onView, onDelete }) {
     enabled: !!acquereur.partenaire_id,
   });
 
+  // Compter les messages non lus
+  const { data: unreadCount = 0 } = useQuery({
+    queryKey: ['unread-messages', acquereur.id],
+    queryFn: async () => {
+      const { supabase } = await import('@/lib/supabase');
+      const { count, error } = await supabase
+        .from('messages_admin')
+        .select('*', { count: 'exact', head: true })
+        .eq('acquereur_id', acquereur.id)
+        .eq('expediteur_type', 'acquereur')
+        .eq('lu', false);
+
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: !!acquereur.id,
+  });
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -134,13 +152,29 @@ export default function AcquereurCard({ acquereur, onEdit, onView, onDelete }) {
             </div>
           )}
 
+          {unreadCount > 0 && (
+            <div className="flex items-center justify-center gap-2 py-2 px-3 bg-red-50 border border-red-200 rounded-md mb-2">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                <span className="text-xs font-semibold text-red-700">
+                  {unreadCount} message{unreadCount > 1 ? 's' : ''} non lu{unreadCount > 1 ? 's' : ''}
+                </span>
+              </div>
+            </div>
+          )}
+
           <Button
             size="sm"
             onClick={() => setShowEspaceClient(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white w-full mt-3"
+            className="bg-blue-600 hover:bg-blue-700 text-white w-full mt-1 relative"
           >
             <MessageSquare className="w-4 h-4 mr-2" />
             Espace Client
+            {unreadCount > 0 && (
+              <Badge className="absolute -top-2 -right-2 bg-red-500 text-white border-2 border-white h-6 w-6 p-0 flex items-center justify-center rounded-full text-xs">
+                {unreadCount}
+              </Badge>
+            )}
           </Button>
 
           {(acquereur.budget_min || acquereur.budget_max || acquereur.budget) && (

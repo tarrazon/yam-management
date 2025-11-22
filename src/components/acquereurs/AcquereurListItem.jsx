@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Edit, Eye, Mail, Phone, Euro, Trash2, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 import EspaceClientModal from "./EspaceClientModal";
 
 const statusColors = {
@@ -25,6 +26,24 @@ const statusLabels = {
 
 export default function AcquereurListItem({ acquereur, onEdit, onView, onDelete }) {
   const [showEspaceClient, setShowEspaceClient] = useState(false);
+
+  // Compter les messages non lus
+  const { data: unreadCount = 0 } = useQuery({
+    queryKey: ['unread-messages', acquereur.id],
+    queryFn: async () => {
+      const { supabase } = await import('@/lib/supabase');
+      const { count, error } = await supabase
+        .from('messages_admin')
+        .select('*', { count: 'exact', head: true })
+        .eq('acquereur_id', acquereur.id)
+        .eq('expediteur_type', 'acquereur')
+        .eq('lu', false);
+
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: !!acquereur.id,
+  });
 
   return (
     <>
@@ -69,10 +88,15 @@ export default function AcquereurListItem({ acquereur, onEdit, onView, onDelete 
             <Button
               size="sm"
               onClick={() => setShowEspaceClient(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white h-8 text-xs"
+              className="bg-blue-600 hover:bg-blue-700 text-white h-8 text-xs relative"
             >
               <MessageSquare className="w-3 h-3 mr-1" />
               Espace Client
+              {unreadCount > 0 && (
+                <Badge className="absolute -top-1 -right-1 bg-red-500 text-white border-2 border-white h-5 w-5 p-0 flex items-center justify-center rounded-full text-[10px]">
+                  {unreadCount}
+                </Badge>
+              )}
             </Button>
             <Button
               variant="ghost"

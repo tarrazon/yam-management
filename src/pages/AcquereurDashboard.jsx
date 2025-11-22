@@ -45,13 +45,39 @@ export default function AcquereurDashboard() {
   const { data: lots = [] } = useQuery({
     queryKey: ['lots-acquereur', acquereur?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      if (!acquereur?.id) return [];
+
+      // Récupérer les lots
+      const { data: lotsData, error: lotsError } = await supabase
         .from('lots_lmnp')
-        .select('*, residence:residences_gestion(*)')
+        .select('*')
         .eq('acquereur_id', acquereur.id)
         .order('numero');
-      if (error) throw error;
-      return data || [];
+
+      if (lotsError) throw lotsError;
+      if (!lotsData || lotsData.length === 0) return [];
+
+      // Récupérer les infos des résidences
+      const residenceIds = [...new Set(lotsData.map(l => l.residence_id).filter(Boolean))];
+      const { data: residences, error: residencesError } = await supabase
+        .from('residences_gestion')
+        .select('*')
+        .in('id', residenceIds);
+
+      if (residencesError) {
+        console.error('Erreur chargement résidences:', residencesError);
+      }
+
+      // Mapper les résidences aux lots
+      const residencesMap = (residences || []).reduce((acc, r) => {
+        acc[r.id] = r;
+        return acc;
+      }, {});
+
+      return lotsData.map(lot => ({
+        ...lot,
+        residence: residencesMap[lot.residence_id] || null
+      }));
     },
     enabled: !!acquereur?.id,
     refetchInterval: 10000,
