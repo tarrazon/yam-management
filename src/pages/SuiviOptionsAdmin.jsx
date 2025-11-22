@@ -228,7 +228,7 @@ export default function SuiviOptionsAdmin() {
                 {lotStatusLabels[lot.statut]}
               </Badge>
             </div>
-            {option && config && (
+            {option && config && lot.statut === 'sous_option' && (
               <div className="flex items-center gap-2">
                 <Badge className={config.color}>
                   <Icon className="w-3 h-3 mr-1" />
@@ -247,7 +247,7 @@ export default function SuiviOptionsAdmin() {
               <span className="text-slate-500">Acquéreur:</span>
               <span className="font-medium">{lot.acquereur_nom || "Non spécifié"}</span>
             </div>
-            {option && option.date_option && (
+            {option && option.statut === 'active' && option.date_option && (
               <div className="flex justify-between">
                 <span className="text-slate-500">Date début:</span>
                 <span className="font-medium">
@@ -255,7 +255,7 @@ export default function SuiviOptionsAdmin() {
                 </span>
               </div>
             )}
-            {option && option.date_expiration && (
+            {option && option.statut === 'active' && option.date_expiration && (
               <div className="flex justify-between">
                 <span className="text-slate-500">Date fin:</span>
                 <span className="font-medium">
