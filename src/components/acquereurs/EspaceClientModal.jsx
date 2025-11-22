@@ -182,14 +182,11 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
 
         if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('documents')
-          .getPublicUrl(filePath);
-
+        // Stocker le chemin du fichier, pas l'URL publique
         return galeriePhotosService.create({
           lot_id: lotLmnp.id,
           titre: file.name.replace(/\.[^/.]+$/, ''),
-          photo_url: publicUrl,
+          photo_url: filePath,
           description: '',
           ordre: photos.length,
         });
