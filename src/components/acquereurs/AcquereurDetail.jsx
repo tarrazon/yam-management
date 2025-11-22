@@ -11,7 +11,6 @@ import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useSignedUrls } from "@/hooks/useSignedUrl";
 import { supabase } from "@/lib/supabase";
-import AppelsDeFondSection from "./AppelsDeFondSection";
 import { messagesAdminService } from "@/api/messagesAdmin";
 import { faqService } from "@/api/faq";
 import { galeriePhotosService } from "@/api/galeriePhotos";
@@ -433,12 +432,6 @@ export default function AcquereurDetail({ acquereur, onClose, onEdit, onDelete }
               ))}
             </CardContent>
           </Card>
-
-          {/* Appels de fond */}
-          <AppelsDeFondSection
-            acquereurId={acquereur.id}
-            lotId={lotLmnp?.id}
-          />
 
 
           {/* Notes */}
