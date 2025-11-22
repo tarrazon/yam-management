@@ -140,6 +140,25 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
     }
   };
 
+  const handleMarkAsRead = async (messageId) => {
+    try {
+      await messagesAdminService.marquerLu(messageId);
+
+      // Mettre à jour l'état local
+      setMessages(messages.map(msg =>
+        msg.id === messageId ? { ...msg, lu: true } : msg
+      ));
+
+      // Invalider le cache React Query pour mettre à jour le compteur
+      queryClient.invalidateQueries(['unread-messages', acquereur.id]);
+
+      toast.success('Message marqué comme lu');
+    } catch (error) {
+      console.error('Erreur marquage message:', error);
+      toast.error('Erreur lors du marquage du message');
+    }
+  };
+
   const handleUploadPhoto = async (e) => {
     if (!lotLmnp?.id) {
       toast.error('Aucun lot associé');
@@ -168,10 +187,10 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
 
         return galeriePhotosService.create({
           lot_id: lotLmnp.id,
-          legende: file.name.replace(/\.[^/.]+$/, ''),
-          url: publicUrl,
-          categorie: 'travaux',
-          uploaded_by: profile?.id,
+          titre: file.name.replace(/\.[^/.]+$/, ''),
+          photo_url: publicUrl,
+          description: '',
+          ordre: photos.length,
         });
       });
 
@@ -191,7 +210,8 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
 
     try {
       const updated = await galeriePhotosService.update(editingPhoto.id, {
-        legende: photoForm.titre,
+        titre: photoForm.titre,
+        description: photoForm.description,
       });
       setPhotos(photos.map(p => p.id === updated.id ? updated : p));
       setEditingPhoto(null);
@@ -318,15 +338,33 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
                           msg.expediteur_type === 'admin'
                             ? 'bg-blue-50 ml-8'
                             : 'bg-slate-50 mr-8'
-                        }`}
+                        } ${!msg.lu && msg.expediteur_type === 'acquereur' ? 'border-2 border-red-200' : ''}`}
                       >
                         <div className="flex items-start justify-between mb-2">
-                          <span className="font-medium text-slate-700">
-                            {msg.expediteur_type === 'admin' ? 'Admin' : 'Acquéreur'}
-                          </span>
-                          <span className="text-xs text-slate-500">
-                            {format(new Date(msg.created_at), 'dd/MM/yyyy HH:mm', { locale: fr })}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-slate-700">
+                              {msg.expediteur_type === 'admin' ? 'Admin' : 'Acquéreur'}
+                            </span>
+                            {!msg.lu && msg.expediteur_type === 'acquereur' && (
+                              <Badge className="bg-red-500 text-white text-xs">Non lu</Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-slate-500">
+                              {format(new Date(msg.created_at), 'dd/MM/yyyy HH:mm', { locale: fr })}
+                            </span>
+                            {!msg.lu && msg.expediteur_type === 'acquereur' && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleMarkAsRead(msg.id)}
+                                className="h-7 px-2 text-xs hover:bg-green-100 text-green-700"
+                              >
+                                <Check className="w-3 h-3 mr-1" />
+                                Marquer lu
+                              </Button>
+                            )}
+                          </div>
                         </div>
                         <p className="text-slate-700">{msg.message}</p>
                       </div>
@@ -409,27 +447,20 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
                               onClick={() => setSelectedPhoto(photo)}
                             >
                               <img
-                                src={photo.url}
-                                alt={photo.legende || 'Photo'}
+                                src={photo.photo_url}
+                                alt={photo.titre || 'Photo'}
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                               />
                               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
                                 <ImageIcon className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                               </div>
-                              {photo.categorie && (
-                                <div className="absolute top-2 left-2">
-                                  <Badge className="bg-white/90 text-slate-700 text-xs">
-                                    {photo.categorie}
-                                  </Badge>
-                                </div>
-                              )}
                             </div>
                             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setEditingPhoto(photo);
-                                  setPhotoForm({ titre: photo.legende || '', description: '' });
+                                  setPhotoForm({ titre: photo.titre || '', description: photo.description || '' });
                                 }}
                                 className="p-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded"
                               >
@@ -445,8 +476,8 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
                                 <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
-                            {photo.legende && (
-                              <p className="text-xs text-slate-600 mt-1 truncate">{photo.legende}</p>
+                            {photo.titre && (
+                              <p className="text-xs text-slate-600 mt-1 truncate">{photo.titre}</p>
                             )}
                           </div>
                         ))}
@@ -516,10 +547,10 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
       {selectedPhoto && (
         <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
           <DialogContent className="max-w-4xl">
-            <img src={selectedPhoto.url} alt={selectedPhoto.legende || 'Photo'} className="w-full rounded-lg" />
-            {selectedPhoto.legende && <h3 className="font-semibold mt-4">{selectedPhoto.legende}</h3>}
-            {selectedPhoto.categorie && (
-              <Badge className="mt-2">{selectedPhoto.categorie}</Badge>
+            <img src={selectedPhoto.photo_url} alt={selectedPhoto.titre || 'Photo'} className="w-full rounded-lg" />
+            {selectedPhoto.titre && <h3 className="font-semibold mt-4">{selectedPhoto.titre}</h3>}
+            {selectedPhoto.description && (
+              <p className="mt-2 text-slate-600">{selectedPhoto.description}</p>
             )}
           </DialogContent>
         </Dialog>
