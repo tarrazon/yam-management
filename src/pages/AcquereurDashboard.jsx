@@ -5,6 +5,7 @@ import { appelsDeFondService } from '@/api/appelsDeFond';
 import { faqService } from '@/api/faq';
 import { galeriePhotosService } from '@/api/galeriePhotos';
 import { messagesAdminService } from '@/api/messagesAdmin';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -19,65 +20,143 @@ import AppelsDeFondTimeline from '@/components/acquereurs/AppelsDeFondTimeline';
 
 export default function AcquereurDashboard() {
   const { profile } = useAuth();
-  const [acquereur, setAcquereur] = useState(null);
-  const [lot, setLot] = useState(null);
-  const [appelsDeFond, setAppelsDeFond] = useState([]);
-  const [messages, setMessages] = useState([]);
-  const [faq, setFaq] = useState([]);
-  const [photos, setPhotos] = useState([]);
+  const queryClient = useQueryClient();
   const [nouveauMessage, setNouveauMessage] = useState('');
-  const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('avancement-travaux');
 
-  useEffect(() => {
-    loadData();
-  }, [profile]);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-
-      const { data: acquereurData, error: acquereurError } = await supabase
+  // Charger les données de l'acquéreur avec React Query
+  const { data: acquereur, isLoading: loadingAcquereur } = useQuery({
+    queryKey: ['acquereur-portal', profile?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
         .from('acquereurs')
         .select('*')
         .eq('user_id', profile.id)
         .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!profile?.id,
+    refetchInterval: 10000, // Rafraîchir toutes les 10 secondes
+  });
 
-      if (acquereurError) throw acquereurError;
-      setAcquereur(acquereurData);
+  // Charger le lot associé
+  const { data: lot } = useQuery({
+    queryKey: ['lot-acquereur', acquereur?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('lots_lmnp')
+        .select('*, residence:residences_gestion(*)')
+        .eq('acquereur_id', acquereur.id)
+        .maybeSingle();
+      if (error && error.code !== 'PGRST116') throw error;
+      return data;
+    },
+    enabled: !!acquereur?.id,
+    refetchInterval: 10000,
+  });
 
-      // Charger les FAQs (disponibles pour tous)
-      const faqData = await faqService.listActive();
-      setFaq(faqData);
+  // Charger les appels de fond
+  const { data: appelsDeFond = [] } = useQuery({
+    queryKey: ['appels-de-fond-portal', acquereur?.id],
+    queryFn: () => appelsDeFondService.listByAcquereur(acquereur.id),
+    enabled: !!acquereur?.id,
+    refetchInterval: 5000, // Rafraîchir toutes les 5 secondes
+  });
 
-      if (acquereurData) {
-        const { data: lotData, error: lotError } = await supabase
-          .from('lots_lmnp')
-          .select('*, residence:residences_gestion(*)')
-          .eq('acquereur_id', acquereurData.id)
-          .maybeSingle();
+  // Charger les messages
+  const { data: messages = [] } = useQuery({
+    queryKey: ['messages-portal', acquereur?.id],
+    queryFn: () => messagesAdminService.list(acquereur.id),
+    enabled: !!acquereur?.id,
+    refetchInterval: 5000,
+  });
 
-        if (lotError && lotError.code !== 'PGRST116') throw lotError;
-        setLot(lotData);
+  // Charger les photos
+  const { data: photos = [] } = useQuery({
+    queryKey: ['photos-portal', lot?.id],
+    queryFn: () => galeriePhotosService.list(lot.id),
+    enabled: !!lot?.id,
+    refetchInterval: 10000,
+  });
 
-        if (lotData) {
-          const appelsData = await appelsDeFondService.listByAcquereur(acquereurData.id);
-          setAppelsDeFond(appelsData);
+  // Charger la FAQ
+  const { data: faq = [] } = useQuery({
+    queryKey: ['faq-portal'],
+    queryFn: () => faqService.listActive(),
+    refetchInterval: 30000, // Rafraîchir toutes les 30 secondes
+  });
 
-          const photosData = await galeriePhotosService.list(lotData.id);
-          setPhotos(photosData);
+  const loading = loadingAcquereur;
+
+  // Abonnement en temps réel pour les changements
+  useEffect(() => {
+    if (!acquereur?.id) return;
+
+    // Subscription pour les appels de fond
+    const appelsFondChannel = supabase
+      .channel('appels-fond-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'appels_de_fond',
+          filter: `acquereur_id=eq.${acquereur.id}`,
+        },
+        () => {
+          queryClient.invalidateQueries(['appels-de-fond-portal', acquereur.id]);
         }
+      )
+      .subscribe();
 
-        const messagesData = await messagesAdminService.list(acquereurData.id);
-        setMessages(messagesData);
-      }
+    // Subscription pour les messages
+    const messagesChannel = supabase
+      .channel('messages-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages_admin',
+          filter: `acquereur_id=eq.${acquereur.id}`,
+        },
+        () => {
+          queryClient.invalidateQueries(['messages-portal', acquereur.id]);
+        }
+      )
+      .subscribe();
 
-    } catch (error) {
-      console.error('Erreur chargement données:', error);
-    } finally {
-      setLoading(false);
+    // Subscription pour les photos
+    if (lot?.id) {
+      const photosChannel = supabase
+        .channel('photos-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'galerie_photos',
+            filter: `lot_id=eq.${lot.id}`,
+          },
+          () => {
+            queryClient.invalidateQueries(['photos-portal', lot.id]);
+          }
+        )
+        .subscribe();
+
+      return () => {
+        appelsFondChannel.unsubscribe();
+        messagesChannel.unsubscribe();
+        photosChannel.unsubscribe();
+      };
     }
-  };
+
+    return () => {
+      appelsFondChannel.unsubscribe();
+      messagesChannel.unsubscribe();
+    };
+  }, [acquereur?.id, lot?.id, queryClient]);
 
   const handleSendMessage = async () => {
     if (!nouveauMessage.trim()) return;
@@ -92,7 +171,7 @@ export default function AcquereurDashboard() {
       });
 
       setNouveauMessage('');
-      loadData();
+      queryClient.invalidateQueries(['messages-portal', acquereur.id]);
     } catch (error) {
       console.error('Erreur envoi message:', error);
     }

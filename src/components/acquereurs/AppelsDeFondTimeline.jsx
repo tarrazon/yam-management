@@ -18,7 +18,7 @@ export default function AppelsDeFondTimeline({ lotId, acquereurId, isAdmin = fal
   const [notes, setNotes] = useState("");
 
   const { data: etapes = [], isLoading } = useQuery({
-    queryKey: ["appels-de-fond", lotId],
+    queryKey: acquereurId ? ["appels-de-fond-portal", acquereurId] : ["appels-de-fond", lotId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("appels_de_fond")
@@ -30,6 +30,7 @@ export default function AppelsDeFondTimeline({ lotId, acquereurId, isAdmin = fal
       return data || [];
     },
     enabled: !!lotId,
+    refetchInterval: isAdmin ? false : 5000, // Rafraîchir toutes les 5 secondes pour les acquéreurs
   });
 
   const toggleValidationMutation = useMutation({
@@ -53,7 +54,7 @@ export default function AppelsDeFondTimeline({ lotId, acquereurId, isAdmin = fal
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(["appels-de-fond", lotId]);
+      queryClient.invalidateQueries(acquereurId ? ["appels-de-fond-portal", acquereurId] : ["appels-de-fond", lotId]);
       toast.success("Statut mis à jour");
     },
     onError: (error) => {
@@ -71,7 +72,7 @@ export default function AppelsDeFondTimeline({ lotId, acquereurId, isAdmin = fal
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(["appels-de-fond", lotId]);
+      queryClient.invalidateQueries(acquereurId ? ["appels-de-fond-portal", acquereurId] : ["appels-de-fond", lotId]);
       toast.success("Notes enregistrées");
       setEditingEtape(null);
       setNotes("");
@@ -86,7 +87,7 @@ export default function AppelsDeFondTimeline({ lotId, acquereurId, isAdmin = fal
       await appelsDeFondService.initStepsForLot(lotId, acquereurId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(["appels-de-fond", lotId]);
+      queryClient.invalidateQueries(acquereurId ? ["appels-de-fond-portal", acquereurId] : ["appels-de-fond", lotId]);
       toast.success("Étapes initialisées avec succès");
     },
     onError: (error) => {
