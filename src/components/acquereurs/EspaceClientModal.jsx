@@ -24,6 +24,7 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
   const { profile } = useAuth();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('messages');
+  const [selectedLotId, setSelectedLotId] = useState(null);
 
   // Messages
   const [messages, setMessages] = useState([]);
@@ -40,21 +41,29 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
   const [faq, setFaq] = useState([]);
 
 
-  // Récupérer les lots associés
+  // Récupérer les lots associés avec les infos de résidence
   const { data: lotsLmnp = [] } = useQuery({
     queryKey: ['lots-lmnp-acquereur', acquereur.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('lots_lmnp')
-        .select('id, numero, statut')
-        .eq('acquereur_id', acquereur.id);
+        .select('id, numero, statut, residence:residences_gestion(nom, ville)')
+        .eq('acquereur_id', acquereur.id)
+        .order('numero');
       if (error) throw error;
       return data || [];
     },
     enabled: isOpen && !!acquereur.id,
   });
 
-  const lotLmnp = lotsLmnp.length > 0 ? lotsLmnp[0] : null;
+  // Sélectionner automatiquement le premier lot
+  useEffect(() => {
+    if (lotsLmnp.length > 0 && !selectedLotId) {
+      setSelectedLotId(lotsLmnp[0].id);
+    }
+  }, [lotsLmnp, selectedLotId]);
+
+  const lotLmnp = lotsLmnp.find(l => l.id === selectedLotId) || null;
 
 
   // Charger les données
@@ -129,8 +138,10 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
 
         return galeriePhotosService.create({
           lot_id: lotLmnp.id,
-          titre: file.name.replace(/\.[^/.]+$/, ''),
-          photo_url: publicUrl,
+          legende: file.name.replace(/\.[^/.]+$/, ''),
+          url: publicUrl,
+          categorie: 'travaux',
+          uploaded_by: profile?.id,
         });
       });
 
@@ -150,8 +161,7 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
 
     try {
       const updated = await galeriePhotosService.update(editingPhoto.id, {
-        titre: photoForm.titre,
-        description: photoForm.description,
+        legende: photoForm.titre,
       });
       setPhotos(photos.map(p => p.id === updated.id ? updated : p));
       setEditingPhoto(null);
@@ -197,7 +207,7 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
         >
           {/* Header */}
           <div className="bg-gradient-to-r from-[#1E40AF] to-[#1E3A8A] text-white p-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-2xl font-bold">Espace Client</h2>
                 <p className="text-blue-100 mt-1">
@@ -211,6 +221,34 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
                 <X className="w-6 h-6" />
               </button>
             </div>
+
+            {/* Sélecteur de lots */}
+            {lotsLmnp.length > 1 && (
+              <div className="mt-4">
+                <label className="text-xs font-semibold text-blue-100 uppercase mb-2 block">
+                  Lot à visualiser ({lotsLmnp.length} lots)
+                </label>
+                <select
+                  value={selectedLotId || ''}
+                  onChange={(e) => setSelectedLotId(e.target.value)}
+                  className="w-full px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent"
+                >
+                  {lotsLmnp.map((lot) => (
+                    <option key={lot.id} value={lot.id} className="text-slate-900">
+                      {lot.residence?.nom || 'Résidence'} - Lot {lot.numero} ({lot.statut})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {lotsLmnp.length === 1 && lotLmnp && (
+              <div className="mt-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-4 py-2">
+                <p className="text-sm text-blue-100">
+                  <span className="font-semibold">{lotLmnp.residence?.nom || 'Résidence'}</span> - Lot {lotLmnp.numero}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Content */}
@@ -291,25 +329,32 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
                   </div>
                 ) : (
                   <>
-                    <div className="flex justify-end mb-4">
-                      <label>
-                        <input
-                          type="file"
-                          multiple
-                          accept="image/*"
-                          onChange={handleUploadPhoto}
-                          className="hidden"
-                          disabled={uploading}
-                        />
-                        <Button
-                          as="span"
-                          className="bg-[#1E40AF] hover:bg-[#1E3A8A] cursor-pointer"
-                          disabled={uploading}
-                        >
-                          <Upload className="w-4 h-4 mr-2" />
-                          {uploading ? 'Upload en cours...' : 'Ajouter des photos'}
-                        </Button>
-                      </label>
+                    <div className="flex items-center justify-between mb-4">
+                      {lotsLmnp.length > 1 && (
+                        <div className="text-sm text-slate-600">
+                          <span className="font-semibold">Lot {lotLmnp.numero}</span> - {lotLmnp.residence?.nom}
+                        </div>
+                      )}
+                      <div className={lotsLmnp.length === 1 ? 'ml-auto' : ''}>
+                        <label>
+                          <input
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            onChange={handleUploadPhoto}
+                            className="hidden"
+                            disabled={uploading}
+                          />
+                          <Button
+                            as="span"
+                            className="bg-[#1E40AF] hover:bg-[#1E3A8A] cursor-pointer"
+                            disabled={uploading}
+                          >
+                            <Upload className="w-4 h-4 mr-2" />
+                            {uploading ? 'Upload en cours...' : 'Ajouter des photos'}
+                          </Button>
+                        </label>
+                      </div>
                     </div>
 
                     {photos.length === 0 ? (
@@ -326,20 +371,27 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
                               onClick={() => setSelectedPhoto(photo)}
                             >
                               <img
-                                src={photo.photo_url}
-                                alt={photo.titre}
+                                src={photo.url}
+                                alt={photo.legende || 'Photo'}
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                               />
                               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
                                 <ImageIcon className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                               </div>
+                              {photo.categorie && (
+                                <div className="absolute top-2 left-2">
+                                  <Badge className="bg-white/90 text-slate-700 text-xs">
+                                    {photo.categorie}
+                                  </Badge>
+                                </div>
+                              )}
                             </div>
                             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setEditingPhoto(photo);
-                                  setPhotoForm({ titre: photo.titre || '', description: photo.description || '' });
+                                  setPhotoForm({ titre: photo.legende || '', description: '' });
                                 }}
                                 className="p-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded"
                               >
@@ -355,8 +407,8 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
                                 <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
-                            {photo.titre && (
-                              <p className="text-xs text-slate-600 mt-1 truncate">{photo.titre}</p>
+                            {photo.legende && (
+                              <p className="text-xs text-slate-600 mt-1 truncate">{photo.legende}</p>
                             )}
                           </div>
                         ))}
@@ -373,13 +425,22 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
                     Aucun lot associé. Les appels de fond seront disponibles une fois un lot attribué.
                   </div>
                 ) : (
-                  <div className="-m-6">
-                    <AppelsDeFondTimeline
-                      lotId={lotLmnp.id}
-                      acquereurId={acquereur.id}
-                      isAdmin={true}
-                    />
-                  </div>
+                  <>
+                    {lotsLmnp.length > 1 && (
+                      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-sm text-blue-900">
+                          <span className="font-semibold">Lot {lotLmnp.numero}</span> - {lotLmnp.residence?.nom} - {lotLmnp.residence?.ville}
+                        </p>
+                      </div>
+                    )}
+                    <div className="-mx-6">
+                      <AppelsDeFondTimeline
+                        lotId={lotLmnp.id}
+                        acquereurId={acquereur.id}
+                        isAdmin={true}
+                      />
+                    </div>
+                  </>
                 )}
               </TabsContent>
 
@@ -409,9 +470,11 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
       {selectedPhoto && (
         <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
           <DialogContent className="max-w-4xl">
-            <img src={selectedPhoto.photo_url} alt={selectedPhoto.titre} className="w-full rounded-lg" />
-            {selectedPhoto.titre && <h3 className="font-semibold mt-4">{selectedPhoto.titre}</h3>}
-            {selectedPhoto.description && <p className="text-slate-600">{selectedPhoto.description}</p>}
+            <img src={selectedPhoto.url} alt={selectedPhoto.legende || 'Photo'} className="w-full rounded-lg" />
+            {selectedPhoto.legende && <h3 className="font-semibold mt-4">{selectedPhoto.legende}</h3>}
+            {selectedPhoto.categorie && (
+              <Badge className="mt-2">{selectedPhoto.categorie}</Badge>
+            )}
           </DialogContent>
         </Dialog>
       )}
@@ -421,22 +484,15 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
         <Dialog open={!!editingPhoto} onOpenChange={() => setEditingPhoto(null)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Modifier la photo</DialogTitle>
+              <DialogTitle>Modifier la légende</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium">Titre</label>
+                <label className="text-sm font-medium">Légende</label>
                 <Input
                   value={photoForm.titre}
                   onChange={(e) => setPhotoForm({ ...photoForm, titre: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Description</label>
-                <Textarea
-                  value={photoForm.description}
-                  onChange={(e) => setPhotoForm({ ...photoForm, description: e.target.value })}
-                  rows={3}
+                  placeholder="Description de la photo"
                 />
               </div>
             </div>
