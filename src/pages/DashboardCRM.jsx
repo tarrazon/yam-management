@@ -2,7 +2,8 @@ import React from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Home, Users, Handshake, Building2, TrendingUp, Euro, FileCheck, Target } from "lucide-react";
+import { Home, Users, Handshake, Building2, TrendingUp, Euro, FileCheck, Target, MessageSquare, FileWarning } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 import StatsCard from "../components/dashboard/StatsCardCRM";
 import ActivityTimeline from "../components/dashboard/ActivityTimeline";
 import PartnersPerformance from "../components/dashboard/PartnersPerformance";
@@ -35,6 +36,66 @@ export default function DashboardCRM() {
     queryKey: ['residences_gestion'],
     queryFn: () => base44.entities.ResidenceGestion.list(),
   });
+
+  // Messages non lus des acquéreurs
+  const { data: messagesNonLus = 0 } = useQuery({
+    queryKey: ['messages_non_lus'],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('messages_admin')
+        .select('*', { count: 'exact', head: true })
+        .eq('expediteur_type', 'acquereur')
+        .eq('lu', false);
+      if (error) {
+        console.error('Erreur récupération messages non lus:', error);
+        return 0;
+      }
+      return count || 0;
+    },
+  });
+
+  // Calcul des documents manquants
+  const documentsManquantsTotal = React.useMemo(() => {
+    let total = 0;
+
+    // Documents manquants pour les acquéreurs
+    acquereurs.forEach(acquereur => {
+      const docs = acquereur.documents || {};
+      if (!docs.cni && !docs.passeport) total++;
+      if (!docs.justificatif_domicile) total++;
+      if (!docs.lettre_intention_achat) total++;
+      if (!docs.mandat_gestion) total++;
+      if (!docs.mandat_acquereur_honoraires) total++;
+    });
+
+    // Documents manquants pour les vendeurs
+    vendeurs.forEach(vendeur => {
+      if (vendeur.type_vendeur === 'entreprise') {
+        const docsEntreprise = vendeur.documents_entreprise || {};
+        if (!docsEntreprise.kbis) total++;
+        if (!docsEntreprise.statuts) total++;
+        if (!docsEntreprise.pv_ag) total++;
+        if (!docsEntreprise.rib) total++;
+        if (!docsEntreprise.titre_propriete) total++;
+        if (!docsEntreprise.diagnostic) total++;
+        if (!docsEntreprise.certificat_mesurage) total++;
+        if (!docsEntreprise.bail_commercial) total++;
+        if (!docsEntreprise.convention_signee) total++;
+      } else if (vendeur.type_vendeur === 'particulier') {
+        const docsParticulier = vendeur.documents_particulier || {};
+        if (!docsParticulier.cni) total++;
+        if (!docsParticulier.questionnaire_etat_civil) total++;
+        if (!docsParticulier.rib) total++;
+        if (!docsParticulier.titre_propriete) total++;
+        if (!docsParticulier.diagnostic) total++;
+        if (!docsParticulier.certificat_mesurage) total++;
+        if (!docsParticulier.bail_commercial) total++;
+        if (!docsParticulier.convention_signee) total++;
+      }
+    });
+
+    return total;
+  }, [acquereurs, vendeurs]);
 
   // Statistiques basées sur les LOTS (source de vérité)
   const lotsDisponibles = lots.filter(l => l.statut === 'disponible').length;
@@ -123,6 +184,49 @@ export default function DashboardCRM() {
             color="purple"
             subtitle={`${lotsVendus} vendus / ${lots.length} lots`}
           />
+        </div>
+
+        {/* Alertes et suivi */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="border-none shadow-lg bg-gradient-to-br from-blue-50 to-cyan-50 hover:shadow-xl transition-shadow cursor-pointer" onClick={() => window.location.href = '/Acquereurs'}>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-xl bg-white/80 shadow-sm">
+                    <MessageSquare className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-blue-700 font-medium">Messages non lus</p>
+                    <p className="text-3xl font-bold text-blue-800 mt-1">{messagesNonLus}</p>
+                    <p className="text-xs text-blue-600 mt-1">Messages des acquéreurs</p>
+                  </div>
+                </div>
+                {messagesNonLus > 0 && (
+                  <div className="animate-pulse">
+                    <span className="flex h-3 w-3 relative">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                    </span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-lg bg-gradient-to-br from-orange-50 to-red-50 hover:shadow-xl transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-xl bg-white/80 shadow-sm">
+                  <FileWarning className="w-6 h-6 text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-orange-700 font-medium">Documents manquants</p>
+                  <p className="text-3xl font-bold text-orange-800 mt-1">{documentsManquantsTotal}</p>
+                  <p className="text-xs text-orange-600 mt-1">Acquéreurs et vendeurs</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* KPIs financiers détaillés */}
