@@ -5,6 +5,7 @@ import { appelsDeFondService } from '@/api/appelsDeFond';
 import { faqService } from '@/api/faq';
 import { galeriePhotosService } from '@/api/galeriePhotos';
 import { messagesAdminService } from '@/api/messagesAdmin';
+import { getSignedUrl } from '@/api/uploadService';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,7 @@ import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { toast } from 'sonner';
+import StorageImage from '@/components/common/StorageImage';
 import AppelsDeFondTimeline from '@/components/acquereurs/AppelsDeFondTimeline';
 
 export default function AcquereurDashboard() {
@@ -615,7 +617,7 @@ export default function AcquereurDashboard() {
                           <div className="grid grid-cols-3 gap-2 mb-3">
                             {photos.slice(0, 3).map(photo => (
                               <div key={photo.id} className="aspect-square overflow-hidden rounded-lg border border-slate-200">
-                                <img
+                                <StorageImage
                                   src={photo.photo_url}
                                   alt={photo.titre}
                                   className="w-full h-full object-cover"
@@ -667,7 +669,30 @@ export default function AcquereurDashboard() {
                               </p>
                             </div>
                           </div>
-                          <Button size="sm" variant="ghost">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={async () => {
+                              try {
+                                const url = await getSignedUrl(doc.url || doc.path);
+                                if (url) {
+                                  const link = document.createElement('a');
+                                  link.href = url;
+                                  link.download = doc.name || key;
+                                  link.target = '_blank';
+                                  document.body.appendChild(link);
+                                  link.click();
+                                  document.body.removeChild(link);
+                                  toast.success('Téléchargement démarré');
+                                } else {
+                                  toast.error('Impossible de télécharger le document');
+                                }
+                              } catch (error) {
+                                console.error('Erreur téléchargement:', error);
+                                toast.error('Erreur lors du téléchargement');
+                              }
+                            }}
+                          >
                             <Download className="w-4 h-4" />
                           </Button>
                         </div>
@@ -842,9 +867,9 @@ export default function AcquereurDashboard() {
                         <Dialog key={photo.id}>
                           <DialogTrigger asChild>
                             <div className="cursor-pointer group relative aspect-square overflow-hidden rounded-lg border border-slate-200">
-                              <img
-                                src={photo.url}
-                                alt={photo.legende || 'Photo du lot'}
+                              <StorageImage
+                                src={photo.photo_url}
+                                alt={photo.titre || 'Photo du lot'}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                               />
                               <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all" />
@@ -859,11 +884,11 @@ export default function AcquereurDashboard() {
                           </DialogTrigger>
                           <DialogContent className="max-w-4xl">
                             <DialogHeader>
-                              <DialogTitle>{photo.legende || 'Photo du lot'}</DialogTitle>
+                              <DialogTitle>{photo.titre || 'Photo du lot'}</DialogTitle>
                             </DialogHeader>
-                            <img
-                              src={photo.url}
-                              alt={photo.legende || 'Photo du lot'}
+                            <StorageImage
+                              src={photo.photo_url}
+                              alt={photo.titre || 'Photo du lot'}
                               className="w-full rounded-lg"
                             />
                             {photo.legende && (
