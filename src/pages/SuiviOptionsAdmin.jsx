@@ -169,7 +169,7 @@ export default function SuiviOptionsAdmin() {
     const option = lotWithOption.option;
 
     const isExpiringSoon = option && option.statut === 'active' && new Date(option.date_expiration) - new Date() < 24 * 60 * 60 * 1000;
-    const isEditing = option && editingOptionId === option.id;
+    const isEditing = editingOptionId === lot.id;
 
     const statusConfig = {
       active: { icon: Clock, color: "bg-green-100 text-green-800", label: "Active" },
@@ -277,21 +277,19 @@ export default function SuiviOptionsAdmin() {
               <div className="pt-2 border-t mt-3">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-xs text-slate-500">Statut actuel du lot:</p>
-                  {option && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setEditingOptionId(isEditing ? null : option.id)}
-                      className="h-6 w-6"
-                      title={isEditing ? "Annuler" : "Modifier le statut du lot"}
-                    >
-                      <Edit2 className="w-3 h-3 text-slate-500" />
-                    </Button>
-                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setEditingOptionId(isEditing ? null : lot.id)}
+                    className="h-6 w-6"
+                    title={isEditing ? "Annuler" : "Modifier le statut du lot"}
+                  >
+                    <Edit2 className="w-3 h-3 text-slate-500" />
+                  </Button>
                 </div>
                 {isEditing ? (
-                  <Select 
-                    value={lot.statut} 
+                  <Select
+                    value={lot.statut}
                     onValueChange={(value) => handleChangeLotStatut(lot.id, value)}
                   >
                     <SelectTrigger className="w-full h-8 text-xs">
