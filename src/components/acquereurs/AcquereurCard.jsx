@@ -75,15 +75,7 @@ export default function AcquereurCard({ acquereur, onEdit, onView, onDelete }) {
                 </Badge>
               </div>
             </div>
-            <div className="flex gap-2 flex-shrink-0 flex-wrap">
-              <Button
-                size="sm"
-                onClick={() => setShowEspaceClient(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <MessageSquare className="w-4 h-4 mr-1" />
-                Espace Client
-              </Button>
+            <div className="flex gap-1 flex-shrink-0">
               <Button
                 variant="ghost"
                 size="icon"
@@ -133,7 +125,7 @@ export default function AcquereurCard({ acquereur, onEdit, onView, onDelete }) {
           {acquereur.telephone && (
             <div className="flex items-center gap-3 text-sm">
               <Phone className="w-4 h-4 text-slate-400 flex-shrink-0" />
-              <a 
+              <a
                 href={`tel:${acquereur.telephone}`}
                 className="text-slate-600 hover:text-[#1E40AF]"
               >
@@ -141,6 +133,15 @@ export default function AcquereurCard({ acquereur, onEdit, onView, onDelete }) {
               </a>
             </div>
           )}
+
+          <Button
+            size="sm"
+            onClick={() => setShowEspaceClient(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white w-full mt-3"
+          >
+            <MessageSquare className="w-4 h-4 mr-2" />
+            Espace Client
+          </Button>
 
           {(acquereur.budget_min || acquereur.budget_max || acquereur.budget) && (
             <div className="pt-3 border-t border-slate-100">
