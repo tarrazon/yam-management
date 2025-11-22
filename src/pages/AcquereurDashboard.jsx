@@ -658,45 +658,56 @@ export default function AcquereurDashboard() {
                 <CardContent>
                   {acquereur.documents && Object.keys(acquereur.documents).length > 0 ? (
                     <div className="space-y-3">
-                      {Object.entries(acquereur.documents).map(([key, doc]) => (
-                        <div key={key} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-                          <div className="flex items-center gap-3">
-                            <FileText className="w-5 h-5 text-[#1E40AF]" />
-                            <div>
-                              <p className="font-medium text-slate-700">{doc.name || key}</p>
-                              <p className="text-xs text-slate-500">
-                                {doc.date ? format(new Date(doc.date), 'dd MMM yyyy', { locale: fr }) : 'Date inconnue'}
-                              </p>
+                      {Object.entries(acquereur.documents).map(([key, docPath]) => {
+                        // docPath peut être une string (ancien format) ou un objet (nouveau format)
+                        const filePath = typeof docPath === 'string' ? docPath : (docPath.url || docPath.path);
+                        const documentName = typeof docPath === 'string' ? key : (docPath.name || key);
+                        const documentDate = typeof docPath === 'string' ? null : docPath.date;
+
+                        return (
+                          <div key={key} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                            <div className="flex items-center gap-3">
+                              <FileText className="w-5 h-5 text-[#1E40AF]" />
+                              <div>
+                                <p className="font-medium text-slate-700 capitalize">{documentName}</p>
+                                <p className="text-xs text-slate-500">
+                                  {documentDate ? format(new Date(documentDate), 'dd MMM yyyy', { locale: fr }) : 'Document disponible'}
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={async () => {
-                              try {
-                                const url = await getSignedUrl(doc.url || doc.path);
-                                if (url) {
-                                  const link = document.createElement('a');
-                                  link.href = url;
-                                  link.download = doc.name || key;
-                                  link.target = '_blank';
-                                  document.body.appendChild(link);
-                                  link.click();
-                                  document.body.removeChild(link);
-                                  toast.success('Téléchargement démarré');
-                                } else {
-                                  toast.error('Impossible de télécharger le document');
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={async () => {
+                                try {
+                                  if (!filePath) {
+                                    toast.error('Chemin du document introuvable');
+                                    return;
+                                  }
+                                  const url = await getSignedUrl(filePath);
+                                  if (url) {
+                                    const link = document.createElement('a');
+                                    link.href = url;
+                                    link.download = documentName;
+                                    link.target = '_blank';
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                    toast.success('Téléchargement démarré');
+                                  } else {
+                                    toast.error('Impossible de télécharger le document');
+                                  }
+                                } catch (error) {
+                                  console.error('Erreur téléchargement:', error);
+                                  toast.error('Erreur lors du téléchargement');
                                 }
-                              } catch (error) {
-                                console.error('Erreur téléchargement:', error);
-                                toast.error('Erreur lors du téléchargement');
-                              }
-                            }}
-                          >
-                            <Download className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      ))}
+                              }}
+                            >
+                              <Download className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        );
+                      })}
                     </div>
                   ) : (
                     <p className="text-slate-500 text-center py-8">Aucun document disponible pour le moment</p>
