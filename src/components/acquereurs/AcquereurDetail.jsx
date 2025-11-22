@@ -12,6 +12,8 @@ import { base44 } from "@/api/base44Client";
 import { useSignedUrls } from "@/hooks/useSignedUrl";
 import { supabase } from "@/lib/supabase";
 import { messagesAdminService } from "@/api/messagesAdmin";
+import AppelsDeFondTimeline from "./AppelsDeFondTimeline";
+import { useAuth } from "@/contexts/AuthContext";
 import { faqService } from "@/api/faq";
 import { galeriePhotosService } from "@/api/galeriePhotos";
 import { format } from 'date-fns';
@@ -433,6 +435,15 @@ export default function AcquereurDetail({ acquereur, onClose, onEdit, onDelete }
             </CardContent>
           </Card>
 
+
+          {/* Appels de fond */}
+          {lotLmnp && (
+            <AppelsDeFondTimeline
+              lotId={lotLmnp.id}
+              acquereurId={acquereur.id}
+              isAdmin={true}
+            />
+          )}
 
           {/* Notes */}
           {acquereur.notes && (

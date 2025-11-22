@@ -15,6 +15,7 @@ import { Home, FileText, MessageSquare, Hammer, Image as ImageIcon, HelpCircle, 
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import AppelsDeFondTimeline from '@/components/acquereurs/AppelsDeFondTimeline';
 
 export default function AcquereurDashboard() {
   const { profile } = useAuth();
@@ -26,7 +27,7 @@ export default function AcquereurDashboard() {
   const [photos, setPhotos] = useState([]);
   const [nouveauMessage, setNouveauMessage] = useState('');
   const [loading, setLoading] = useState(true);
-  const [activeSection, setActiveSection] = useState('tableau-bord');
+  const [activeSection, setActiveSection] = useState('avancement-travaux');
 
   useEffect(() => {
     loadData();
@@ -136,9 +137,9 @@ export default function AcquereurDashboard() {
 
   const menuItems = [
     { id: 'tableau-bord', label: 'Tableau de bord', icon: Home },
+    { id: 'avancement-travaux', label: 'Avancement travaux', icon: Hammer },
     { id: 'documents', label: 'Documents', icon: FileText },
     { id: 'messages', label: 'Messages', icon: MessageSquare },
-    { id: 'appels-fond', label: 'Appels de fond', icon: Hammer },
     { id: 'galerie', label: 'Galerie', icon: ImageIcon },
     { id: 'faq', label: 'FAQ', icon: HelpCircle },
   ];
@@ -462,6 +463,14 @@ export default function AcquereurDashboard() {
                   </Card>
                 </div>
               </div>
+            )}
+
+            {activeSection === 'avancement-travaux' && lot && (
+              <AppelsDeFondTimeline
+                lotId={lot.id}
+                acquereurId={acquereur.id}
+                isAdmin={false}
+              />
             )}
 
             {activeSection === 'documents' && (
