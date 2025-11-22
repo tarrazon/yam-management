@@ -174,10 +174,28 @@ export default function AppelsDeFondTimeline({ lotId, acquereurId, isAdmin = fal
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <DollarSign className="w-5 h-5 text-[#1E40AF]" />
-          Appels de fond - Suivi des travaux
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <DollarSign className="w-5 h-5 text-[#1E40AF]" />
+            Appels de fond - Suivi des travaux
+          </CardTitle>
+          {isAdmin && etapes.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (confirm('Réinitialiser les étapes ? Cette action supprimera toutes les étapes actuelles et créera les 10 étapes standards.')) {
+                  initStepsMutation.mutate();
+                }
+              }}
+              disabled={initStepsMutation.isPending}
+              className="text-slate-600 hover:text-slate-800"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Réinitialiser
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="p-6">
         <div className="space-y-8">
