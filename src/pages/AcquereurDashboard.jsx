@@ -23,6 +23,7 @@ export default function AcquereurDashboard() {
   const queryClient = useQueryClient();
   const [nouveauMessage, setNouveauMessage] = useState('');
   const [activeSection, setActiveSection] = useState('tableau-bord');
+  const [selectedLotId, setSelectedLotId] = useState(null);
 
   // Charger les données de l'acquéreur avec React Query
   const { data: acquereur, isLoading: loadingAcquereur } = useQuery({
@@ -40,21 +41,31 @@ export default function AcquereurDashboard() {
     refetchInterval: 10000, // Rafraîchir toutes les 10 secondes
   });
 
-  // Charger le lot associé
-  const { data: lot } = useQuery({
-    queryKey: ['lot-acquereur', acquereur?.id],
+  // Charger TOUS les lots de l'acquéreur
+  const { data: lots = [] } = useQuery({
+    queryKey: ['lots-acquereur', acquereur?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('lots_lmnp')
         .select('*, residence:residences_gestion(*)')
         .eq('acquereur_id', acquereur.id)
-        .maybeSingle();
-      if (error && error.code !== 'PGRST116') throw error;
-      return data;
+        .order('numero');
+      if (error) throw error;
+      return data || [];
     },
     enabled: !!acquereur?.id,
     refetchInterval: 10000,
   });
+
+  // Sélectionner automatiquement le premier lot si aucun n'est sélectionné
+  useEffect(() => {
+    if (lots.length > 0 && !selectedLotId) {
+      setSelectedLotId(lots[0].id);
+    }
+  }, [lots, selectedLotId]);
+
+  // Le lot actuellement sélectionné
+  const lot = lots.find(l => l.id === selectedLotId);
 
   // Charger les appels de fond du lot actif uniquement
   const { data: appelsDeFond = [] } = useQuery({
@@ -277,6 +288,26 @@ export default function AcquereurDashboard() {
           <p className="text-sm text-slate-500 mt-1">{acquereur.prenom} {acquereur.nom}</p>
         </div>
 
+        {/* Sélecteur de lots */}
+        {lots.length > 1 && (
+          <div className="p-4 border-b border-slate-200 bg-slate-50">
+            <label className="text-xs font-semibold text-slate-600 uppercase mb-2 block">
+              Mes lots ({lots.length})
+            </label>
+            <select
+              value={selectedLotId || ''}
+              onChange={(e) => setSelectedLotId(e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1E40AF] focus:border-transparent"
+            >
+              {lots.map((l) => (
+                <option key={l.id} value={l.id}>
+                  {l.residence?.nom} - Lot {l.numero}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <nav className="flex-1 p-4">
           <ul className="space-y-2">
             {menuItems.map((item) => {
@@ -404,9 +435,16 @@ export default function AcquereurDashboard() {
                   {/* Votre logement */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-[#1E40AF] flex items-center gap-2">
-                        <Building className="w-5 h-5" />
-                        Votre logement
+                      <CardTitle className="text-[#1E40AF] flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Building className="w-5 h-5" />
+                          {lots.length > 1 ? 'Vos logements' : 'Votre logement'}
+                        </div>
+                        {lots.length > 1 && (
+                          <Badge className="bg-blue-100 text-blue-800">
+                            {lots.length} lots
+                          </Badge>
+                        )}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -718,10 +756,17 @@ export default function AcquereurDashboard() {
               </Card>
             )}
 
-            {activeSection === 'galerie' && (
+            {activeSection === 'galerie' && lot && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-[#1E40AF]">Galerie Photos</CardTitle>
+                  <CardTitle className="text-[#1E40AF] flex items-center justify-between">
+                    <span>Galerie Photos - Lot {lot.numero}</span>
+                    {lots.length > 1 && (
+                      <span className="text-sm font-normal text-slate-500">
+                        {lot.residence?.nom}
+                      </span>
+                    )}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {photos.length > 0 ? (
@@ -731,31 +776,40 @@ export default function AcquereurDashboard() {
                           <DialogTrigger asChild>
                             <div className="cursor-pointer group relative aspect-square overflow-hidden rounded-lg border border-slate-200">
                               <img
-                                src={photo.photo_url}
-                                alt={photo.titre}
+                                src={photo.url}
+                                alt={photo.legende || 'Photo du lot'}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                               />
                               <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all" />
+                              {photo.categorie && (
+                                <div className="absolute top-2 left-2">
+                                  <Badge className="bg-white/90 text-slate-700 text-xs">
+                                    {photo.categorie}
+                                  </Badge>
+                                </div>
+                              )}
                             </div>
                           </DialogTrigger>
                           <DialogContent className="max-w-4xl">
                             <DialogHeader>
-                              <DialogTitle>{photo.titre}</DialogTitle>
+                              <DialogTitle>{photo.legende || 'Photo du lot'}</DialogTitle>
                             </DialogHeader>
                             <img
-                              src={photo.photo_url}
-                              alt={photo.titre}
+                              src={photo.url}
+                              alt={photo.legende || 'Photo du lot'}
                               className="w-full rounded-lg"
                             />
-                            {photo.description && (
-                              <p className="text-sm text-slate-600">{photo.description}</p>
+                            {photo.legende && (
+                              <p className="text-sm text-slate-600">{photo.legende}</p>
                             )}
                           </DialogContent>
                         </Dialog>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-slate-500 text-center py-8">Aucune photo disponible pour le moment</p>
+                    <p className="text-slate-500 text-center py-8">
+                      Aucune photo disponible pour ce lot
+                    </p>
                   )}
                 </CardContent>
               </Card>
