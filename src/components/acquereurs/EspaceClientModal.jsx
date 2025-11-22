@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import StorageImage from '@/components/common/StorageImage';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -443,7 +444,7 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
                               className="cursor-pointer group relative aspect-square overflow-hidden rounded-lg border border-slate-200"
                               onClick={() => setSelectedPhoto(photo)}
                             >
-                              <img
+                              <StorageImage
                                 src={photo.photo_url}
                                 alt={photo.titre || 'Photo'}
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
@@ -544,7 +545,11 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
       {selectedPhoto && (
         <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
           <DialogContent className="max-w-4xl">
-            <img src={selectedPhoto.photo_url} alt={selectedPhoto.titre || 'Photo'} className="w-full rounded-lg" />
+            <StorageImage
+              src={selectedPhoto.photo_url}
+              alt={selectedPhoto.titre || 'Photo'}
+              className="w-full rounded-lg"
+            />
             {selectedPhoto.titre && <h3 className="font-semibold mt-4">{selectedPhoto.titre}</h3>}
             {selectedPhoto.description && (
               <p className="mt-2 text-slate-600">{selectedPhoto.description}</p>
