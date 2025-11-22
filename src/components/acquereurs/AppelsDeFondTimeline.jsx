@@ -18,7 +18,7 @@ export default function AppelsDeFondTimeline({ lotId, acquereurId, isAdmin = fal
   const [notes, setNotes] = useState("");
 
   const { data: etapes = [], isLoading } = useQuery({
-    queryKey: acquereurId ? ["appels-de-fond-portal", acquereurId] : ["appels-de-fond", lotId],
+    queryKey: isAdmin ? ["appels-de-fond", lotId] : ["appels-de-fond-portal", lotId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("appels_de_fond")
@@ -54,7 +54,7 @@ export default function AppelsDeFondTimeline({ lotId, acquereurId, isAdmin = fal
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(acquereurId ? ["appels-de-fond-portal", acquereurId] : ["appels-de-fond", lotId]);
+      queryClient.invalidateQueries(isAdmin ? ["appels-de-fond", lotId] : ["appels-de-fond-portal", lotId]);
       toast.success("Statut mis à jour");
     },
     onError: (error) => {
@@ -72,7 +72,7 @@ export default function AppelsDeFondTimeline({ lotId, acquereurId, isAdmin = fal
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(acquereurId ? ["appels-de-fond-portal", acquereurId] : ["appels-de-fond", lotId]);
+      queryClient.invalidateQueries(isAdmin ? ["appels-de-fond", lotId] : ["appels-de-fond-portal", lotId]);
       toast.success("Notes enregistrées");
       setEditingEtape(null);
       setNotes("");
@@ -87,7 +87,7 @@ export default function AppelsDeFondTimeline({ lotId, acquereurId, isAdmin = fal
       await appelsDeFondService.initStepsForLot(lotId, acquereurId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(acquereurId ? ["appels-de-fond-portal", acquereurId] : ["appels-de-fond", lotId]);
+      queryClient.invalidateQueries(isAdmin ? ["appels-de-fond", lotId] : ["appels-de-fond-portal", lotId]);
       toast.success("Étapes initialisées avec succès");
     },
     onError: (error) => {

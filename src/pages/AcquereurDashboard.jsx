@@ -22,7 +22,7 @@ export default function AcquereurDashboard() {
   const { profile } = useAuth();
   const queryClient = useQueryClient();
   const [nouveauMessage, setNouveauMessage] = useState('');
-  const [activeSection, setActiveSection] = useState('avancement-travaux');
+  const [activeSection, setActiveSection] = useState('tableau-bord');
 
   // Charger les données de l'acquéreur avec React Query
   const { data: acquereur, isLoading: loadingAcquereur } = useQuery({
@@ -56,11 +56,20 @@ export default function AcquereurDashboard() {
     refetchInterval: 10000,
   });
 
-  // Charger les appels de fond
+  // Charger les appels de fond du lot actif uniquement
   const { data: appelsDeFond = [] } = useQuery({
-    queryKey: ['appels-de-fond-portal', acquereur?.id],
-    queryFn: () => appelsDeFondService.listByAcquereur(acquereur.id),
-    enabled: !!acquereur?.id,
+    queryKey: ['appels-de-fond-portal', lot?.id],
+    queryFn: async () => {
+      if (!lot?.id) return [];
+      const { data, error } = await supabase
+        .from('appels_de_fond')
+        .select('*')
+        .eq('lot_id', lot.id)
+        .order('ordre', { ascending: true });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!lot?.id,
     refetchInterval: 5000, // Rafraîchir toutes les 5 secondes
   });
 
@@ -91,9 +100,9 @@ export default function AcquereurDashboard() {
 
   // Abonnement en temps réel pour les changements
   useEffect(() => {
-    if (!acquereur?.id) return;
+    if (!lot?.id || !acquereur?.id) return;
 
-    // Subscription pour les appels de fond
+    // Subscription pour les appels de fond du lot actif
     const appelsFondChannel = supabase
       .channel('appels-fond-changes')
       .on(
@@ -102,10 +111,10 @@ export default function AcquereurDashboard() {
           event: '*',
           schema: 'public',
           table: 'appels_de_fond',
-          filter: `acquereur_id=eq.${acquereur.id}`,
+          filter: `lot_id=eq.${lot.id}`,
         },
         () => {
-          queryClient.invalidateQueries(['appels-de-fond-portal', acquereur.id]);
+          queryClient.invalidateQueries(['appels-de-fond-portal', lot.id]);
         }
       )
       .subscribe();
@@ -156,7 +165,7 @@ export default function AcquereurDashboard() {
       appelsFondChannel.unsubscribe();
       messagesChannel.unsubscribe();
     };
-  }, [acquereur?.id, lot?.id, queryClient]);
+  }, [lot?.id, acquereur?.id, queryClient]);
 
   const handleSendMessage = async () => {
     if (!nouveauMessage.trim()) return;
