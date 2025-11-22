@@ -16,6 +16,7 @@ import { Home, FileText, MessageSquare, Hammer, Image as ImageIcon, HelpCircle, 
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { toast } from 'sonner';
 import AppelsDeFondTimeline from '@/components/acquereurs/AppelsDeFondTimeline';
 
 export default function AcquereurDashboard() {
@@ -117,6 +118,11 @@ export default function AcquereurDashboard() {
     enabled: !!acquereur?.id,
     refetchInterval: 5000,
   });
+
+  // Compter les messages non lus (messages envoyés par l'admin)
+  const unreadMessagesCount = messages.filter(msg =>
+    msg.expediteur_type === 'admin' && !msg.lu
+  ).length;
 
   // Charger les photos
   const { data: photos = [] } = useQuery({
@@ -220,6 +226,17 @@ export default function AcquereurDashboard() {
       queryClient.invalidateQueries(['messages-portal', acquereur.id]);
     } catch (error) {
       console.error('Erreur envoi message:', error);
+    }
+  };
+
+  const handleMarkMessageAsRead = async (messageId) => {
+    try {
+      await messagesAdminService.marquerLu(messageId);
+      queryClient.invalidateQueries(['messages-portal', acquereur.id]);
+      toast.success('Message marqué comme lu');
+    } catch (error) {
+      console.error('Erreur marquage message:', error);
+      toast.error('Erreur lors du marquage du message');
     }
   };
 
@@ -338,11 +355,12 @@ export default function AcquereurDashboard() {
           <ul className="space-y-2">
             {menuItems.map((item) => {
               const Icon = item.icon;
+              const showBadge = item.id === 'messages' && unreadMessagesCount > 0;
               return (
                 <li key={item.id}>
                   <button
                     onClick={() => setActiveSection(item.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors relative ${
                       activeSection === item.id
                         ? 'bg-[#1E40AF] text-white'
                         : 'text-slate-700 hover:bg-slate-100'
@@ -350,6 +368,11 @@ export default function AcquereurDashboard() {
                   >
                     <Icon className="w-5 h-5" />
                     <span className="font-medium">{item.label}</span>
+                    {showBadge && (
+                      <Badge className="ml-auto bg-red-500 text-white text-xs h-5 w-5 p-0 flex items-center justify-center rounded-full">
+                        {unreadMessagesCount}
+                      </Badge>
+                    )}
                   </button>
                 </li>
               );
@@ -671,20 +694,38 @@ export default function AcquereurDashboard() {
                         animate={{ opacity: 1, y: 0 }}
                         className={`flex ${msg.expediteur_type === 'acquereur' ? 'justify-end' : 'justify-start'}`}
                       >
-                        <div className={`max-w-md p-4 rounded-lg ${
+                        <div className={`max-w-md p-4 rounded-lg relative ${
                           msg.expediteur_type === 'acquereur'
                             ? 'bg-[#1E40AF] text-white'
-                            : 'bg-slate-100 text-slate-700'
+                            : `bg-slate-100 text-slate-700 ${!msg.lu ? 'border-2 border-red-300' : ''}`
                         }`}>
-                          <p className="text-sm font-medium mb-1">
-                            {msg.expediteur_type === 'admin' ? 'Administrateur YAM' : 'Vous'}
-                          </p>
+                          <div className="flex items-start justify-between gap-2 mb-1">
+                            <p className="text-sm font-medium">
+                              {msg.expediteur_type === 'admin' ? 'Administrateur YAM' : 'Vous'}
+                            </p>
+                            {msg.expediteur_type === 'admin' && !msg.lu && (
+                              <Badge className="bg-red-500 text-white text-[10px] px-1.5 py-0.5">Non lu</Badge>
+                            )}
+                          </div>
                           <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
-                          <p className={`text-xs mt-2 ${
-                            msg.expediteur_type === 'acquereur' ? 'text-blue-200' : 'text-slate-500'
-                          }`}>
-                            {format(new Date(msg.created_at), 'dd MMM yyyy à HH:mm', { locale: fr })}
-                          </p>
+                          <div className="flex items-center justify-between gap-2 mt-2">
+                            <p className={`text-xs ${
+                              msg.expediteur_type === 'acquereur' ? 'text-blue-200' : 'text-slate-500'
+                            }`}>
+                              {format(new Date(msg.created_at), 'dd MMM yyyy à HH:mm', { locale: fr })}
+                            </p>
+                            {msg.expediteur_type === 'admin' && !msg.lu && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleMarkMessageAsRead(msg.id)}
+                                className="h-6 px-2 text-[10px] hover:bg-green-100 text-green-700"
+                              >
+                                <Check className="w-3 h-3 mr-0.5" />
+                                Lu
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </motion.div>
                     ))}

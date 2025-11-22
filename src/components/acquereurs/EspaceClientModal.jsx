@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, MessageSquare, Image as ImageIcon, HelpCircle, Send, Upload, Trash2, FileText, Check, Clock, CheckCircle, Hammer, Plus } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { messagesAdminService } from '@/api/messagesAdmin';
@@ -23,6 +23,7 @@ import AppelsDeFondTimeline from './AppelsDeFondTimeline';
 export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
   const { profile } = useAuth();
   const queryClient = useQueryClient();
+  const fileInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState('messages');
   const [selectedLotId, setSelectedLotId] = useState(null);
 
@@ -412,24 +413,23 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
                         </div>
                       )}
                       <div className={lotsLmnp.length === 1 ? 'ml-auto' : ''}>
-                        <label>
-                          <input
-                            type="file"
-                            multiple
-                            accept="image/*"
-                            onChange={handleUploadPhoto}
-                            className="hidden"
-                            disabled={uploading}
-                          />
-                          <Button
-                            as="span"
-                            className="bg-[#1E40AF] hover:bg-[#1E3A8A] cursor-pointer"
-                            disabled={uploading}
-                          >
-                            <Upload className="w-4 h-4 mr-2" />
-                            {uploading ? 'Upload en cours...' : 'Ajouter des photos'}
-                          </Button>
-                        </label>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          onChange={handleUploadPhoto}
+                          className="hidden"
+                          disabled={uploading}
+                        />
+                        <Button
+                          onClick={() => fileInputRef.current?.click()}
+                          className="bg-[#1E40AF] hover:bg-[#1E3A8A]"
+                          disabled={uploading}
+                        >
+                          <Upload className="w-4 h-4 mr-2" />
+                          {uploading ? 'Upload en cours...' : 'Ajouter des photos'}
+                        </Button>
                       </div>
                     </div>
 
