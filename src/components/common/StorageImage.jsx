@@ -17,17 +17,20 @@ export default function StorageImage({ src, alt, className, fallback }) {
       }
 
       try {
+        console.log('[StorageImage] Loading image from:', src);
         const url = await getSignedUrl(src);
+        console.log('[StorageImage] Got URL:', url);
         if (mounted) {
           if (url) {
             setImageUrl(url);
             setError(false);
           } else {
+            console.error('[StorageImage] No URL returned');
             setError(true);
           }
         }
       } catch (err) {
-        console.error('Error loading image:', err);
+        console.error('[StorageImage] Error loading image:', err);
         if (mounted) {
           setError(true);
         }

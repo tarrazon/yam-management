@@ -68,17 +68,32 @@ export const deleteFile = async (filePath) => {
 export const getSignedUrl = async (filePath, expiresIn = 3600) => {
   if (!filePath) return null;
 
-  // Si c'est déjà une URL complète, la retourner
-  if (filePath.startsWith('http')) return filePath;
+  console.log('[getSignedUrl] Input:', filePath);
+
+  // Si c'est une URL externe (Pexels, etc.), la retourner telle quelle
+  if (filePath.startsWith('http') && !filePath.includes('supabase.co')) {
+    console.log('[getSignedUrl] External URL, returning as-is');
+    return filePath;
+  }
+
+  // Si c'est une URL Supabase complète, extraire le chemin
+  let actualPath = filePath;
+  if (filePath.includes('supabase.co/storage/v1/object/public/documents/')) {
+    actualPath = filePath.split('/public/documents/')[1];
+    console.log('[getSignedUrl] Extracted path from full URL:', actualPath);
+  }
+
+  console.log('[getSignedUrl] Requesting signed URL for:', actualPath);
 
   const { data, error } = await supabase.storage
     .from('documents')
-    .createSignedUrl(filePath, expiresIn);
+    .createSignedUrl(actualPath, expiresIn);
 
   if (error) {
-    console.error('Error creating signed URL:', error);
+    console.error('[getSignedUrl] Error creating signed URL:', error);
     return null;
   }
 
+  console.log('[getSignedUrl] Signed URL created:', data.signedUrl);
   return data.signedUrl;
 };
