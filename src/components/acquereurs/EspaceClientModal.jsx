@@ -253,15 +253,20 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
 
   if (!isOpen) return null;
 
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
     <>
       <div
         className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto"
-        onClick={onClose}
+        onClick={handleBackdropClick}
       >
         <div
           className="bg-white rounded-xl shadow-2xl max-w-5xl w-full my-8 overflow-hidden flex flex-col max-h-[90vh]"
-          onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
           <div className="bg-gradient-to-r from-[#1E40AF] to-[#1E3A8A] text-white p-6">

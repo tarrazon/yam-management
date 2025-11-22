@@ -65,15 +65,14 @@ export default function AcquereurListItem({ acquereur, onEdit, onView, onDelete 
             </div>
           )}
 
-          <div className="flex gap-1 justify-end">
+          <div className="flex gap-2 justify-end items-center">
             <Button
-              variant="ghost"
-              size="icon"
+              size="sm"
               onClick={() => setShowEspaceClient(true)}
-              className="hover:bg-blue-50 h-8 w-8"
-              title="Espace Client"
+              className="bg-blue-600 hover:bg-blue-700 text-white h-8 text-xs"
             >
-              <MessageSquare className="w-4 h-4 text-blue-600" />
+              <MessageSquare className="w-3 h-3 mr-1" />
+              Espace Client
             </Button>
             <Button
               variant="ghost"
