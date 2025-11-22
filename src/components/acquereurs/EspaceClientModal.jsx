@@ -46,16 +46,42 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
     queryKey: ['lots-lmnp-acquereur', acquereur?.id],
     queryFn: async () => {
       if (!acquereur?.id) return [];
-      const { data, error } = await supabase
+
+      // Récupérer les lots
+      const { data: lots, error: lotsError } = await supabase
         .from('lots_lmnp')
-        .select('id, numero, statut, residence:residences_gestion(nom, ville)')
+        .select('id, numero, statut, residence_id')
         .eq('acquereur_id', acquereur.id)
         .order('numero');
-      if (error) {
-        console.error('Erreur chargement lots:', error);
-        throw error;
+
+      if (lotsError) {
+        console.error('Erreur chargement lots:', lotsError);
+        throw lotsError;
       }
-      return data || [];
+
+      if (!lots || lots.length === 0) return [];
+
+      // Récupérer les infos des résidences
+      const residenceIds = [...new Set(lots.map(l => l.residence_id).filter(Boolean))];
+      const { data: residences, error: residencesError } = await supabase
+        .from('residences_gestion')
+        .select('id, nom, ville')
+        .in('id', residenceIds);
+
+      if (residencesError) {
+        console.error('Erreur chargement résidences:', residencesError);
+      }
+
+      // Mapper les résidences aux lots
+      const residencesMap = (residences || []).reduce((acc, r) => {
+        acc[r.id] = r;
+        return acc;
+      }, {});
+
+      return lots.map(lot => ({
+        ...lot,
+        residence: residencesMap[lot.residence_id] || null
+      }));
     },
     enabled: isOpen && !!acquereur?.id,
   });
