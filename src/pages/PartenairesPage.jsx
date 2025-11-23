@@ -15,7 +15,7 @@ import PartenaireDetail from "../components/partenaires/PartenaireDetail";
 import PartenaireTypeFilter from "../components/partenaires/PartenaireTypeFilter";
 import { motion, AnimatePresence } from "framer-motion";
 import DeleteConfirmDialog from "../components/common/DeleteConfirmDialog";
-import { flattenPartenaireTypes } from "@/utils/partenaireTypes";
+import { flattenPartenaireTypes, formatPartenaireTypes } from "@/utils/partenaireTypes";
 
 export default function PartenairesPage() {
   const [showForm, setShowForm] = useState(false);
@@ -187,10 +187,11 @@ export default function PartenairesPage() {
       const nombreVentes = lotsVendus.length;
       const caGenere = lotsVendus.reduce((sum, lot) => sum + (lot.prix_fai || 0), 0);
       const commissionTotale = lotsVendus.reduce((sum, lot) => sum + (lot.commission_partenaire || 0), 0);
+      const typesFormattes = formatPartenaireTypes(p.type_partenaire).join(', ');
 
       return {
         "Nom": p.nom || "",
-        "Type": p.type_partenaire || "",
+        "Type": typesFormattes || "",
         "Statut": p.statut || "",
         "Contact principal": p.contact_principal || "",
         "Email": p.email || "",
