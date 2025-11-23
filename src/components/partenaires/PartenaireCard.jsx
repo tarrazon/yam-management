@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Handshake, Edit, Mail, Phone, MapPin, Eye, TrendingUp, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { formatPartenaireTypes } from "@/utils/partenaireTypes";
 
 const statusColors = {
   actif: "bg-green-100 text-green-800 border-green-200",
@@ -20,25 +21,9 @@ const statusLabels = {
   suspendu: "Suspendu",
 };
 
-const typeColors = {
-  cgp: "bg-blue-100 text-blue-800",
-  plateforme: "bg-purple-100 text-purple-800",
-  courtier: "bg-indigo-100 text-indigo-800",
-  notaire: "bg-amber-100 text-amber-800",
-  diffuseur_web: "bg-pink-100 text-pink-800",
-  autre: "bg-slate-100 text-slate-800",
-};
-
-const typeLabels = {
-  cgp: "CGP",
-  plateforme: "Plateforme",
-  courtier: "Courtier",
-  notaire: "Notaire",
-  diffuseur_web: "Diffuseur Web",
-  autre: "Autre",
-};
-
 export default function PartenaireCard({ partenaire, onEdit, onView, onDelete }) {
+  const partenaireTypes = formatPartenaireTypes(partenaire.type_partenaire);
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -61,9 +46,22 @@ export default function PartenaireCard({ partenaire, onEdit, onView, onDelete })
                   <Badge className={`${statusColors[partenaire.statut]} border`}>
                     {statusLabels[partenaire.statut]}
                   </Badge>
-                  <Badge className={typeColors[partenaire.type_partenaire]}>
-                    {typeLabels[partenaire.type_partenaire]}
-                  </Badge>
+                  {partenaireTypes.length > 0 ? (
+                    partenaireTypes.slice(0, 2).map((type, index) => (
+                      <Badge key={index} variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                        {type}
+                      </Badge>
+                    ))
+                  ) : (
+                    <Badge variant="outline" className="bg-slate-50 text-slate-600">
+                      Non spécifié
+                    </Badge>
+                  )}
+                  {partenaireTypes.length > 2 && (
+                    <Badge variant="outline" className="bg-slate-100 text-slate-600">
+                      +{partenaireTypes.length - 2}
+                    </Badge>
+                  )}
                 </div>
               </div>
             </div>

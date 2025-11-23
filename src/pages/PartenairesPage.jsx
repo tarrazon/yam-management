@@ -12,8 +12,10 @@ import PartenaireCard from "../components/partenaires/PartenaireCard";
 import PartenaireListItem from "../components/partenaires/PartenaireListItem";
 import PartenaireForm from "../components/partenaires/PartenaireForm";
 import PartenaireDetail from "../components/partenaires/PartenaireDetail";
+import PartenaireTypeFilter from "../components/partenaires/PartenaireTypeFilter";
 import { motion, AnimatePresence } from "framer-motion";
 import DeleteConfirmDialog from "../components/common/DeleteConfirmDialog";
+import { flattenPartenaireTypes } from "@/utils/partenaireTypes";
 
 export default function PartenairesPage() {
   const [showForm, setShowForm] = useState(false);
@@ -21,7 +23,7 @@ export default function PartenairesPage() {
   const [viewingPartenaire, setViewingPartenaire] = useState(null);
   const [deletingPartenaire, setDeletingPartenaire] = useState(null);
   const [filter, setFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState([]);
   const [dateDebut, setDateDebut] = useState("");
   const [dateFin, setDateFin] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -150,7 +152,17 @@ export default function PartenairesPage() {
       return true;
     })
     .filter(p => filter === "all" || p.statut === filter)
-    .filter(p => typeFilter === "all" || p.type_partenaire === typeFilter)
+    .filter(p => {
+      // Filtrage par type : multi-sélection
+      if (typeFilter.length === 0) return true;
+
+      const partenaireFlattened = flattenPartenaireTypes(p.type_partenaire);
+
+      // Vérifier si le partenaire a au moins un des types sélectionnés
+      return typeFilter.some(selectedType =>
+        partenaireFlattened.some(pType => pType.startsWith(selectedType))
+      );
+    })
     .filter(p => {
       if (!dateDebut && !dateFin) return true;
       const datePartenaire = p.date_convention || p.created_at;
@@ -335,20 +347,10 @@ export default function PartenairesPage() {
             <div className="grid md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="type_filter" className="text-sm">Type de partenaire</Label>
-                <Select value={typeFilter} onValueChange={setTypeFilter}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tous types</SelectItem>
-                    <SelectItem value="cgp">CGP</SelectItem>
-                    <SelectItem value="plateforme">Plateforme</SelectItem>
-                    <SelectItem value="courtier">Courtier</SelectItem>
-                    <SelectItem value="notaire">Notaire</SelectItem>
-                    <SelectItem value="diffuseur_web">Diffuseur web</SelectItem>
-                    <SelectItem value="autre">Autre</SelectItem>
-                  </SelectContent>
-                </Select>
+                <PartenaireTypeFilter
+                  value={typeFilter}
+                  onChange={setTypeFilter}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="date_debut" className="text-sm">Date de début</Label>
@@ -369,12 +371,12 @@ export default function PartenairesPage() {
                 />
               </div>
             </div>
-            {(typeFilter !== "all" || dateDebut || dateFin) && (
+            {(typeFilter.length > 0 || dateDebut || dateFin) && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setTypeFilter("all");
+                  setTypeFilter([]);
                   setDateDebut("");
                   setDateFin("");
                 }}

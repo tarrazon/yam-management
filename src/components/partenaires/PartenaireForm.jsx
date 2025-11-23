@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { X, Save } from "lucide-react";
 import { motion } from "framer-motion";
 import { autoCleanFormData } from "@/utils/formHelpers";
+import PartenaireTypeSelector from "./PartenaireTypeSelector";
 
 export default function PartenaireForm({ partenaire, onSubmit, onCancel, isLoading }) {
   const [formData, setFormData] = useState(partenaire || {
@@ -19,7 +20,7 @@ export default function PartenaireForm({ partenaire, onSubmit, onCancel, isLoadi
     email: "",
     telephone: "",
     adresse: "",
-    type_partenaire: "cgp",
+    type_partenaire: {},
     zone_activite: "",
     specialite: "",
     convention_signee: false,
@@ -62,8 +63,8 @@ export default function PartenaireForm({ partenaire, onSubmit, onCancel, isLoadi
               </TabsList>
 
               <TabsContent value="general" className="space-y-6 mt-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-2 md:col-span-2">
+                <div className="space-y-6">
+                  <div className="space-y-2">
                     <Label htmlFor="nom">Nom du partenaire ou société *</Label>
                     <Input
                       id="nom"
@@ -74,23 +75,14 @@ export default function PartenaireForm({ partenaire, onSubmit, onCancel, isLoadi
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="type_partenaire">Type de partenaire *</Label>
-                    <Select
-                      value={formData.type_partenaire}
-                      onValueChange={(value) => setFormData({ ...formData, type_partenaire: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="cgp">CGP</SelectItem>
-                        <SelectItem value="plateforme">Plateforme</SelectItem>
-                        <SelectItem value="courtier">Courtier</SelectItem>
-                        <SelectItem value="notaire">Notaire</SelectItem>
-                        <SelectItem value="diffuseur_web">Diffuseur Web</SelectItem>
-                        <SelectItem value="autre">Autre</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label>Type de partenaire *</Label>
+                    <p className="text-sm text-slate-500 mb-2">
+                      Sélectionnez une ou plusieurs catégories et sous-catégories
+                    </p>
+                    <PartenaireTypeSelector
+                      value={formData.type_partenaire || {}}
+                      onChange={(value) => setFormData({ ...formData, type_partenaire: value })}
+                    />
                   </div>
 
                   <div className="space-y-2">
