@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X, Save, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
@@ -17,6 +18,7 @@ export default function GestionnaireForm({ gestionnaire, onSubmit, onCancel, isL
     email: "",
     telephone: "",
     adresse: "",
+    type_gestion: "bail_commercial",
     residence_ids: []
   });
 
@@ -122,6 +124,22 @@ export default function GestionnaireForm({ gestionnaire, onSubmit, onCancel, isL
                 placeholder="Ex: Société de gestion immobilière"
                 required
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="type_gestion">Type de gestionnaire *</Label>
+              <Select
+                value={formData.type_gestion}
+                onValueChange={(value) => setFormData({ ...formData, type_gestion: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionnez le type" />
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  <SelectItem value="bail_commercial">Bail commercial</SelectItem>
+                  <SelectItem value="mandat_gestion">Mandat de gestion</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">

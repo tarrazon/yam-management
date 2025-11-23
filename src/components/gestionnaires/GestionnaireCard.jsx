@@ -2,9 +2,21 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Mail, Phone, MapPin, Edit, Trash2, Home } from "lucide-react";
+import { Building2, Mail, Phone, MapPin, Edit, Trash2, Home, FileText, Briefcase } from "lucide-react";
+
+const TYPE_LABELS = {
+  bail_commercial: "Bail commercial",
+  mandat_gestion: "Mandat de gestion"
+};
+
+const TYPE_ICONS = {
+  bail_commercial: Briefcase,
+  mandat_gestion: FileText
+};
 
 export default function GestionnaireCard({ gestionnaire, onEdit, onDelete, residences = [] }) {
+  const TypeIcon = TYPE_ICONS[gestionnaire.type_gestion] || Briefcase;
+
   return (
     <Card className="hover:shadow-lg transition-shadow duration-200">
       <CardContent className="p-6">
@@ -14,9 +26,15 @@ export default function GestionnaireCard({ gestionnaire, onEdit, onDelete, resid
               <Building2 className="w-6 h-6 text-blue-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-bold text-[#1E40AF] truncate">
-                {gestionnaire.nom_societe}
-              </h3>
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="text-lg font-bold text-[#1E40AF] truncate">
+                  {gestionnaire.nom_societe}
+                </h3>
+                <Badge variant="outline" className="flex items-center gap-1 text-xs">
+                  <TypeIcon className="w-3 h-3" />
+                  {TYPE_LABELS[gestionnaire.type_gestion] || gestionnaire.type_gestion}
+                </Badge>
+              </div>
               {gestionnaire.contact_principal && (
                 <p className="text-sm text-slate-600 mt-1">
                   Contact: {gestionnaire.contact_principal}
