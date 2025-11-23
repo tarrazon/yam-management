@@ -64,14 +64,6 @@ export const PARTENAIRE_TYPES_HIERARCHY = {
       residence_principale: { label: "Résidence Principale" }
     }
   },
-  notaire: {
-    label: "Notaire",
-    children: {
-      notaire_vendeur: { label: "Notaire vendeur" },
-      notaire_acquereur: { label: "Notaire acquéreur" },
-      notaire_apporteur_affaires: { label: "Notaire apporteur d'affaires" }
-    }
-  },
   avocat: {
     label: "Avocat",
     children: {
