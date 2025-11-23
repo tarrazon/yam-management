@@ -3,15 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp } from "lucide-react";
 import { formatCurrency } from "@/utils/formHelpers";
-
-const typeColors = {
-  cgp: "bg-purple-100 text-purple-700",
-  plateforme: "bg-blue-100 text-blue-700",
-  courtier: "bg-green-100 text-green-700",
-  notaire: "bg-amber-100 text-amber-700",
-  diffuseur_web: "bg-pink-100 text-pink-700",
-  autre: "bg-slate-100 text-slate-700",
-};
+import { formatPartenaireTypes } from "@/utils/partenaireTypes";
 
 export default function PartnersPerformance({ partenaires, lots }) {
   // Calculer les performances réelles basées sur les lots vendus
@@ -62,9 +54,9 @@ export default function PartnersPerformance({ partenaires, lots }) {
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm truncate">{partenaire.nom || partenaire.nom_societe || 'Sans nom'}</p>
                     <div className="flex items-center gap-2 mt-1">
-                      {partenaire.type_partenaire && (
-                        <Badge className={`${typeColors[partenaire.type_partenaire] || typeColors.autre} text-xs`} variant="secondary">
-                          {partenaire.type_partenaire.toUpperCase()}
+                      {partenaire.type_partenaire && formatPartenaireTypes(partenaire.type_partenaire).length > 0 && (
+                        <Badge className="bg-blue-100 text-blue-700 text-xs" variant="secondary">
+                          {formatPartenaireTypes(partenaire.type_partenaire)[0]}
                         </Badge>
                       )}
                       <span className="text-xs text-slate-500">

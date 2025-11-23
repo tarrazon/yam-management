@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Partenaire } from "@/api/entities";
+import { formatPartenaireTypes } from "@/utils/partenaireTypes";
 
 const getNavigationItems = (userRole) => {
   const adminItems = [
@@ -255,9 +256,9 @@ export default function Layout({ children, currentPageName }) {
                 {partenaireInfo.contact_principal && (
                   <p className="text-xs text-slate-600 truncate">{partenaireInfo.contact_principal}</p>
                 )}
-                {partenaireInfo.type_partenaire && (
+                {partenaireInfo.type_partenaire && formatPartenaireTypes(partenaireInfo.type_partenaire).length > 0 && (
                   <p className="text-xs text-amber-700 font-semibold mt-1">
-                    {partenaireInfo.type_partenaire.toUpperCase()}
+                    {formatPartenaireTypes(partenaireInfo.type_partenaire)[0]}
                   </p>
                 )}
               </div>

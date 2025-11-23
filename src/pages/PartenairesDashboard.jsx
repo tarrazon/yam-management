@@ -8,6 +8,7 @@ import { Home, Users, FileCheck, Clock, AlertCircle, Download, Euro, TrendingUp,
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { formatCurrency, calculateRetrocession } from "@/utils/formHelpers";
+import { formatPartenaireTypes } from "@/utils/partenaireTypes";
 
 export default function PartenairesDashboard() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -151,15 +152,19 @@ export default function PartenairesDashboard() {
                     </div>
                   )}
 
-                  {partenaire.type_partenaire && (
+                  {partenaire.type_partenaire && formatPartenaireTypes(partenaire.type_partenaire).length > 0 && (
                     <div>
                       <div className="flex items-center gap-2 mb-2">
                         <Briefcase className="w-4 h-4 text-[#1E40AF]" />
                         <p className="text-xs font-semibold text-slate-500 uppercase">Type</p>
                       </div>
-                      <Badge className="bg-sky-100 text-sky-800 text-sm">
-                        {partenaire.type_partenaire.toUpperCase()}
-                      </Badge>
+                      <div className="flex flex-wrap gap-2">
+                        {formatPartenaireTypes(partenaire.type_partenaire).slice(0, 3).map((type, index) => (
+                          <Badge key={index} className="bg-sky-100 text-sky-800 text-sm">
+                            {type}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

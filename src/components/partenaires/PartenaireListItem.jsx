@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Edit, Eye, Mail, Phone, Handshake, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { formatPartenaireTypes } from "@/utils/partenaireTypes";
 
 const statusColors = {
   actif: "bg-green-100 text-green-800",
@@ -18,16 +19,8 @@ const statusLabels = {
   suspendu: "Suspendu",
 };
 
-const typeColors = {
-  cgp: "bg-blue-100 text-blue-800",
-  plateforme: "bg-purple-100 text-purple-800",
-  courtier: "bg-indigo-100 text-indigo-800",
-  notaire: "bg-amber-100 text-amber-800",
-  diffuseur_web: "bg-pink-100 text-pink-800",
-  autre: "bg-slate-100 text-slate-800",
-};
-
 export default function PartenaireListItem({ partenaire, onEdit, onView, onDelete }) {
+  const partenaireTypes = formatPartenaireTypes(partenaire.type_partenaire);
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
@@ -49,9 +42,11 @@ export default function PartenaireListItem({ partenaire, onEdit, onView, onDelet
                 <Badge className={`${statusColors[partenaire.statut]} text-xs`}>
                   {statusLabels[partenaire.statut]}
                 </Badge>
-                <Badge className={`${typeColors[partenaire.type_partenaire]} text-xs`}>
-                  {partenaire.type_partenaire.toUpperCase()}
-                </Badge>
+                {partenaireTypes.length > 0 && (
+                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs">
+                    {partenaireTypes[0]}
+                  </Badge>
+                )}
               </div>
             </div>
           </div>

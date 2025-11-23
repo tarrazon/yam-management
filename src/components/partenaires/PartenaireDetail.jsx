@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { X, Edit, Mail, Phone, MapPin, Handshake, FileText, TrendingUp, Users, Euro, Trash2, FileCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import PartenaireStats from "./PartenaireStats";
+import { formatPartenaireTypes } from "@/utils/partenaireTypes";
 
 const statusColors = {
   actif: "bg-green-100 text-green-800 border-green-200",
@@ -21,24 +22,8 @@ const statusLabels = {
   suspendu: "Suspendu",
 };
 
-// Assuming common types for 'type_partenaire'
-const typeColors = {
-  fournisseur: "bg-blue-100 text-blue-800 border-blue-200",
-  client: "bg-purple-100 text-purple-800 border-purple-200",
-  partenaire_commercial: "bg-orange-100 text-orange-800 border-orange-200",
-  affilie: "bg-teal-100 text-teal-800 border-teal-200",
-  autre: "bg-gray-100 text-gray-800 border-gray-200",
-};
-
-const typeLabels = {
-  fournisseur: "Fournisseur",
-  client: "Client",
-  partenaire_commercial: "Partenaire Commercial",
-  affilie: "Affilié",
-  autre: "Autre",
-};
-
 export default function PartenaireDetail({ partenaire, onClose, onEdit, onDelete }) {
+  const partenaireTypes = formatPartenaireTypes(partenaire.type_partenaire);
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -62,16 +47,18 @@ export default function PartenaireDetail({ partenaire, onClose, onEdit, onDelete
             </div>
             <div>
               <h2 className="text-2xl font-bold text-white">{partenaire.nom}</h2>
-              <div className="flex gap-2 mt-2">
+              <div className="flex gap-2 mt-2 flex-wrap">
                 {partenaire.statut && (
                   <Badge className={`${statusColors[partenaire.statut] || 'bg-slate-100 text-slate-800 border-slate-200'} border`}>
                     {statusLabels[partenaire.statut] || partenaire.statut}
                   </Badge>
                 )}
-                {partenaire.type_partenaire && (
-                  <Badge className={`${typeColors[partenaire.type_partenaire] || 'bg-gray-100 text-gray-800 border-gray-200'} border`}>
-                    {typeLabels[partenaire.type_partenaire] || partenaire.type_partenaire}
-                  </Badge>
+                {partenaireTypes.length > 0 && (
+                  partenaireTypes.slice(0, 3).map((type, index) => (
+                    <Badge key={index} className="bg-blue-100 text-blue-800 border-blue-200 border">
+                      {type}
+                    </Badge>
+                  ))
                 )}
               </div>
             </div>
