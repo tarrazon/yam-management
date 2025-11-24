@@ -114,7 +114,7 @@ export default function UsersManagement() {
     setEditingUser(user);
     setEditFormData({
       role_custom: user.role_custom || 'admin',
-      partenaire_id: user.partenaire_id || '',
+      partenaire_id: user.partenaire_id ? String(user.partenaire_id) : '',
       options_max: user.options_max || 3,
       duree_option_jours: user.duree_option_jours || 5,
     });
@@ -516,7 +516,7 @@ export default function UsersManagement() {
                 <div className="space-y-2">
                   <Label>Partenaire associé <span className="text-red-500">*</span></Label>
                   <Select
-                    value={createFormData.partenaire_id}
+                    value={createFormData.partenaire_id || undefined}
                     onValueChange={(value) => setCreateFormData({...createFormData, partenaire_id: value})}
                   >
                     <SelectTrigger>
@@ -524,7 +524,9 @@ export default function UsersManagement() {
                     </SelectTrigger>
                     <SelectContent className="bg-white">
                       {partenaires.map(p => (
-                        <SelectItem key={p.id} value={p.id}>{p.nom}</SelectItem>
+                        <SelectItem key={p.id} value={String(p.id)}>
+                          {p.prenom} {p.nom}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -627,7 +629,7 @@ export default function UsersManagement() {
                     <div className="space-y-2">
                       <Label>Partenaire associé *</Label>
                       <Select
-                        value={editFormData.partenaire_id}
+                        value={editFormData.partenaire_id || undefined}
                         onValueChange={(value) => setEditFormData({...editFormData, partenaire_id: value})}
                       >
                         <SelectTrigger>
@@ -635,7 +637,9 @@ export default function UsersManagement() {
                         </SelectTrigger>
                         <SelectContent>
                           {partenaires.map(p => (
-                            <SelectItem key={p.id} value={p.id}>{p.nom}</SelectItem>
+                            <SelectItem key={p.id} value={String(p.id)}>
+                              {p.prenom} {p.nom}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
