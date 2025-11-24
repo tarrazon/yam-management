@@ -59,9 +59,35 @@ export default function UsersManagement() {
   });
 
   const updateUserMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.User.update(id, data),
+    mutationFn: async ({ id, data }) => {
+      const { role_custom, partenaire_id } = data;
+      const profileData = { role_custom, partenaire_id };
+
+      await base44.entities.User.update(id, profileData);
+
+      if (role_custom === 'partenaire' && partenaire_id) {
+        const { options_max, duree_option_jours } = data;
+        const partenaireData = {};
+
+        if (options_max !== undefined) partenaireData.options_max = options_max;
+        if (duree_option_jours !== undefined) partenaireData.duree_option_jours = duree_option_jours;
+
+        if (Object.keys(partenaireData).length > 0) {
+          const { error: partenaireError } = await supabase
+            .from('partenaires')
+            .update(partenaireData)
+            .eq('id', partenaire_id);
+
+          if (partenaireError) {
+            console.error('Erreur mise à jour partenaire:', partenaireError);
+            throw partenaireError;
+          }
+        }
+      }
+    },
     onSuccess: () => {
       queryClient.refetchQueries({ queryKey: ['users'] });
+      queryClient.refetchQueries({ queryKey: ['partenaires_list'] });
       setEditingUser(null);
       setEditFormData(null);
     },
