@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, MessageSquare, Loader2, Mail } from "lucide-react";
+import { Send, MessageSquare, Loader2, Mail, CheckCheck } from "lucide-react";
 import { messagesPartenairesService } from '@/api/messagesPartenaires';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
+import { Badge } from "@/components/ui/badge";
 
 export default function MessageriePartenaire() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -61,13 +62,15 @@ export default function MessageriePartenaire() {
     }
   });
 
-  useEffect(() => {
-    if (messages.length > 0) {
-      messages
-        .filter(msg => msg.expediteur_type === 'admin' && !msg.lu)
-        .forEach(msg => marquerLuMutation.mutate(msg.id));
+  const messagesNonLus = messages.filter(msg => msg.expediteur_type === 'admin' && !msg.lu).length;
+
+  const marquerTousLus = () => {
+    const messagesNonLusItems = messages.filter(msg => msg.expediteur_type === 'admin' && !msg.lu);
+    messagesNonLusItems.forEach(msg => marquerLuMutation.mutate(msg.id));
+    if (messagesNonLusItems.length > 0) {
+      toast.success(`${messagesNonLusItems.length} message${messagesNonLusItems.length > 1 ? 's' : ''} marqué${messagesNonLusItems.length > 1 ? 's' : ''} comme lu${messagesNonLusItems.length > 1 ? 's' : ''}`);
     }
-  }, [messages]);
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -113,13 +116,31 @@ export default function MessageriePartenaire() {
 
         <Card className="border-none shadow-xl">
           <CardHeader className="border-b bg-gradient-to-r from-blue-50 to-white">
-            <CardTitle className="flex items-center gap-2">
-              <Mail className="w-5 h-5 text-blue-600" />
-              Conversation
-              {messages.length > 0 && (
-                <span className="text-sm font-normal text-slate-500">
-                  ({messages.length} message{messages.length > 1 ? 's' : ''})
-                </span>
+            <CardTitle className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-2">
+                <Mail className="w-5 h-5 text-blue-600" />
+                Conversation
+                {messages.length > 0 && (
+                  <span className="text-sm font-normal text-slate-500">
+                    ({messages.length} message{messages.length > 1 ? 's' : ''})
+                  </span>
+                )}
+                {messagesNonLus > 0 && (
+                  <Badge className="bg-red-500 text-white">
+                    {messagesNonLus} non lu{messagesNonLus > 1 ? 's' : ''}
+                  </Badge>
+                )}
+              </div>
+              {messagesNonLus > 0 && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={marquerTousLus}
+                  className="text-xs"
+                >
+                  <CheckCheck className="w-4 h-4 mr-1" />
+                  Marquer tout comme lu
+                </Button>
               )}
             </CardTitle>
           </CardHeader>

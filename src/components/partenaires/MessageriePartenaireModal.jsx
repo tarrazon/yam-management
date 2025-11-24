@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, MessageSquare, Loader2 } from "lucide-react";
+import { Send, MessageSquare, Loader2, CheckCheck } from "lucide-react";
 import { messagesPartenairesService } from '@/api/messagesPartenaires';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -57,13 +57,13 @@ export default function MessageriePartenaireModal({ open, onClose, partenaire })
     }
   });
 
-  useEffect(() => {
-    if (messages.length > 0) {
-      messages
-        .filter(msg => msg.expediteur_type === 'partenaire' && !msg.lu)
-        .forEach(msg => marquerLuMutation.mutate(msg.id));
+  const marquerTousLus = () => {
+    const messagesNonLus = messages.filter(msg => msg.expediteur_type === 'partenaire' && !msg.lu);
+    messagesNonLus.forEach(msg => marquerLuMutation.mutate(msg.id));
+    if (messagesNonLus.length > 0) {
+      toast.success(`${messagesNonLus.length} message${messagesNonLus.length > 1 ? 's' : ''} marqué${messagesNonLus.length > 1 ? 's' : ''} comme lu${messagesNonLus.length > 1 ? 's' : ''}`);
     }
-  }, [messages]);
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -92,18 +92,31 @@ export default function MessageriePartenaireModal({ open, onClose, partenaire })
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col bg-white">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-blue-600" />
-            Messagerie - {partenaire?.nom || partenaire?.societe}
-            {messages.length > 0 && (
-              <span className="text-sm font-normal text-slate-500">
-                ({messages.length} message{messages.length > 1 ? 's' : ''})
-              </span>
-            )}
+          <DialogTitle className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-blue-600" />
+              Messagerie - {partenaire?.nom || partenaire?.societe}
+              {messages.length > 0 && (
+                <span className="text-sm font-normal text-slate-500">
+                  ({messages.length} message{messages.length > 1 ? 's' : ''})
+                </span>
+              )}
+              {messagesNonLus > 0 && (
+                <Badge className="bg-red-500 text-white">
+                  {messagesNonLus} non lu{messagesNonLus > 1 ? 's' : ''}
+                </Badge>
+              )}
+            </div>
             {messagesNonLus > 0 && (
-              <Badge className="bg-red-500 text-white">
-                {messagesNonLus} non lu{messagesNonLus > 1 ? 's' : ''}
-              </Badge>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={marquerTousLus}
+                className="text-xs"
+              >
+                <CheckCheck className="w-4 h-4 mr-1" />
+                Marquer tout comme lu
+              </Button>
             )}
           </DialogTitle>
         </DialogHeader>

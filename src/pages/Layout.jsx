@@ -21,6 +21,9 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { Partenaire } from "@/api/entities";
 import { formatPartenaireTypes } from "@/utils/partenaireTypes";
+import { useMessagesNonLus } from "@/hooks/useMessagesNonLus";
+import { Badge } from "@/components/ui/badge";
+import { base44 } from "@/api/base44Client";
 
 const getNavigationItems = (userRole) => {
   const adminItems = [
@@ -202,9 +205,18 @@ export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const { user, profile, loading: isLoadingUser, signOut } = useAuth();
   const [partenaireInfo, setPartenaireInfo] = React.useState(null);
+  const [currentUser, setCurrentUser] = React.useState(null);
 
   const userRole = profile?.role_custom || 'admin';
   const navigationItems = getNavigationItems(userRole);
+
+  React.useEffect(() => {
+    if (userRole === 'partenaire') {
+      base44.auth.me().then(setCurrentUser);
+    }
+  }, [userRole]);
+
+  const { data: messagesNonLus = 0 } = useMessagesNonLus(currentUser?.partenaire_id);
 
   React.useEffect(() => {
     const fetchPartenaireInfo = async () => {
@@ -292,17 +304,22 @@ export default function Layout({ children, currentPageName }) {
                 <SidebarMenu>
                   {navigationItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton 
-                        asChild 
+                      <SidebarMenuButton
+                        asChild
                         className={`hover:bg-slate-50 transition-all duration-200 rounded-xl mb-1 ${
-                          location.pathname === item.url 
-                            ? 'bg-[#1E40AF] text-white hover:bg-[#1E3A8A]' 
+                          location.pathname === item.url
+                            ? 'bg-[#1E40AF] text-white hover:bg-[#1E3A8A]'
                             : 'text-slate-600'
                         }`}
                       >
-                        <Link to={item.url} className="flex items-center gap-3 px-3 py-2.5">
+                        <Link to={item.url} className="flex items-center gap-3 px-3 py-2.5 relative">
                           <item.icon className="w-5 h-5" />
                           <span className="font-medium">{item.title}</span>
+                          {item.title === "Messagerie" && messagesNonLus > 0 && (
+                            <Badge className="ml-auto bg-red-500 text-white h-5 w-5 p-0 flex items-center justify-center rounded-full text-xs">
+                              {messagesNonLus}
+                            </Badge>
+                          )}
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
