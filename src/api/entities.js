@@ -12,7 +12,8 @@ import {
   contactResidenceService,
   dossierVenteService,
   optionLotService,
-  profileService
+  profileService,
+  gestionnaireService
 } from './supabaseService';
 
 export const Residence = residenceService;
@@ -31,3 +32,4 @@ export const DossierVente = dossierVenteService;
 export const OptionLot = optionLotService;
 export const Profile = profileService;
 export const User = profileService;
+export const Gestionnaire = gestionnaireService;

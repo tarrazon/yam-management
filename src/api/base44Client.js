@@ -20,6 +20,7 @@ export const base44 = {
     OptionLot: entities.OptionLot,
     Profile: entities.Profile,
     User: entities.User,
+    Gestionnaire: entities.Gestionnaire,
   },
   integrations: {
     Core: integrations.Core,

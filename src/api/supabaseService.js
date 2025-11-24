@@ -129,3 +129,4 @@ export const contactResidenceService = new SupabaseService('contacts_residence')
 export const dossierVenteService = new SupabaseService('dossiers_vente');
 export const optionLotService = new SupabaseService('options_lot');
 export const profileService = new SupabaseService('profiles');
+export const gestionnaireService = new SupabaseService('gestionnaires');
