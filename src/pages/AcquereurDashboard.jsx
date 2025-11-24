@@ -242,6 +242,17 @@ export default function AcquereurDashboard() {
     }
   };
 
+  useEffect(() => {
+    if (activeSection === 'messages' && messages.length > 0 && acquereur?.id) {
+      const unreadAdminMessages = messages.filter(msg => msg.expediteur_type === 'admin' && !msg.lu);
+      unreadAdminMessages.forEach(msg => {
+        messagesAdminService.marquerLu(msg.id).then(() => {
+          queryClient.invalidateQueries(['messages-portal', acquereur.id]);
+        }).catch(err => console.error('Erreur marquage auto:', err));
+      });
+    }
+  }, [activeSection, messages, acquereur?.id]);
+
   const getStatutIcon = (statut) => {
     switch (statut) {
       case 'complete':

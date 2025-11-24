@@ -38,8 +38,8 @@ export default function DashboardCRM() {
   });
 
   // Messages non lus des acquéreurs
-  const { data: messagesNonLus = 0 } = useQuery({
-    queryKey: ['messages_non_lus'],
+  const { data: messagesNonLusAcquereurs = 0 } = useQuery({
+    queryKey: ['messages_non_lus_acquereurs'],
     queryFn: async () => {
       const { count, error } = await supabase
         .from('messages_admin')
@@ -47,12 +47,33 @@ export default function DashboardCRM() {
         .eq('expediteur_type', 'acquereur')
         .eq('lu', false);
       if (error) {
-        console.error('Erreur récupération messages non lus:', error);
+        console.error('Erreur récupération messages non lus acquéreurs:', error);
         return 0;
       }
       return count || 0;
     },
+    refetchInterval: 5000,
   });
+
+  // Messages non lus des partenaires
+  const { data: messagesNonLusPartenaires = 0 } = useQuery({
+    queryKey: ['messages_non_lus_partenaires'],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('messages_partenaires')
+        .select('*', { count: 'exact', head: true })
+        .eq('expediteur_type', 'partenaire')
+        .eq('lu', false);
+      if (error) {
+        console.error('Erreur récupération messages non lus partenaires:', error);
+        return 0;
+      }
+      return count || 0;
+    },
+    refetchInterval: 5000,
+  });
+
+  const messagesNonLusTotal = messagesNonLusAcquereurs + messagesNonLusPartenaires;
 
   // Calcul des documents manquants
   const documentsManquantsTotal = React.useMemo(() => {
@@ -197,11 +218,20 @@ export default function DashboardCRM() {
                   </div>
                   <div>
                     <p className="text-sm text-blue-700 font-medium">Messages non lus</p>
-                    <p className="text-3xl font-bold text-blue-800 mt-1">{messagesNonLus}</p>
-                    <p className="text-xs text-blue-600 mt-1">Messages des acquéreurs</p>
+                    <p className="text-3xl font-bold text-blue-800 mt-1">{messagesNonLusTotal}</p>
+                    <div className="flex gap-3 mt-2">
+                      <div className="flex items-center gap-1">
+                        <Users className="w-3 h-3 text-blue-600" />
+                        <p className="text-xs text-blue-600">{messagesNonLusAcquereurs} acquéreur{messagesNonLusAcquereurs > 1 ? 's' : ''}</p>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Handshake className="w-3 h-3 text-blue-600" />
+                        <p className="text-xs text-blue-600">{messagesNonLusPartenaires} partenaire{messagesNonLusPartenaires > 1 ? 's' : ''}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                {messagesNonLus > 0 && (
+                {messagesNonLusTotal > 0 && (
                   <div className="animate-pulse">
                     <span className="flex h-3 w-3 relative">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
