@@ -109,12 +109,18 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
       if (lotData?.residence_gestion_id) {
         try {
           const contactsData = await base44.entities.ContactResidence.filter({ residence_gestion_id: lotData.residence_gestion_id });
+          console.log('[WorkflowTimeline] Loaded contacts residence:', {
+            residence_gestion_id: lotData.residence_gestion_id,
+            count: contactsData?.length || 0,
+            contacts: contactsData?.map(c => ({ nom: c.nom, prenom: c.prenom, email: c.email, fonction: c.fonction }))
+          });
           setContactsResidence(contactsData || []);
         } catch (error) {
           console.error('[WorkflowTimeline] Error loading contacts:', error);
           setContactsResidence([]);
         }
       } else {
+        console.log('[WorkflowTimeline] No residence_gestion_id on lot');
         setContactsResidence([]);
       }
 
@@ -195,9 +201,16 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
       case 'notaire':
         return notaire?.email ? { name: notaire.nom, email: notaire.email } : null;
       case 'gestionnaire':
+        console.log('[WorkflowTimeline] getRecipientInfo - gestionnaire:', { has: !!gestionnaire, email: gestionnaire?.email, nom: gestionnaire?.nom });
         return gestionnaire?.email ? { name: gestionnaire.nom, email: gestionnaire.email } : null;
       case 'contact_residence':
+        console.log('[WorkflowTimeline] getRecipientInfo - contact_residence:', { count: contactsResidence.length, contacts: contactsResidence.map(c => ({ nom: c.nom, email: c.email })) });
         const contact = contactsResidence.find(c => c.email);
+        if (contact) {
+          console.log('[WorkflowTimeline] Found contact with email:', { nom: contact.nom, prenom: contact.prenom, email: contact.email });
+        } else {
+          console.log('[WorkflowTimeline] No contact found with email');
+        }
         return contact ? { name: `${contact.prenom} ${contact.nom} (${contact.fonction || 'Contact'})`, email: contact.email } : null;
       case 'bo':
         return { name: 'Back Office', email: 'back-office' };
