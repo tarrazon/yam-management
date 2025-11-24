@@ -7,8 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Mail, Edit, Save, X, AlertCircle } from 'lucide-react';
+import { Mail, Edit, Save, X, AlertCircle, Cake, Play } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -20,17 +21,26 @@ import {
 
 export default function WorkflowEmailTemplates() {
   const [steps, setSteps] = useState([]);
+  const [specialTemplates, setSpecialTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingStep, setEditingStep] = useState(null);
+  const [editingSpecial, setEditingSpecial] = useState(null);
   const [formData, setFormData] = useState({
     email_subject: '',
     email_body: '',
     send_email: false,
   });
+  const [specialFormData, setSpecialFormData] = useState({
+    email_subject: '',
+    email_body: '',
+    is_active: false,
+  });
   const [submitting, setSubmitting] = useState(false);
+  const [testingBirthday, setTestingBirthday] = useState(false);
 
   useEffect(() => {
     loadSteps();
+    loadSpecialTemplates();
   }, []);
 
   const loadSteps = async () => {
@@ -48,6 +58,21 @@ export default function WorkflowEmailTemplates() {
       toast.error('Erreur lors du chargement des étapes');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadSpecialTemplates = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('email_templates_special')
+        .select('*')
+        .order('code', { ascending: true });
+
+      if (error) throw error;
+      setSpecialTemplates(data || []);
+    } catch (error) {
+      console.error('Error loading special templates:', error);
+      toast.error('Erreur lors du chargement des templates spéciaux');
     }
   };
 
@@ -260,6 +285,80 @@ L'équipe YAM Management`
     }
   };
 
+  const handleEditSpecial = (template) => {
+    setEditingSpecial(template);
+    setSpecialFormData({
+      email_subject: template.email_subject,
+      email_body: template.email_body,
+      is_active: template.is_active,
+    });
+  };
+
+  const handleSubmitSpecial = async (e) => {
+    e.preventDefault();
+
+    if (!specialFormData.email_subject || !specialFormData.email_body) {
+      toast.error('Le sujet et le corps de l\'email sont requis');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      const { error } = await supabase
+        .from('email_templates_special')
+        .update({
+          email_subject: specialFormData.email_subject,
+          email_body: specialFormData.email_body,
+          is_active: specialFormData.is_active,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', editingSpecial.id);
+
+      if (error) throw error;
+
+      toast.success('Template spécial mis à jour avec succès');
+      setEditingSpecial(null);
+      loadSpecialTemplates();
+    } catch (error) {
+      console.error('Error updating special template:', error);
+      toast.error('Erreur lors de la mise à jour du template');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleTestBirthdayEmail = async () => {
+    try {
+      setTestingBirthday(true);
+
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/send-birthday-emails`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success(`Test terminé: ${result.sent || 0} email(s) envoyé(s)`);
+      } else {
+        toast.error(`Erreur: ${result.error || 'Erreur inconnue'}`);
+      }
+    } catch (error) {
+      console.error('Error testing birthday email:', error);
+      toast.error('Erreur lors du test');
+    } finally {
+      setTestingBirthday(false);
+    }
+  };
+
   const getVariablesHelp = () => {
     return (
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
@@ -299,15 +398,25 @@ L'équipe YAM Management`
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-[#1E40AF] flex items-center gap-3">
             <Mail className="w-8 h-8" />
-            Templates d'emails du dossier
+            Templates d'emails
           </h1>
           <p className="text-slate-500 mt-2">
-            Configurez les emails automatiques envoyés lors de la complétion des étapes du dossier
+            Configurez les emails automatiques envoyés par le système
           </p>
         </div>
 
-        <div className="grid gap-4">
-          {steps.map((step) => (
+        <Tabs defaultValue="workflow" className="w-full">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="workflow">Workflow dossier</TabsTrigger>
+            <TabsTrigger value="special">
+              <Cake className="w-4 h-4 mr-2" />
+              Templates spéciaux
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="workflow" className="mt-6">
+            <div className="grid gap-4">
+              {steps.map((step) => (
             <Card key={step.id} className="border-none shadow-md">
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -358,7 +467,83 @@ L'équipe YAM Management`
               )}
             </Card>
           ))}
-        </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="special" className="mt-6">
+            <div className="grid gap-4">
+              {specialTemplates.map((template) => (
+                <Card key={template.id} className="border-none shadow-md">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="flex items-center gap-2">
+                          <Cake className="w-5 h-5 text-amber-600" />
+                          {template.label}
+                          {template.is_active && (
+                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                              Activé
+                            </Badge>
+                          )}
+                        </CardTitle>
+                        <CardDescription className="mt-2">
+                          {template.description}
+                        </CardDescription>
+                        <CardDescription className="mt-1">
+                          {template.email_subject && (
+                            <span className="text-slate-600">
+                              Sujet: <span className="font-medium">{template.email_subject}</span>
+                            </span>
+                          )}
+                        </CardDescription>
+                      </div>
+                      <div className="flex gap-2">
+                        {template.code === 'birthday' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleTestBirthdayEmail}
+                            disabled={testingBirthday}
+                          >
+                            {testingBirthday ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                                Test...
+                              </>
+                            ) : (
+                              <>
+                                <Play className="w-4 h-4 mr-2" />
+                                Tester
+                              </>
+                            )}
+                          </Button>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditSpecial(template)}
+                        >
+                          <Edit className="w-4 h-4 mr-2" />
+                          Éditer
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  {template.email_body && (
+                    <CardContent>
+                      <div className="bg-white rounded-lg p-4 border border-slate-200">
+                        <p className="text-xs font-semibold text-slate-600 mb-2">Aperçu du message:</p>
+                        <p className="text-sm text-slate-700 whitespace-pre-wrap line-clamp-3">
+                          {template.email_body}
+                        </p>
+                      </div>
+                    </CardContent>
+                  )}
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
 
       <Dialog open={!!editingStep} onOpenChange={() => setEditingStep(null)}>
@@ -422,6 +607,118 @@ L'équipe YAM Management`
                 type="button"
                 variant="outline"
                 onClick={() => setEditingStep(null)}
+                disabled={submitting}
+              >
+                <X className="w-4 h-4 mr-2" />
+                Annuler
+              </Button>
+              <Button
+                type="submit"
+                disabled={submitting}
+                className="bg-[#F59E0B] hover:bg-[#D97706] text-white"
+              >
+                {submitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Enregistrement...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Enregistrer
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!editingSpecial} onOpenChange={() => setEditingSpecial(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white">
+          <DialogHeader>
+            <DialogTitle className="text-xl flex items-center gap-2">
+              <Cake className="w-6 h-6 text-amber-600" />
+              {editingSpecial?.label}
+            </DialogTitle>
+            <DialogDescription>
+              {editingSpecial?.description}
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmitSpecial} className="space-y-6">
+            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200">
+              <div>
+                <Label className="text-base font-semibold">Activer ce template</Label>
+                <p className="text-sm text-slate-500 mt-1">
+                  Les emails seront envoyés automatiquement selon le déclencheur configuré
+                </p>
+              </div>
+              <Switch
+                checked={specialFormData.is_active}
+                onCheckedChange={(checked) => setSpecialFormData({ ...specialFormData, is_active: checked })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="special_email_subject">Sujet de l'email *</Label>
+              <Input
+                id="special_email_subject"
+                value={specialFormData.email_subject}
+                onChange={(e) => setSpecialFormData({ ...specialFormData, email_subject: e.target.value })}
+                placeholder="Ex: Joyeux anniversaire {{prenom}} !"
+                required
+                className="bg-white"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="special_email_body">Corps de l'email *</Label>
+              <Textarea
+                id="special_email_body"
+                value={specialFormData.email_body}
+                onChange={(e) => setSpecialFormData({ ...specialFormData, email_body: e.target.value })}
+                rows={10}
+                placeholder="Bonjour {{prenom}} {{nom}},&#10;&#10;Toute l'équipe vous souhaite un très joyeux anniversaire !&#10;&#10;Cordialement"
+                required
+                className="font-mono text-sm bg-white"
+              />
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4" />
+                Variables disponibles pour ce template
+              </h4>
+              <div className="text-sm text-blue-800 space-y-1">
+                {editingSpecial?.variables_available &&
+                  JSON.parse(editingSpecial.variables_available).map((variable) => (
+                    <p key={variable}>
+                      <code className="bg-blue-100 px-1 rounded">{`{{${variable}}}`}</code> - {variable === 'prenom' ? 'Prénom de l\'acquéreur' : variable === 'nom' ? 'Nom de l\'acquéreur' : 'Email de l\'acquéreur'}
+                    </p>
+                  ))
+                }
+              </div>
+            </div>
+
+            {editingSpecial?.code === 'birthday' && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <h4 className="font-semibold text-amber-900 mb-2 flex items-center gap-2">
+                  <Cake className="w-4 h-4" />
+                  Déclenchement automatique
+                </h4>
+                <p className="text-sm text-amber-800">
+                  Cet email sera envoyé automatiquement chaque jour à 8h00 du matin aux acquéreurs dont c'est l'anniversaire.
+                  Un CRON job vérifie quotidiennement les dates de naissance.
+                </p>
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setEditingSpecial(null)}
                 disabled={submitting}
               >
                 <X className="w-4 h-4 mr-2" />
