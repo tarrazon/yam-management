@@ -141,6 +141,12 @@ const getNavigationItems = (userRole) => {
       icon: HelpCircle,
       roles: ['admin'],
     },
+    {
+      title: "Export Base de données",
+      url: createPageUrl("DatabaseExport"),
+      icon: Database,
+      roles: ['admin'],
+    },
   ];
 
   const acquereurItems = [

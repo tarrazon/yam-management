@@ -76,6 +76,8 @@ import CommercialDashboard from "./CommercialDashboard";
 
 import MessageriePartenaire from "./MessageriePartenaire";
 
+import DatabaseExport from "./DatabaseExport";
+
 import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -176,6 +178,8 @@ const PAGES = {
     CommercialDashboard: CommercialDashboard,
 
     MessageriePartenaire: MessageriePartenaire,
+
+    DatabaseExport: DatabaseExport,
 
 }
 
@@ -297,6 +301,8 @@ function PagesContent() {
             <Route path="/faq-management" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['admin']}><FAQManagement /></ProtectedRoute></Layout>} />
 
             <Route path="/MessageriePartenaire" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['partenaire']}><MessageriePartenaire /></ProtectedRoute></Layout>} />
+
+            <Route path="/DatabaseExport" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['admin']}><DatabaseExport /></ProtectedRoute></Layout>} />
 
         </Routes>
     );
