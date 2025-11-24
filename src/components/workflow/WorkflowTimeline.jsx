@@ -299,14 +299,45 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
                       Complétez l'étape précédente pour débloquer
                     </p>
                   )}
-                  {isPending && canComplete && step.send_email && step.delay_days > 0 && !isBlocked && (
+                  {isPending && canComplete && step.send_email && !isBlocked && (
                     <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded">
-                      <p className="text-xs text-blue-700 flex items-center gap-1">
+                      <p className="text-xs text-blue-700 flex items-center gap-1 mb-1">
                         <Mail className="w-3 h-3" />
-                        Email automatique sera envoyé {step.delay_days} jours après complétion de l'étape
+                        {step.delay_days > 0
+                          ? `Email automatique sera envoyé ${step.delay_days} jours après complétion de l'étape`
+                          : 'Email automatique sera envoyé à la complétion de l\'étape'
+                        }
                       </p>
+                      <div className="text-xs text-blue-600 ml-4 space-y-0.5 mt-1">
+                        {(() => {
+                          const emailRecipients = step.email_recipients || ['acquereur', 'vendeur'];
+                          const hasRecipients =
+                            (emailRecipients.includes('acquereur') && acquereur?.email) ||
+                            (emailRecipients.includes('vendeur') && vendeur?.email) ||
+                            emailRecipients.includes('bo');
+
+                          if (!hasRecipients) {
+                            return <p className="text-amber-600">⚠ Aucun email de destinataire disponible</p>;
+                          }
+
+                          return (
+                            <>
+                              <p className="font-medium">Sera envoyé à:</p>
+                              {emailRecipients.includes('acquereur') && acquereur?.email && (
+                                <p>→ Acquéreur : {acquereur.email}</p>
+                              )}
+                              {emailRecipients.includes('vendeur') && vendeur?.email && (
+                                <p>→ Vendeur : {vendeur.email}</p>
+                              )}
+                              {emailRecipients.includes('bo') && (
+                                <p>→ Back Office</p>
+                              )}
+                            </>
+                          );
+                        })()}
+                      </div>
                       {step.progress?.email_scheduled_at && (
-                        <p className="text-xs text-blue-600 mt-1">
+                        <p className="text-xs text-blue-600 mt-2">
                           📅 Programmé le : {format(new Date(step.progress.email_scheduled_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}
                         </p>
                       )}
@@ -439,13 +470,49 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
                       </span>
                     </div>
                   )}
-                  {step.send_email && !progressItem.email_sent && step.delay_days > 0 && progressItem.created_at && (
-                    <div className="flex items-center gap-2 text-xs text-blue-600">
-                      <Mail className="w-3 h-3" />
-                      <span>
-                        Email automatique prévu le {format(addDays(new Date(progressItem.created_at), step.delay_days), 'dd MMMM yyyy', { locale: fr })}
-                        <span className="text-slate-500"> ({step.delay_days} jours après création)</span>
-                      </span>
+                  {step.send_email && !progressItem.email_sent && progressItem.created_at && (
+                    <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded">
+                      <div className="flex items-center gap-2 text-xs text-blue-700 mb-1">
+                        <Mail className="w-3 h-3" />
+                        <span>
+                          Email automatique prévu le {format(
+                            step.delay_days > 0
+                              ? addDays(new Date(progressItem.created_at), step.delay_days)
+                              : new Date(progressItem.created_at),
+                            'dd MMMM yyyy',
+                            { locale: fr }
+                          )}
+                          {step.delay_days > 0 && <span className="text-slate-500"> ({step.delay_days} jours après création)</span>}
+                        </span>
+                      </div>
+                      <div className="text-xs text-blue-600 ml-4 space-y-0.5">
+                        {(() => {
+                          const emailRecipients = step.email_recipients || ['acquereur', 'vendeur'];
+                          const hasRecipients =
+                            (emailRecipients.includes('acquereur') && acquereur?.email) ||
+                            (emailRecipients.includes('vendeur') && vendeur?.email) ||
+                            emailRecipients.includes('bo');
+
+                          if (!hasRecipients) {
+                            return <p className="text-amber-600">⚠ Aucun email de destinataire disponible</p>;
+                          }
+
+                          return (
+                            <>
+                              <p className="font-medium">Sera envoyé à:</p>
+                              {emailRecipients.includes('acquereur') && acquereur?.email && (
+                                <p>→ Acquéreur : {acquereur.email}</p>
+                              )}
+                              {emailRecipients.includes('vendeur') && vendeur?.email && (
+                                <p>→ Vendeur : {vendeur.email}</p>
+                              )}
+                              {emailRecipients.includes('bo') && (
+                                <p>→ Back Office</p>
+                              )}
+                            </>
+                          );
+                        })()}
+                      </div>
                     </div>
                   )}
                   {progressItem.notes && (
