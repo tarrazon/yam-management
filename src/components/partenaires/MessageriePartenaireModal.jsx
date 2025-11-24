@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, MessageSquare, Loader2, CheckCheck } from "lucide-react";
+import { Send, MessageSquare, Loader2, CheckCheck, Check } from "lucide-react";
 import { messagesPartenairesService } from '@/api/messagesPartenaires';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -158,19 +158,33 @@ export default function MessageriePartenaireModal({ open, onClose, partenaire })
                     <div className="flex items-start gap-2">
                       <div className="flex-1">
                         <p className="text-sm whitespace-pre-wrap break-words">{msg.message}</p>
-                        <p
-                          className={`text-xs mt-1 ${
-                            isAdmin ? 'text-blue-100' : 'text-slate-400'
-                          }`}
-                        >
-                          {new Date(msg.created_at).toLocaleString('fr-FR', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </p>
+                        <div className="flex items-center justify-between mt-1">
+                          <p
+                            className={`text-xs ${
+                              isAdmin ? 'text-blue-100' : 'text-slate-400'
+                            }`}
+                          >
+                            {new Date(msg.created_at).toLocaleString('fr-FR', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                          {isAdmin && msg.lu && (
+                            <div className="flex items-center gap-1 text-blue-100">
+                              <CheckCheck className="w-3 h-3" />
+                              <span className="text-xs">Lu</span>
+                            </div>
+                          )}
+                          {isAdmin && !msg.lu && (
+                            <div className="flex items-center gap-1 text-blue-200">
+                              <Check className="w-3 h-3" />
+                              <span className="text-xs">Envoyé</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>

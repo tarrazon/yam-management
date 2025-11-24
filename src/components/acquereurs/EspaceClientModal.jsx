@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, MessageSquare, Image as ImageIcon, HelpCircle, Send, Upload, Trash2, FileText, Check, Clock, CheckCircle, Hammer, Plus } from 'lucide-react';
+import { X, MessageSquare, Image as ImageIcon, HelpCircle, Send, Upload, Trash2, FileText, Check, Clock, CheckCircle, Hammer, Plus, CheckCheck } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { messagesAdminService } from '@/api/messagesAdmin';
 import { galeriePhotosService } from '@/api/galeriePhotos';
@@ -352,6 +352,18 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
                             <span className="text-xs text-slate-500">
                               {format(new Date(msg.created_at), 'dd/MM/yyyy HH:mm', { locale: fr })}
                             </span>
+                            {msg.expediteur_type === 'admin' && msg.lu && (
+                              <div className="flex items-center gap-1 text-green-600">
+                                <CheckCheck className="w-3 h-3" />
+                                <span className="text-xs">Lu</span>
+                              </div>
+                            )}
+                            {msg.expediteur_type === 'admin' && !msg.lu && (
+                              <div className="flex items-center gap-1 text-slate-400">
+                                <Check className="w-3 h-3" />
+                                <span className="text-xs">Envoyé</span>
+                              </div>
+                            )}
                             {!msg.lu && msg.expediteur_type === 'acquereur' && (
                               <Button
                                 size="sm"
