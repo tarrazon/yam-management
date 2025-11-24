@@ -3,7 +3,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { LayoutDashboard, Users, Home, FileCheck, Handshake, Building2, Contact, Settings, LogOut, BarChart3, Shield, FileCode, Clock, Mail, Briefcase, Code, HelpCircle, MessageSquare } from "lucide-react";
+import { LayoutDashboard, Users, Home, FileCheck, Handshake, Building2, Contact, Settings, LogOut, BarChart3, Shield, FileCode, Clock, Mail, Briefcase, Code, HelpCircle, MessageSquare, Database } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
