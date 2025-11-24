@@ -45,6 +45,8 @@ export default function DatabaseExport() {
   );
 
   const handleExport = async (format) => {
+    console.log("Export demandé pour le format:", format);
+
     if (!session?.access_token) {
       toast.error("Vous devez être connecté pour exporter");
       return;
@@ -167,6 +169,7 @@ export default function DatabaseExport() {
               <Button
                 variant={selectedTables === "all" ? "default" : "outline"}
                 onClick={() => setSelectedTables("all")}
+                className={selectedTables === "all" ? "bg-[#1E40AF] text-white hover:bg-[#1E40AF]/90" : ""}
               >
                 <Database className="w-4 h-4 mr-2" />
                 Toutes les tables
@@ -174,6 +177,7 @@ export default function DatabaseExport() {
               <Button
                 variant={selectedTables === "custom" ? "default" : "outline"}
                 onClick={() => setSelectedTables("custom")}
+                className={selectedTables === "custom" ? "bg-[#1E40AF] text-white hover:bg-[#1E40AF]/90" : ""}
               >
                 <CheckCircle2 className="w-4 h-4 mr-2" />
                 Sélection personnalisée
@@ -232,7 +236,7 @@ export default function DatabaseExport() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Button
                 variant="outline"
-                className="h-32 flex flex-col items-center justify-center gap-3 hover:border-blue-500 hover:bg-blue-50"
+                className="h-32 flex flex-col items-center justify-center gap-3 hover:border-blue-500 hover:bg-blue-50 transition-all cursor-pointer text-slate-900"
                 onClick={() => handleExport("json")}
                 disabled={loading}
               >
@@ -242,14 +246,14 @@ export default function DatabaseExport() {
                   <FileJson className="w-8 h-8 text-blue-600" />
                 )}
                 <div className="text-center">
-                  <div className="font-semibold">Format JSON</div>
+                  <div className="font-semibold text-slate-900">Format JSON</div>
                   <div className="text-xs text-slate-600">Structuré et lisible</div>
                 </div>
               </Button>
 
               <Button
                 variant="outline"
-                className="h-32 flex flex-col items-center justify-center gap-3 hover:border-green-500 hover:bg-green-50"
+                className="h-32 flex flex-col items-center justify-center gap-3 hover:border-green-500 hover:bg-green-50 transition-all cursor-pointer text-slate-900"
                 onClick={() => handleExport("csv")}
                 disabled={loading}
               >
@@ -259,24 +263,24 @@ export default function DatabaseExport() {
                   <FileSpreadsheet className="w-8 h-8 text-green-600" />
                 )}
                 <div className="text-center">
-                  <div className="font-semibold">Format CSV</div>
+                  <div className="font-semibold text-slate-900">Format CSV</div>
                   <div className="text-xs text-slate-600">Compatible Excel</div>
                 </div>
               </Button>
 
               <Button
                 variant="outline"
-                className="h-32 flex flex-col items-center justify-center gap-3 hover:border-purple-500 hover:bg-purple-50"
+                className="h-32 flex flex-col items-center justify-center gap-3 hover:border-slate-500 hover:bg-slate-50 transition-all cursor-pointer text-slate-900"
                 onClick={() => handleExport("sql")}
                 disabled={loading}
               >
                 {loading ? (
-                  <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+                  <Loader2 className="w-8 h-8 animate-spin text-slate-600" />
                 ) : (
-                  <FileCode className="w-8 h-8 text-purple-600" />
+                  <FileCode className="w-8 h-8 text-slate-600" />
                 )}
                 <div className="text-center">
-                  <div className="font-semibold">Format SQL</div>
+                  <div className="font-semibold text-slate-900">Format SQL</div>
                   <div className="text-xs text-slate-600">Pour restauration</div>
                 </div>
               </Button>
