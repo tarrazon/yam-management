@@ -479,10 +479,10 @@ export default function DatabaseExport() {
           <div>
             <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
               <Database className="w-8 h-8 text-[#1E40AF]" />
-              Export de la base de données
+              Export des données
             </h1>
             <p className="text-slate-600 mt-2">
-              Exportez l'intégralité ou une partie de votre base de données en plusieurs formats
+              Exportez l'intégralité ou une partie de vos données en plusieurs formats
             </p>
           </div>
         </div>

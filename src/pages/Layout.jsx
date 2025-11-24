@@ -142,7 +142,7 @@ const getNavigationItems = (userRole) => {
       roles: ['admin'],
     },
     {
-      title: "Export Base de données",
+      title: "Export des données",
       url: createPageUrl("DatabaseExport"),
       icon: Database,
       roles: ['admin'],
