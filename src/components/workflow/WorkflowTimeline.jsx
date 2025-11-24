@@ -31,6 +31,10 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
   const [lot, setLot] = useState(null);
   const [acquereur, setAcquereur] = useState(null);
   const [vendeur, setVendeur] = useState(null);
+  const [partenaire, setPartenaire] = useState(null);
+  const [notaire, setNotaire] = useState(null);
+  const [gestionnaire, setGestionnaire] = useState(null);
+  const [contactsResidence, setContactsResidence] = useState([]);
   const [sendingEmail, setSendingEmail] = useState({});
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -79,6 +83,39 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
         setVendeur(vendeurData);
       } else {
         setVendeur(null);
+      }
+
+      if (lotData?.partenaire_id) {
+        const partenaireData = await base44.entities.Partenaire.findOne(lotData.partenaire_id);
+        setPartenaire(partenaireData);
+      } else {
+        setPartenaire(null);
+      }
+
+      if (lotData?.notaire_id) {
+        const notaireData = await base44.entities.Notaire.findOne(lotData.notaire_id);
+        setNotaire(notaireData);
+      } else {
+        setNotaire(null);
+      }
+
+      if (lotData?.gestionnaire_id) {
+        const gestionnaireData = await base44.entities.Gestionnaire.findOne(lotData.gestionnaire_id);
+        setGestionnaire(gestionnaireData);
+      } else {
+        setGestionnaire(null);
+      }
+
+      if (lotData?.residence_gestion_id) {
+        try {
+          const contactsData = await base44.entities.ContactResidence.filter({ residence_gestion_id: lotData.residence_gestion_id });
+          setContactsResidence(contactsData || []);
+        } catch (error) {
+          console.error('[WorkflowTimeline] Error loading contacts:', error);
+          setContactsResidence([]);
+        }
+      } else {
+        setContactsResidence([]);
       }
 
       const progressMap = {};
@@ -142,6 +179,32 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
     } catch (error) {
       console.error('Error resetting step:', error);
       toast.error('Erreur lors de la réinitialisation');
+    }
+  };
+
+  const getRecipientInfo = (recipientType) => {
+    switch (recipientType) {
+      case 'acquereur':
+        return acquereur?.email ? { name: `${acquereur.prenom} ${acquereur.nom}`, email: acquereur.email } : null;
+      case 'vendeur':
+        return vendeur?.email ? { name: `${vendeur.prenom} ${vendeur.nom}`, email: vendeur.email } : null;
+      case 'partenaire':
+        return partenaire?.email ? { name: partenaire.nom, email: partenaire.email } : null;
+      case 'cgp':
+        return partenaire?.email ? { name: `CGP - ${partenaire.nom}`, email: partenaire.email } : null;
+      case 'notaire':
+        return notaire?.email ? { name: notaire.nom, email: notaire.email } : null;
+      case 'gestionnaire':
+        return gestionnaire?.email ? { name: gestionnaire.nom, email: gestionnaire.email } : null;
+      case 'contact_residence':
+        const contact = contactsResidence.find(c => c.email);
+        return contact ? { name: `${contact.prenom} ${contact.nom} (${contact.fonction || 'Contact'})`, email: contact.email } : null;
+      case 'bo':
+        return { name: 'Back Office', email: 'back-office' };
+      case 'commercial':
+        return { name: 'Commercial', email: 'commercial' };
+      default:
+        return null;
     }
   };
 
@@ -310,28 +373,19 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
                       </p>
                       <div className="text-xs text-blue-600 ml-4 space-y-0.5 mt-1">
                         {(() => {
-                          const emailRecipients = step.email_recipients || ['acquereur', 'vendeur'];
-                          const hasRecipients =
-                            (emailRecipients.includes('acquereur') && acquereur?.email) ||
-                            (emailRecipients.includes('vendeur') && vendeur?.email) ||
-                            emailRecipients.includes('bo');
+                          const emailRecipients = step.email_recipients || [];
+                          const recipients = emailRecipients.map(type => getRecipientInfo(type)).filter(Boolean);
 
-                          if (!hasRecipients) {
+                          if (recipients.length === 0) {
                             return <p className="text-amber-600">⚠ Aucun email de destinataire disponible</p>;
                           }
 
                           return (
                             <>
                               <p className="font-medium">Sera envoyé à:</p>
-                              {emailRecipients.includes('acquereur') && acquereur?.email && (
-                                <p>→ Acquéreur : {acquereur.email}</p>
-                              )}
-                              {emailRecipients.includes('vendeur') && vendeur?.email && (
-                                <p>→ Vendeur : {vendeur.email}</p>
-                              )}
-                              {emailRecipients.includes('bo') && (
-                                <p>→ Back Office</p>
-                              )}
+                              {recipients.map((recipient, idx) => (
+                                <p key={idx}>→ {recipient.name} : {recipient.email}</p>
+                              ))}
                             </>
                           );
                         })()}
@@ -351,29 +405,16 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
                       </p>
                       <div className="text-xs text-green-600 ml-4 space-y-0.5">
                         {(() => {
-                          const emailRecipients = step.email_recipients || ['acquereur', 'vendeur'];
-                          const hasRecipients =
-                            (emailRecipients.includes('acquereur') && acquereur?.email) ||
-                            (emailRecipients.includes('vendeur') && vendeur?.email) ||
-                            emailRecipients.includes('bo');
+                          const emailRecipients = step.email_recipients || [];
+                          const recipients = emailRecipients.map(type => getRecipientInfo(type)).filter(Boolean);
 
-                          if (!hasRecipients) {
+                          if (recipients.length === 0) {
                             return <p className="text-amber-600">⚠ Aucun email de destinataire disponible</p>;
                           }
 
-                          return (
-                            <>
-                              {emailRecipients.includes('acquereur') && acquereur?.email && (
-                                <p>→ Acquéreur : {acquereur.email}</p>
-                              )}
-                              {emailRecipients.includes('vendeur') && vendeur?.email && (
-                                <p>→ Vendeur : {vendeur.email}</p>
-                              )}
-                              {emailRecipients.includes('bo') && (
-                                <p>→ Back Office</p>
-                              )}
-                            </>
-                          );
+                          return recipients.map((recipient, idx) => (
+                            <p key={idx}>→ {recipient.name} : {recipient.email}</p>
+                          ));
                         })()}
                       </div>
                     </div>
@@ -487,28 +528,19 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
                       </div>
                       <div className="text-xs text-blue-600 ml-4 space-y-0.5">
                         {(() => {
-                          const emailRecipients = step.email_recipients || ['acquereur', 'vendeur'];
-                          const hasRecipients =
-                            (emailRecipients.includes('acquereur') && acquereur?.email) ||
-                            (emailRecipients.includes('vendeur') && vendeur?.email) ||
-                            emailRecipients.includes('bo');
+                          const emailRecipients = step.email_recipients || [];
+                          const recipients = emailRecipients.map(type => getRecipientInfo(type)).filter(Boolean);
 
-                          if (!hasRecipients) {
+                          if (recipients.length === 0) {
                             return <p className="text-amber-600">⚠ Aucun email de destinataire disponible</p>;
                           }
 
                           return (
                             <>
                               <p className="font-medium">Sera envoyé à:</p>
-                              {emailRecipients.includes('acquereur') && acquereur?.email && (
-                                <p>→ Acquéreur : {acquereur.email}</p>
-                              )}
-                              {emailRecipients.includes('vendeur') && vendeur?.email && (
-                                <p>→ Vendeur : {vendeur.email}</p>
-                              )}
-                              {emailRecipients.includes('bo') && (
-                                <p>→ Back Office</p>
-                              )}
+                              {recipients.map((recipient, idx) => (
+                                <p key={idx}>→ {recipient.name} : {recipient.email}</p>
+                              ))}
                             </>
                           );
                         })()}
