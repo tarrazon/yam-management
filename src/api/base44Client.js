@@ -36,6 +36,19 @@ export const base44 = {
         .eq('id', user.id)
         .maybeSingle();
 
+      // Si c'est un partenaire, récupérer son partenaire_id
+      if (profile?.role_custom === 'partenaire') {
+        const { data: partenaire } = await supabase
+          .from('partenaires')
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (partenaire) {
+          profile.partenaire_id = partenaire.id;
+        }
+      }
+
       return profile;
     },
     logout: async () => {
