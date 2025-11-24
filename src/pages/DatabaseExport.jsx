@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
 
 export default function DatabaseExport() {
-  const { session } = useAuth();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [exportResult, setExportResult] = useState(null);
   const [selectedTables, setSelectedTables] = useState("all");
@@ -49,40 +49,36 @@ export default function DatabaseExport() {
   const handleExport = async (format) => {
     console.log("1️⃣ Export demandé pour le format:", format);
 
-    if (!session?.access_token) {
-      console.error("❌ Pas de session access_token");
+    if (!user) {
+      console.error("❌ Pas d'utilisateur connecté");
       toast.error("Vous devez être connecté pour exporter");
       return;
     }
 
-    console.log("2️⃣ Session OK, token présent");
+    console.log("2️⃣ Utilisateur connecté:", user.email);
+
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+    if (sessionError || !session) {
+      console.error("❌ Erreur lors de la récupération de la session:", sessionError);
+      toast.error("Erreur d'authentification");
+      return;
+    }
+
+    console.log("3️⃣ Session récupérée avec succès, token présent:", !!session.access_token);
 
     try {
-      console.log("3️⃣ Avant setLoading(true)");
+      console.log("4️⃣ Avant setLoading(true)");
       setLoading(true);
-      console.log("4️⃣ Après setLoading(true)");
+      console.log("5️⃣ Après setLoading(true)");
 
-      console.log("5️⃣ Avant setExportResult(null)");
+      console.log("6️⃣ Avant setExportResult(null)");
       setExportResult(null);
-      console.log("6️⃣ Après setExportResult(null)");
+      console.log("7️⃣ Après setExportResult(null)");
 
-      console.log("7️⃣ Avant setProgress");
+      console.log("8️⃣ Avant setProgress");
       setProgress({ current: 0, total: 0, table: "" });
-      console.log("8️⃣ Après setProgress");
-
-      console.log("9️⃣ Entrée dans le try, début du traitement...");
-      console.log("🔟 Supabase client:", supabase);
-      console.log("1️⃣1️⃣ Test connexion Supabase...");
-
-      try {
-        const { data: testData, error: testError } = await supabase
-          .from('profiles')
-          .select('id')
-          .limit(1);
-        console.log("1️⃣2️⃣ Test Supabase réussi:", testData, testError);
-      } catch (testErr) {
-        console.error("❌ Test Supabase échoué:", testErr);
-      }
+      console.log("9️⃣ Après setProgress - Début du traitement des tables...");
 
       const allTables = availableTables.map(t => t.id);
       const tablesToExport = selectedTables === "all"
