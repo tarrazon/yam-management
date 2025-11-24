@@ -17,8 +17,8 @@ export const workflowService = {
     return data;
   },
 
-  async getLotWorkflowProgress(lotId) {
-    const { data, error } = await supabase
+  async getLotWorkflowProgress(lotId, workflowType = null) {
+    let query = supabase
       .from('lot_workflow_progress')
       .select(`
         *,
@@ -26,13 +26,28 @@ export const workflowService = {
           nom,
           prenom,
           email
+        ),
+        workflow_step:workflow_steps!step_code (
+          workflow_type,
+          label,
+          email_recipients
         )
       `)
-      .eq('lot_id', lotId)
-      .order('created_at');
+      .eq('lot_id', lotId);
+
+    const { data, error } = await query.order('created_at');
 
     if (error) throw error;
-    return data || [];
+
+    let filteredData = data || [];
+
+    if (workflowType && filteredData.length > 0) {
+      filteredData = filteredData.filter(p =>
+        p.workflow_step && p.workflow_step.workflow_type === workflowType
+      );
+    }
+
+    return filteredData;
   },
 
   async completeStep(lotId, stepCode, notes = null) {

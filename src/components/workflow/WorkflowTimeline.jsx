@@ -43,8 +43,8 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
   const loadWorkflow = async () => {
     try {
       setLoading(true);
-      const [allProgressData, stepsData, lotData] = await Promise.all([
-        workflowService.getLotWorkflowProgress(lotId),
+      const [progressData, stepsData, lotData] = await Promise.all([
+        workflowService.getLotWorkflowProgress(lotId, workflowType),
         workflowService.getWorkflowSteps(workflowType),
         base44.entities.LotLMNP.findOne(lotId)
       ]);
@@ -54,9 +54,6 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
         toast.error('Aucune étape de dossier trouvée');
         return;
       }
-
-      const stepCodes = stepsData.map(s => s.code);
-      const progressData = allProgressData.filter(p => stepCodes.includes(p.step_code));
 
       setLot(lotData);
 
