@@ -13,18 +13,20 @@ export default function CommercialDashboard() {
   const { profile } = useAuth();
 
   const { data: partenairesCommercial = [], isLoading: isLoadingPartenaires } = useQuery({
-    queryKey: ['partenaires_commercial', profile?.id],
+    queryKey: ['partenaires_commercial', profile?.id, profile?.email],
     queryFn: async () => {
       if (!profile?.id) return [];
+      // Cherche par ID (nouveau format) ou email (ancien format pour compatibilité)
       const { data, error } = await supabase
         .from('partenaires')
         .select('*')
-        .eq('created_by', profile.id)
+        .or(`created_by.eq.${profile.id},created_by.eq.${profile.email}`)
         .order('nom', { ascending: true });
       if (error) {
         console.error('Error fetching partenaires:', error);
         throw error;
       }
+      console.log('Partenaires récupérés pour', profile.email, ':', data?.length || 0);
       return data || [];
     },
     enabled: !!profile?.id,
