@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Database, Download, FileJson, FileSpreadsheet, FileCode, CheckCircle2, AlertCircle, Loader2, Cloud } from "lucide-react";
+import { Database, Download, FileJson, FileSpreadsheet, FileCode, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
@@ -163,11 +163,10 @@ export default function DatabaseExport() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <Button
                 variant={selectedTables === "all" ? "default" : "outline"}
                 onClick={() => setSelectedTables("all")}
-                className="flex-1"
               >
                 <Database className="w-4 h-4 mr-2" />
                 Toutes les tables
@@ -175,7 +174,6 @@ export default function DatabaseExport() {
               <Button
                 variant={selectedTables === "custom" ? "default" : "outline"}
                 onClick={() => setSelectedTables("custom")}
-                className="flex-1"
               >
                 <CheckCircle2 className="w-4 h-4 mr-2" />
                 Sélection personnalisée
@@ -333,23 +331,6 @@ export default function DatabaseExport() {
           </Card>
         )}
 
-        <Card className="border-blue-200 bg-blue-50">
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-3">
-              <Cloud className="w-5 h-5 text-blue-600 mt-0.5" />
-              <div>
-                <h3 className="font-semibold text-blue-900 mb-2">Export automatique vers Google Drive</h3>
-                <p className="text-sm text-blue-800 mb-3">
-                  Fonctionnalité à venir : synchronisation automatique avec Google Drive pour des sauvegardes régulières.
-                </p>
-                <Button variant="outline" size="sm" disabled className="bg-white">
-                  <Cloud className="w-4 h-4 mr-2" />
-                  Configurer Google Drive (Prochainement)
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         <Card>
           <CardHeader>
