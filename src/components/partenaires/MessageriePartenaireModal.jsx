@@ -14,12 +14,24 @@ export default function MessageriePartenaireModal({ open, onClose, partenaire })
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  const { data: messages = [], isLoading } = useQuery({
+  const { data: messages = [], isLoading, error } = useQuery({
     queryKey: ['messages-partenaires', partenaire?.id],
-    queryFn: () => messagesPartenairesService.list(partenaire.id),
+    queryFn: async () => {
+      console.log('Fetching messages for partenaire:', partenaire.id);
+      const result = await messagesPartenairesService.list(partenaire.id);
+      console.log('Messages received:', result);
+      return result;
+    },
     enabled: !!partenaire?.id && open,
     refetchInterval: 3000,
   });
+
+  useEffect(() => {
+    if (error) {
+      console.error('Error loading messages:', error);
+      toast.error('Erreur lors du chargement des messages');
+    }
+  }, [error]);
 
   const sendMessageMutation = useMutation({
     mutationFn: (messageData) => messagesPartenairesService.create(messageData),
@@ -80,18 +92,30 @@ export default function MessageriePartenaireModal({ open, onClose, partenaire })
           <DialogTitle className="flex items-center gap-2">
             <MessageSquare className="w-5 h-5 text-blue-600" />
             Messagerie - {partenaire?.nom || partenaire?.societe}
+            {messages.length > 0 && (
+              <span className="text-sm font-normal text-slate-500">
+                ({messages.length} message{messages.length > 1 ? 's' : ''})
+              </span>
+            )}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto space-y-4 p-4 bg-slate-50 rounded-lg min-h-[400px]">
+        <div className="flex-1 overflow-y-auto space-y-4 p-4 bg-white rounded-lg min-h-[400px] border border-slate-200">
           {isLoading ? (
             <div className="flex items-center justify-center h-full">
               <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center h-full text-red-500">
+              <MessageSquare className="w-12 h-12 mb-2" />
+              <p>Erreur de chargement</p>
+              <p className="text-xs mt-1">{error.message}</p>
             </div>
           ) : messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-slate-400">
               <MessageSquare className="w-12 h-12 mb-2" />
               <p>Aucun message</p>
+              <p className="text-xs mt-1">Partenaire ID: {partenaire?.id}</p>
             </div>
           ) : (
             messages.map((msg) => {
