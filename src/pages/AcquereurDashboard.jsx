@@ -235,15 +235,23 @@ export default function AcquereurDashboard() {
     mutationFn: (id) => messagesAdminService.marquerLu(id),
     onSuccess: () => {
       queryClient.invalidateQueries(['messages-portal', acquereur?.id]);
+    },
+    onError: (error) => {
+      console.error('Erreur marquage message:', error);
+      toast.error('Erreur lors du marquage du message');
     }
   });
 
   const marquerTousLus = () => {
     const messagesNonLusItems = messages.filter(msg => msg.expediteur_type === 'admin' && !msg.lu);
-    messagesNonLusItems.forEach(msg => marquerLuMutation.mutate(msg.id));
-    if (messagesNonLusItems.length > 0) {
-      toast.success(`${messagesNonLusItems.length} message${messagesNonLusItems.length > 1 ? 's' : ''} marqué${messagesNonLusItems.length > 1 ? 's' : ''} comme lu${messagesNonLusItems.length > 1 ? 's' : ''}`);
+
+    if (messagesNonLusItems.length === 0) {
+      return;
     }
+
+    messagesNonLusItems.forEach(msg => marquerLuMutation.mutate(msg.id));
+
+    toast.success(`${messagesNonLusItems.length} message${messagesNonLusItems.length > 1 ? 's' : ''} marqué${messagesNonLusItems.length > 1 ? 's' : ''} comme lu${messagesNonLusItems.length > 1 ? 's' : ''}`);
   };
 
   const getStatutIcon = (statut) => {
