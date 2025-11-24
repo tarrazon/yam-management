@@ -71,14 +71,16 @@ export default function SuiviDossierDetail({ lot, onClose, onEdit }) {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onEdit(lot)}
-              className="text-white hover:bg-white/20"
-            >
-              <Edit className="w-5 h-5" />
-            </Button>
+            {onEdit && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onEdit(lot)}
+                className="text-white hover:bg-white/20"
+              >
+                <Edit className="w-5 h-5" />
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="icon"
