@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Database, Download, FileJson, FileSpreadsheet, FileCode, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { Database, Download, FileJson, FileSpreadsheet, FileCode, CheckCircle2, AlertCircle, Loader2, FolderArchive, Upload, HardDrive } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
@@ -15,6 +15,8 @@ export default function DatabaseExport() {
   const [exportResult, setExportResult] = useState(null);
   const [selectedTables, setSelectedTables] = useState("all");
   const [progress, setProgress] = useState({ current: 0, total: 0, table: "" });
+  const [storageLoading, setStorageLoading] = useState(false);
+  const [storageProgress, setStorageProgress] = useState({ current: 0, total: 0, file: "" });
 
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const apiEndpoint = `${supabaseUrl}/functions/v1/export-database`;
@@ -271,6 +273,186 @@ export default function DatabaseExport() {
     }
   };
 
+  const handleExportDocuments = async () => {
+    if (!user) {
+      toast.error("Vous devez être connecté");
+      return;
+    }
+
+    setStorageLoading(true);
+    setStorageProgress({ current: 0, total: 0, file: "" });
+
+    try {
+      const { data: filesList, error: listError } = await supabase.storage
+        .from('documents')
+        .list('', {
+          limit: 10000,
+          offset: 0,
+        });
+
+      if (listError) throw listError;
+
+      if (!filesList || filesList.length === 0) {
+        toast.info("Aucun document à exporter");
+        setStorageLoading(false);
+        return;
+      }
+
+      const exportData = {
+        export_date: new Date().toISOString(),
+        bucket: 'documents',
+        total_files: filesList.length,
+        files: []
+      };
+
+      setStorageProgress({ current: 0, total: filesList.length, file: "Récupération des fichiers..." });
+
+      for (let i = 0; i < filesList.length; i++) {
+        const file = filesList[i];
+        setStorageProgress({ current: i + 1, total: filesList.length, file: file.name });
+
+        try {
+          const { data: fileData, error: downloadError } = await supabase.storage
+            .from('documents')
+            .download(file.name);
+
+          if (downloadError) {
+            console.error(`Erreur téléchargement ${file.name}:`, downloadError);
+            exportData.files.push({
+              name: file.name,
+              path: file.name,
+              error: downloadError.message
+            });
+            continue;
+          }
+
+          const reader = new FileReader();
+          const base64Promise = new Promise((resolve) => {
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(fileData);
+          });
+
+          const base64Data = await base64Promise;
+
+          exportData.files.push({
+            name: file.name,
+            path: file.name,
+            size: file.metadata?.size || fileData.size,
+            mimetype: file.metadata?.mimetype || fileData.type,
+            data: base64Data,
+            created_at: file.created_at,
+            updated_at: file.updated_at
+          });
+        } catch (err) {
+          console.error(`Erreur traitement ${file.name}:`, err);
+          exportData.files.push({
+            name: file.name,
+            path: file.name,
+            error: err.message
+          });
+        }
+      }
+
+      const jsonContent = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([jsonContent], { type: "application/json" });
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = `yam_documents_export_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+
+      const successCount = exportData.files.filter(f => !f.error).length;
+      const errorCount = exportData.files.filter(f => f.error).length;
+
+      toast.success(`Export documents réussi ! ${successCount} fichiers exportés${errorCount > 0 ? `, ${errorCount} erreurs` : ''}`);
+    } catch (error) {
+      console.error("Erreur export documents:", error);
+      toast.error(`Erreur: ${error.message}`);
+    } finally {
+      setStorageLoading(false);
+      setStorageProgress({ current: 0, total: 0, file: "" });
+    }
+  };
+
+  const handleImportDocuments = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!user) {
+      toast.error("Vous devez être connecté");
+      return;
+    }
+
+    setStorageLoading(true);
+    setStorageProgress({ current: 0, total: 0, file: "" });
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const importData = JSON.parse(e.target.result);
+
+          if (!importData.files || !Array.isArray(importData.files)) {
+            throw new Error("Format de fichier invalide");
+          }
+
+          const filesToImport = importData.files.filter(f => !f.error && f.data);
+          setStorageProgress({ current: 0, total: filesToImport.length, file: "Import en cours..." });
+
+          let successCount = 0;
+          let errorCount = 0;
+
+          for (let i = 0; i < filesToImport.length; i++) {
+            const fileInfo = filesToImport[i];
+            setStorageProgress({ current: i + 1, total: filesToImport.length, file: fileInfo.name });
+
+            try {
+              const base64Response = await fetch(fileInfo.data);
+              const blob = await base64Response.blob();
+
+              const { error: uploadError } = await supabase.storage
+                .from('documents')
+                .upload(fileInfo.path, blob, {
+                  contentType: fileInfo.mimetype,
+                  upsert: true
+                });
+
+              if (uploadError) {
+                console.error(`Erreur upload ${fileInfo.name}:`, uploadError);
+                errorCount++;
+              } else {
+                successCount++;
+              }
+            } catch (err) {
+              console.error(`Erreur traitement ${fileInfo.name}:`, err);
+              errorCount++;
+            }
+          }
+
+          toast.success(`Import terminé ! ${successCount} fichiers importés${errorCount > 0 ? `, ${errorCount} erreurs` : ''}`);
+        } catch (error) {
+          console.error("Erreur parsing fichier:", error);
+          toast.error(`Erreur: ${error.message}`);
+        } finally {
+          setStorageLoading(false);
+          setStorageProgress({ current: 0, total: 0, file: "" });
+        }
+      };
+
+      reader.readAsText(file);
+    } catch (error) {
+      console.error("Erreur import documents:", error);
+      toast.error(`Erreur: ${error.message}`);
+      setStorageLoading(false);
+      setStorageProgress({ current: 0, total: 0, file: "" });
+    }
+
+    event.target.value = '';
+  };
+
   const toggleTable = (tableId) => {
     setCheckedTables(prev => ({
       ...prev,
@@ -512,6 +694,128 @@ export default function DatabaseExport() {
           </Card>
         )}
 
+        <Card className="border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-orange-100/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3">
+              <HardDrive className="w-6 h-6 text-orange-600" />
+              Sauvegarde des documents et fichiers
+            </CardTitle>
+            <CardDescription>
+              Exportez et importez tous vos documents du bucket Supabase Storage (photos, PDF, documents)
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert className="border-orange-300 bg-orange-100">
+              <AlertCircle className="h-4 w-4 text-orange-700" />
+              <AlertDescription className="text-orange-900">
+                <div className="space-y-1">
+                  <div className="font-medium">Protection contre la perte de données</div>
+                  <div className="text-sm">Cette fonctionnalité permet de sauvegarder tous vos fichiers uploadés (documents acquereurs, photos lots, etc.) en cas de piratage, corruption ou suppression accidentelle.</div>
+                </div>
+              </AlertDescription>
+            </Alert>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Button
+                variant="outline"
+                size="lg"
+                className="h-auto flex flex-col items-center justify-center gap-3 p-6 hover:border-orange-500 hover:bg-orange-50 transition-all text-slate-900"
+                onClick={handleExportDocuments}
+                disabled={storageLoading}
+              >
+                {storageLoading ? (
+                  <Loader2 className="w-10 h-10 animate-spin text-orange-600" />
+                ) : (
+                  <Download className="w-10 h-10 text-orange-600" />
+                )}
+                <div className="text-center">
+                  <div className="font-semibold text-lg">Exporter les documents</div>
+                  <div className="text-sm text-slate-600 mt-1">
+                    Télécharger tous les fichiers en JSON
+                  </div>
+                </div>
+              </Button>
+
+              <label className="cursor-pointer">
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleImportDocuments}
+                  className="hidden"
+                  disabled={storageLoading}
+                />
+                <div
+                  className={`h-full flex flex-col items-center justify-center gap-3 p-6 border-2 border-dashed rounded-lg transition-all ${
+                    storageLoading
+                      ? 'border-slate-300 bg-slate-100'
+                      : 'border-orange-300 hover:border-orange-500 hover:bg-orange-50'
+                  }`}
+                >
+                  {storageLoading ? (
+                    <Loader2 className="w-10 h-10 animate-spin text-orange-600" />
+                  ) : (
+                    <Upload className="w-10 h-10 text-orange-600" />
+                  )}
+                  <div className="text-center">
+                    <div className="font-semibold text-lg text-slate-900">Importer les documents</div>
+                    <div className="text-sm text-slate-600 mt-1">
+                      Restaurer depuis un fichier JSON
+                    </div>
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            {storageLoading && storageProgress.total > 0 && (
+              <div className="space-y-2 p-4 bg-white rounded-lg border border-orange-200">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-600 font-medium">
+                    Traitement en cours... {storageProgress.current}/{storageProgress.total}
+                  </span>
+                  <span className="text-slate-900">
+                    {Math.round((storageProgress.current / storageProgress.total) * 100)}%
+                  </span>
+                </div>
+                <div className="w-full bg-slate-200 rounded-full h-3">
+                  <div
+                    className="bg-orange-600 h-3 rounded-full transition-all duration-300"
+                    style={{ width: `${(storageProgress.current / storageProgress.total) * 100}%` }}
+                  ></div>
+                </div>
+                {storageProgress.file && (
+                  <div className="text-xs text-slate-600 truncate">
+                    {storageProgress.file}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="bg-white p-4 rounded-lg border border-orange-200">
+              <h4 className="font-semibold text-sm text-slate-900 mb-3 flex items-center gap-2">
+                <FolderArchive className="w-4 h-4 text-orange-600" />
+                Informations importantes
+              </h4>
+              <ul className="space-y-2 text-sm text-slate-600">
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>Les fichiers sont encodés en Base64 dans le JSON</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>L'import remplace les fichiers existants (upsert)</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>Limite : 10 000 fichiers par export</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                  <span className="text-amber-700">Le fichier JSON peut être volumineux selon le nombre de documents</span>
+                </li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>
