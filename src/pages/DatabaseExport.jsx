@@ -47,28 +47,39 @@ export default function DatabaseExport() {
   );
 
   const handleExport = async (format) => {
-    console.log("Export demandé pour le format:", format);
+    console.log("1️⃣ Export demandé pour le format:", format);
 
     if (!session?.access_token) {
+      console.error("❌ Pas de session access_token");
       toast.error("Vous devez être connecté pour exporter");
       return;
     }
 
-    setLoading(true);
-    setExportResult(null);
-    setProgress({ current: 0, total: 0, table: "" });
+    console.log("2️⃣ Session OK, token présent");
 
     try {
-      console.log("Session vérifiée, début du traitement...");
-      console.log("Supabase client:", supabase);
-      console.log("Test connexion Supabase...");
+      console.log("3️⃣ Avant setLoading(true)");
+      setLoading(true);
+      console.log("4️⃣ Après setLoading(true)");
+
+      console.log("5️⃣ Avant setExportResult(null)");
+      setExportResult(null);
+      console.log("6️⃣ Après setExportResult(null)");
+
+      console.log("7️⃣ Avant setProgress");
+      setProgress({ current: 0, total: 0, table: "" });
+      console.log("8️⃣ Après setProgress");
+
+      console.log("9️⃣ Entrée dans le try, début du traitement...");
+      console.log("🔟 Supabase client:", supabase);
+      console.log("1️⃣1️⃣ Test connexion Supabase...");
 
       try {
         const { data: testData, error: testError } = await supabase
           .from('profiles')
           .select('id')
           .limit(1);
-        console.log("Test Supabase réussi:", testData, testError);
+        console.log("1️⃣2️⃣ Test Supabase réussi:", testData, testError);
       } catch (testErr) {
         console.error("❌ Test Supabase échoué:", testErr);
       }
