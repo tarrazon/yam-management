@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, CheckCircle, XCircle, AlertCircle, Search, Filter, Edit2, ShoppingBag } from "lucide-react";
+import { Clock, CheckCircle, XCircle, AlertCircle, Search, Filter, Edit2, ShoppingBag, Mail, MailCheck } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 
@@ -307,6 +307,31 @@ export default function SuiviOptionsAdmin() {
                 ) : (
                   <Badge className="bg-slate-100 text-slate-800">{lot.statut}</Badge>
                 )}
+              </div>
+            )}
+            {option && option.notification_recipient && (
+              <div className="pt-2 border-t mt-3">
+                <div className="flex items-start gap-2">
+                  {option.email_sent ? (
+                    <MailCheck className="w-4 h-4 text-green-600 mt-0.5" />
+                  ) : (
+                    <Mail className="w-4 h-4 text-blue-600 mt-0.5" />
+                  )}
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-slate-700">Notification email</p>
+                    <p className="text-xs text-slate-600">À: {option.notification_recipient}</p>
+                    {option.email_scheduled_at && !option.email_sent && (
+                      <p className="text-xs text-blue-600 mt-1">
+                        Prévu: {new Date(option.email_scheduled_at).toLocaleDateString('fr-FR')} à {new Date(option.email_scheduled_at).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}
+                      </p>
+                    )}
+                    {option.email_sent && option.email_sent_at && (
+                      <p className="text-xs text-green-600 mt-1">
+                        Envoyé: {new Date(option.email_sent_at).toLocaleDateString('fr-FR')} à {new Date(option.email_sent_at).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
             {option && option.notes && (
