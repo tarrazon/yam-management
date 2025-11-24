@@ -149,7 +149,7 @@ Deno.serve(async (req: Request) => {
             </div>
           </div>
           <div class="footer">
-            <p style="margin: 0;">Yam Management - Gestion LMNP</p>
+            <p style="margin: 0;">Y'am Asset Management - Gestion LMNP</p>
             <p style="margin: 5px 0 0 0;">Cette notification a été générée automatiquement</p>
           </div>
         </body>
@@ -167,7 +167,7 @@ Lot n°: ${payload.lot_numero}
 Acquéreur: ${acquereurInfo}
 Période d'option: Du ${new Date(payload.date_debut).toLocaleDateString('fr-FR')} au ${new Date(payload.date_fin).toLocaleDateString('fr-FR')}
 
-Yam Management - Gestion LMNP
+Y'am Asset Management - Gestion LMNP
     `;
 
     const emailPromises = notificationEmails.map((item) =>
@@ -178,7 +178,7 @@ Yam Management - Gestion LMNP
           "Authorization": `Bearer ${resendApiKey}`,
         },
         body: JSON.stringify({
-          from: "YAM Management <noreply@yam-management.fr>",
+          from: "Y'am Asset Management <noreply@yam-management.fr>",
           to: [item.email],
           subject: `Nouvelle option - ${payload.residence_nom} - Lot ${payload.lot_numero}`,
           html: emailHtml,

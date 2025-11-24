@@ -148,7 +148,7 @@ export default function OnboardingPartenaire() {
                 <Building2 className="w-10 h-10 text-white" />
               </div>
               <CardTitle className="text-3xl font-bold text-[#1E40AF] mb-2">
-                Bienvenue sur Yam Management ! 🎉
+                Bienvenue sur Y'am Asset Management ! 🎉
               </CardTitle>
               <p className="text-slate-600 text-lg">
                 Bonjour <span className="font-semibold text-[#1E40AF]">{currentUser.full_name}</span>

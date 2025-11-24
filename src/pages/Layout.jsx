@@ -235,12 +235,12 @@ export default function Layout({ children, currentPageName }) {
               <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg overflow-hidden">
                 <img 
                   src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69145453c61abf56db426be9/20cb93525_yam.jpg" 
-                  alt="Yam Management"
+                  alt="Y'am Asset Management"
                   className="w-full h-full object-contain"
                 />
               </div>
               <div>
-                <h2 className="font-bold text-[#1E40AF] text-lg tracking-tight">Yam Management</h2>
+                <h2 className="font-bold text-[#1E40AF] text-lg tracking-tight">Y'am Asset Management</h2>
                 <p className="text-xs text-slate-500 font-medium">Gestion LMNP</p>
               </div>
             </div>
@@ -324,7 +324,7 @@ export default function Layout({ children, currentPageName }) {
           <header className="bg-white border-b border-slate-200 px-6 py-4 md:hidden">
             <div className="flex items-center gap-4">
               <SidebarTrigger className="hover:bg-slate-100 p-2 rounded-lg transition-colors" />
-              <h1 className="text-xl font-bold text-[#1E40AF]">Yam Management</h1>
+              <h1 className="text-xl font-bold text-[#1E40AF]">Y'am Asset Management</h1>
             </div>
           </header>
 

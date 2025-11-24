@@ -152,7 +152,7 @@ export default function ExportXML() {
           </CardHeader>
           <CardContent className="text-sm text-blue-800 space-y-2">
             <p>✅ <strong>Option 1 - Import manuel :</strong> Téléchargez le fichier XML et importez-le dans WordPress</p>
-            <p>✅ <strong>Option 2 - API REST :</strong> Utilisez l'API Yam Management directement depuis WordPress (recommandé pour synchronisation automatique)</p>
+            <p>✅ <strong>Option 2 - API REST :</strong> Utilisez l'API Y'am Asset Management directement depuis WordPress (recommandé pour synchronisation automatique)</p>
             <p>💡 Seuls les lots marqués "Publié sur WordPress" sont inclus dans l'export</p>
             <p>🔄 Le flux se génère automatiquement avec les données les plus récentes à chaque ouverture de cette page</p>
           </CardContent>
@@ -312,7 +312,7 @@ export default function ExportXML() {
               <ol className="list-decimal list-inside space-y-2 text-amber-800 ml-2">
                 <li>Téléchargez tous les fichiers PHP depuis le guide complet</li>
                 <li>Créez le dossier <code className="bg-white px-1 rounded">crm-lmnp-sync</code> dans <code className="bg-white px-1 rounded">wp-content/plugins/</code></li>
-                <li>Activez le plugin et configurez votre Token API Yam Management</li>
+                <li>Activez le plugin et configurez votre Token API Y'am Asset Management</li>
               </ol>
               <p className="text-amber-700 mt-3 text-xs">
                 ⏱️ Le plugin se synchronise automatiquement toutes les 2 heures !

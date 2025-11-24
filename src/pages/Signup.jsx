@@ -67,13 +67,13 @@ export default function Signup() {
           <div className="flex justify-center mb-4">
             <img
               src="/logo.jpg"
-              alt="Yam Management"
+              alt="Y'am Asset Management"
               className="w-24 h-24 object-contain"
             />
           </div>
           <CardTitle className="text-2xl font-bold">Créer un compte</CardTitle>
           <CardDescription>
-            Rejoignez Yam Management
+            Rejoignez Y'am Asset Management
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>

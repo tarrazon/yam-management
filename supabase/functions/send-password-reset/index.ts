@@ -103,9 +103,9 @@ Deno.serve(async (req: Request) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "YAM Management <noreply@yam-management.fr>",
+        from: "Y'am Asset Management <noreply@yam-management.fr>",
         to: [email],
-        subject: "Réinitialisation de votre mot de passe - YAM Management",
+        subject: "Réinitialisation de votre mot de passe - Y'am Asset Management",
         html: `
           <!DOCTYPE html>
           <html>
@@ -127,7 +127,7 @@ Deno.serve(async (req: Request) => {
                 </div>
                 <div class="content">
                   <p>Bonjour,</p>
-                  <p>Vous avez demandé à réinitialiser votre mot de passe pour votre compte YAM Management.</p>
+                  <p>Vous avez demandé à réinitialiser votre mot de passe pour votre compte Y'am Asset Management.</p>
                   <p>Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe :</p>
                   <div style="text-align: center;">
                     <a href="${resetUrl}" class="button">Réinitialiser mon mot de passe</a>
@@ -138,7 +138,7 @@ Deno.serve(async (req: Request) => {
                   <p style="font-size: 12px; color: #999;">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br><a href="${resetUrl}" style="color: #2563eb;">${resetUrl}</a></p>
                 </div>
                 <div class="footer">
-                  <p>© 2025 YAM Management. Tous droits réservés.</p>
+                  <p>© 2025 Y'am Asset Management. Tous droits réservés.</p>
                 </div>
               </div>
             </body>

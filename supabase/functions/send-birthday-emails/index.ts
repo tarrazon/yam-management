@@ -163,8 +163,8 @@ Deno.serve(async (req: Request) => {
                 </div>
               </div>
               <div class="footer">
-                <p style="margin: 0;">YAM Management - Gestion LMNP</p>
-                <p style="margin: 5px 0 0 0;">© ${today.getFullYear()} YAM Management. Tous droits réservés.</p>
+                <p style="margin: 0;">Y'am Asset Management - Gestion LMNP</p>
+                <p style="margin: 5px 0 0 0;">© ${today.getFullYear()} Y'am Asset Management. Tous droits réservés.</p>
               </div>
             </body>
           </html>
@@ -179,7 +179,7 @@ Deno.serve(async (req: Request) => {
             "Authorization": `Bearer ${resendApiKey}`,
           },
           body: JSON.stringify({
-            from: "YAM Management <noreply@yam-management.fr>",
+            from: "Y'am Asset Management <noreply@yam-management.fr>",
             to: [acq.email],
             subject: subject,
             html: emailHtml,

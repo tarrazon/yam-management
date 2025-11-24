@@ -54,11 +54,11 @@ export default function Login() {
           <div className="flex justify-center mb-4">
             <img
               src="/logo.jpg"
-              alt="Yam Management"
+              alt="Y'am Asset Management"
               className="w-24 h-24 object-contain"
             />
           </div>
-          <CardTitle className="text-2xl font-bold">Yam Management</CardTitle>
+          <CardTitle className="text-2xl font-bold">Y'am Asset Management</CardTitle>
           <CardDescription>
             Connectez-vous à votre compte
           </CardDescription>

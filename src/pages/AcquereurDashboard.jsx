@@ -329,8 +329,20 @@ export default function AcquereurDashboard() {
       {/* Menu latéral */}
       <div className="w-64 bg-white border-r border-slate-200 flex flex-col">
         <div className="p-6 border-b border-slate-200">
-          <h2 className="text-lg font-bold text-[#1E40AF]">Mon Espace Client</h2>
-          <p className="text-sm text-slate-500 mt-1">{acquereur.prenom} {acquereur.nom}</p>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg overflow-hidden">
+              <img
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69145453c61abf56db426be9/20cb93525_yam.jpg"
+                alt="Y'am Asset Management"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <div>
+              <h2 className="font-bold text-[#1E40AF] text-base">Y'am Asset Management</h2>
+              <p className="text-xs text-slate-500">Mon Espace Client</p>
+            </div>
+          </div>
+          <p className="text-sm text-slate-600 font-medium">{acquereur.prenom} {acquereur.nom}</p>
         </div>
 
         {/* Sélecteur de lots */}

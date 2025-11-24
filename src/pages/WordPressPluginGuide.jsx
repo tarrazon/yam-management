@@ -44,7 +44,7 @@ export default function WordPressPluginGuide() {
 /**
  * Plugin Name: CRM LMNP Sync
  * Plugin URI: https://votre-site.com
- * Description: Synchronise automatiquement les lots LMNP depuis votre CRM Yam Management
+ * Description: Synchronise automatiquement les lots LMNP depuis votre CRM Y'am Asset Management
  * Version: 1.0.0
  * Author: Votre Nom
  * Author URI: https://votre-site.com
@@ -179,7 +179,7 @@ add_action('admin_notices', 'crm_lmnp_admin_notices');`;
   // Classe API
   const apiClassFile = `<?php
 /**
- * Classe pour gérer les appels API vers Yam Management
+ * Classe pour gérer les appels API vers Y'am Asset Management
  */
 
 if (!defined('ABSPATH')) {
@@ -686,7 +686,7 @@ function crm_lmnp_render_settings_page() {
         <h1>⚙️ Paramètres CRM LMNP Sync</h1>
         
         <div class="card" style="max-width: 800px; margin-top: 20px;">
-            <h2>Configuration de l'API Yam Management</h2>
+            <h2>Configuration de l'API Y'am Asset Management</h2>
             
             <form method="post" action="">
                 <?php wp_nonce_field('crm_lmnp_settings'); ?>
@@ -694,7 +694,7 @@ function crm_lmnp_render_settings_page() {
                 <table class="form-table">
                     <tr>
                         <th scope="row">
-                            <label for="crm_lmnp_api_token">Token API Yam Management</label>
+                            <label for="crm_lmnp_api_token">Token API Y'am Asset Management</label>
                         </th>
                         <td>
                             <input type="text" 
@@ -702,7 +702,7 @@ function crm_lmnp_render_settings_page() {
                                    name="crm_lmnp_api_token" 
                                    value="<?php echo esc_attr($api_token); ?>" 
                                    class="regular-text"
-                                   placeholder="Votre token API Yam Management">
+                                   placeholder="Votre token API Y'am Asset Management">
                             <p class="description">
                                 Obtenez votre token API depuis votre dashboard Yam Management
                             </p>
