@@ -199,6 +199,7 @@ export const workflowService = {
         .select(`
           *,
           residence:residence_id (
+            id,
             nom,
             ville
           ),
@@ -310,7 +311,8 @@ export const workflowService = {
         step_code: stepCode,
         email_recipients: emailRecipients,
         acquereur_email: acquereurEmail,
-        vendeur_email: vendeurEmail
+        vendeur_email: vendeurEmail,
+        partenaire_email: lot.partenaire?.email
       });
 
       if (emailRecipients.includes('acquereur') && acquereurEmail) {
@@ -325,6 +327,34 @@ export const workflowService = {
         recipients.push(vendeurEmail);
       } else if (emailRecipients.includes('vendeur')) {
         console.warn('[workflowService] Vendeur should receive email but no email found');
+      }
+
+      if (emailRecipients.includes('partenaire') && lot.partenaire?.email) {
+        console.log('[workflowService] Adding partenaire email:', lot.partenaire.email);
+        recipients.push(lot.partenaire.email);
+      } else if (emailRecipients.includes('partenaire')) {
+        console.warn('[workflowService] Partenaire should receive email but no email found');
+      }
+
+      if (emailRecipients.includes('contact_residence') && lot.residence?.id) {
+        const { data: contacts, error: contactError } = await supabase
+          .from('contacts_residence')
+          .select('email')
+          .eq('residence_id', lot.residence.id)
+          .eq('type_contact', 'syndic');
+
+        if (contactError) {
+          console.error('[workflowService] Error fetching contact residence:', contactError);
+        } else if (contacts && contacts.length > 0) {
+          contacts.forEach(contact => {
+            if (contact.email) {
+              console.log('[workflowService] Adding contact residence email:', contact.email);
+              recipients.push(contact.email);
+            }
+          });
+        } else {
+          console.warn('[workflowService] Contact residence should receive email but no contact found');
+        }
       }
 
       if (emailRecipients.includes('bo')) {
