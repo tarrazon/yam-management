@@ -76,8 +76,11 @@ export default function DatabaseExport() {
 
       let totalRecords = 0;
 
+      console.log(`Début de l'export de ${tablesToExport.length} table(s):`, tablesToExport);
+
       for (const tableName of tablesToExport) {
         try {
+          console.log(`Récupération de la table: ${tableName}...`);
           const { data, error, count } = await supabase
             .from(tableName)
             .select("*", { count: "exact" })
@@ -91,6 +94,7 @@ export default function DatabaseExport() {
               data: [],
             };
           } else {
+            console.log(`✓ ${tableName}: ${count} enregistrement(s)`);
             exportData.tables[tableName] = {
               count: count || 0,
               exported: data?.length || 0,
@@ -107,6 +111,8 @@ export default function DatabaseExport() {
           };
         }
       }
+
+      console.log(`Export terminé: ${totalRecords} enregistrements au total`);
 
       if (format === "json") {
         const jsonData = {
@@ -171,11 +177,13 @@ export default function DatabaseExport() {
 
         toast.success(`Export CSV réussi ! ${totalRecords} enregistrements`);
       } else if (format === "sql") {
+        console.log("Génération du fichier SQL...");
         let sqlContent = `-- YAM Management - Database Export\n`;
         sqlContent += `-- Export Date: ${exportData.export_date}\n`;
         sqlContent += `-- Database: ${exportData.database}\n\n`;
 
         for (const [tableName, tableData] of Object.entries(exportData.tables)) {
+          console.log(`Génération SQL pour ${tableName}...`);
           sqlContent += `\n-- Table: ${tableName} (${tableData.count} rows)\n`;
 
           if (tableData.error) {
@@ -200,6 +208,7 @@ export default function DatabaseExport() {
           }
         }
 
+        console.log("Création du blob et téléchargement...");
         const blob = new Blob([sqlContent], { type: "text/plain" });
         const downloadUrl = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
@@ -210,6 +219,7 @@ export default function DatabaseExport() {
         document.body.removeChild(link);
         window.URL.revokeObjectURL(downloadUrl);
 
+        console.log("✓ Téléchargement SQL terminé");
         toast.success(`Export SQL réussi ! ${totalRecords} enregistrements`);
       }
     } catch (error) {
