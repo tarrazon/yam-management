@@ -75,7 +75,7 @@ export default function CommercialDashboard() {
           <p className="text-slate-500">Suivi de mes partenaires et de leur activité</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <StatsCard
             title="Mes Partenaires"
             value={partenairesCommercial.length}
@@ -83,15 +83,6 @@ export default function CommercialDashboard() {
             icon={Handshake}
             trend="neutral"
             iconBgColor="bg-gradient-to-br from-amber-500 to-orange-600"
-          />
-
-          <StatsCard
-            title="Lots disponibles"
-            value={lotsDisponibles.length}
-            subtitle={`${lotsEnCours.length} en cours`}
-            icon={Building2}
-            trend="neutral"
-            iconBgColor="bg-gradient-to-br from-blue-500 to-blue-600"
           />
 
           <StatsCard
@@ -123,12 +114,6 @@ export default function CommercialDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
-                  <div>
-                    <p className="text-sm text-slate-600">Lots disponibles</p>
-                    <p className="text-2xl font-bold text-blue-600">{lotsDisponibles.length}</p>
-                  </div>
-                </div>
                 <div className="flex items-center justify-between p-4 bg-amber-50 rounded-lg">
                   <div>
                     <p className="text-sm text-slate-600">En cours de vente</p>

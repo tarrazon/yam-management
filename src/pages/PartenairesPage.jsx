@@ -258,14 +258,16 @@ export default function PartenairesPage() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button
-              onClick={exportToExcel}
-              variant="outline"
-              className="border-[#1E40AF] text-[#1E40AF] hover:bg-[#1E40AF] hover:text-white"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Export Excel
-            </Button>
+            {currentUser?.role_custom === 'admin' && (
+              <Button
+                onClick={exportToExcel}
+                variant="outline"
+                className="border-[#1E40AF] text-[#1E40AF] hover:bg-[#1E40AF] hover:text-white"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export Excel
+              </Button>
+            )}
             <Button
               onClick={() => {
                 setShowForm(!showForm);
@@ -425,7 +427,7 @@ export default function PartenairesPage() {
                   partenaire={partenaire}
                   onEdit={handleEdit}
                   onView={handleView}
-                  onDelete={handleDelete}
+                  onDelete={currentUser?.role_custom === 'admin' ? handleDelete : null}
                 />
               ))}
             </AnimatePresence>
@@ -439,7 +441,7 @@ export default function PartenairesPage() {
                   partenaire={partenaire}
                   onEdit={handleEdit}
                   onView={handleView}
-                  onDelete={handleDelete}
+                  onDelete={currentUser?.role_custom === 'admin' ? handleDelete : null}
                 />
               ))}
             </AnimatePresence>
@@ -452,7 +454,7 @@ export default function PartenairesPage() {
               partenaire={viewingPartenaire}
               onClose={() => setViewingPartenaire(null)}
               onEdit={handleEdit}
-              onDelete={handleDelete}
+              onDelete={currentUser?.role_custom === 'admin' ? handleDelete : null}
             />
           )}
         </AnimatePresence>
