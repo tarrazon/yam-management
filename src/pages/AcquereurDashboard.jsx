@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Home, FileText, MessageSquare, Hammer, Image as ImageIcon, HelpCircle, Check, Clock, Send, Download, Mail, Phone, MapPin, User, Building, Calendar, TrendingUp } from 'lucide-react';
+import { Home, FileText, MessageSquare, Hammer, Image as ImageIcon, HelpCircle, Check, Clock, Send, Download, Mail, Phone, MapPin, User, Building, Calendar, TrendingUp, LogOut } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -22,7 +22,7 @@ import StorageImage from '@/components/common/StorageImage';
 import AppelsDeFondTimeline from '@/components/acquereurs/AppelsDeFondTimeline';
 
 export default function AcquereurDashboard() {
-  const { profile } = useAuth();
+  const { profile, signOut } = useAuth();
   const queryClient = useQueryClient();
   const [nouveauMessage, setNouveauMessage] = useState('');
   const [activeSection, setActiveSection] = useState('tableau-bord');
@@ -381,6 +381,16 @@ export default function AcquereurDashboard() {
             })}
           </ul>
         </nav>
+
+        <div className="p-4 border-t border-slate-200">
+          <button
+            onClick={signOut}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-red-600 hover:bg-red-50 transition-colors"
+          >
+            <LogOut className="w-5 h-5" />
+            <span className="font-medium">Déconnexion</span>
+          </button>
+        </div>
       </div>
 
       {/* Contenu principal */}
