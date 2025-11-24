@@ -629,8 +629,11 @@ export default function UsersManagement() {
                     <div className="space-y-2">
                       <Label>Partenaire associé *</Label>
                       <Select
-                        value={editFormData.partenaire_id || undefined}
-                        onValueChange={(value) => setEditFormData({...editFormData, partenaire_id: value})}
+                        value={editFormData.partenaire_id && String(editFormData.partenaire_id)}
+                        onValueChange={(value) => {
+                          console.log('Partenaire sélectionné:', value);
+                          setEditFormData({...editFormData, partenaire_id: value});
+                        }}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionner un partenaire" />
@@ -643,6 +646,9 @@ export default function UsersManagement() {
                           ))}
                         </SelectContent>
                       </Select>
+                      {editFormData.partenaire_id && (
+                        <p className="text-xs text-green-600">Partenaire sélectionné</p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
@@ -676,13 +682,22 @@ export default function UsersManagement() {
                 Annuler
               </Button>
               <Button
-                onClick={handleSaveUser}
+                onClick={() => {
+                  console.log('Tentative de sauvegarde avec:', editFormData);
+                  handleSaveUser();
+                }}
                 className="bg-[#1E40AF] hover:bg-[#1E3A8A]"
-                disabled={editFormData?.role_custom === 'partenaire' && !editFormData?.partenaire_id}
+                disabled={
+                  updateUserMutation.isPending ||
+                  (editFormData?.role_custom === 'partenaire' && !editFormData?.partenaire_id)
+                }
               >
                 <Save className="w-4 h-4 mr-2" />
-                Enregistrer
+                {updateUserMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
               </Button>
+              {editFormData?.role_custom === 'partenaire' && !editFormData?.partenaire_id && (
+                <p className="text-xs text-red-500 w-full text-center">Veuillez sélectionner un partenaire</p>
+              )}
             </DialogFooter>
           </DialogContent>
         </Dialog>
