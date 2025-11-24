@@ -56,11 +56,11 @@ export default function CommercialDashboard() {
   const lotsDisponibles = lotsPartenaires.filter(lot => lot.statut === 'disponible');
   const lotsVendus = lotsPartenaires.filter(lot => lot.statut === 'vendu');
   const lotsEnCours = lotsPartenaires.filter(lot =>
-    ['reserve', 'compromis', 'acte_programme'].includes(lot.statut)
+    ['sous_option', 'reserve', 'compromis', 'acte_programme'].includes(lot.statut)
   );
 
-  const caRealise = lotsVendus.reduce((sum, lot) => sum + (parseFloat(lot.prix_vente) || 0), 0);
-  const caPotentiel = lotsEnCours.reduce((sum, lot) => sum + (parseFloat(lot.prix_vente) || 0), 0);
+  const caRealise = lotsVendus.reduce((sum, lot) => sum + (parseFloat(lot.prix) || 0), 0);
+  const caPotentiel = lotsEnCours.reduce((sum, lot) => sum + (parseFloat(lot.prix) || 0), 0);
 
   const tauxConversion = lotsPartenaires.length > 0
     ? ((lotsVendus.length / lotsPartenaires.length) * 100).toFixed(1)
@@ -226,7 +226,7 @@ export default function CommercialDashboard() {
                     const vendusPartenaire = lotsPartenaire.filter(l => l.statut === 'vendu').length;
                     const caPartenaire = lotsPartenaire
                       .filter(l => l.statut === 'vendu')
-                      .reduce((sum, l) => sum + (parseFloat(l.prix_vente) || 0), 0);
+                      .reduce((sum, l) => sum + (parseFloat(l.prix) || 0), 0);
 
                     return (
                       <div
@@ -266,7 +266,7 @@ export default function CommercialDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {lotsPartenaires.filter(l => ['reserve', 'compromis', 'acte_programme', 'vendu'].includes(l.statut)).length === 0 ? (
+              {lotsPartenaires.filter(l => ['sous_option', 'reserve', 'compromis', 'acte_programme', 'vendu'].includes(l.statut)).length === 0 ? (
                 <div className="text-center py-8 text-slate-500">
                   <FileText className="w-12 h-12 mx-auto mb-3 text-slate-300" />
                   <p>Aucun dossier en cours</p>
@@ -275,9 +275,9 @@ export default function CommercialDashboard() {
               ) : (
                 <div className="space-y-3 max-h-[400px] overflow-y-auto">
                   {lotsPartenaires
-                    .filter(l => ['reserve', 'compromis', 'acte_programme', 'vendu'].includes(l.statut))
+                    .filter(l => ['sous_option', 'reserve', 'compromis', 'acte_programme', 'vendu'].includes(l.statut))
                     .sort((a, b) => {
-                      const order = { 'reserve': 1, 'compromis': 2, 'acte_programme': 3, 'vendu': 4 };
+                      const order = { 'sous_option': 1, 'reserve': 2, 'compromis': 3, 'acte_programme': 4, 'vendu': 5 };
                       return order[a.statut] - order[b.statut];
                     })
                     .map((lot) => {
@@ -299,7 +299,8 @@ export default function CommercialDashboard() {
                                   {lot.residence_nom} - {lot.numero}
                                 </p>
                                 <Badge variant={
-                                  lot.statut === 'reserve' ? 'default' :
+                                  lot.statut === 'sous_option' ? 'default' :
+                                  lot.statut === 'reserve' ? 'secondary' :
                                   lot.statut === 'compromis' ? 'secondary' :
                                   lot.statut === 'acte_programme' ? 'outline' :
                                   'success'
@@ -324,10 +325,10 @@ export default function CommercialDashboard() {
                                   <span className="font-medium text-slate-800">{lot.acquereur_nom}</span>
                                 </div>
                               )}
-                              {lot.prix_vente && (
+                              {lot.prix && (
                                 <div className="flex justify-between text-xs">
                                   <span className="text-slate-600">Prix:</span>
-                                  <span className="font-medium text-green-600">{formatCurrency(lot.prix_vente)}</span>
+                                  <span className="font-medium text-green-600">{formatCurrency(lot.prix)}</span>
                                 </div>
                               )}
                               {lot.phase_post_vente && (
