@@ -60,6 +60,18 @@ export default function DatabaseExport() {
 
     try {
       console.log("Session vérifiée, début du traitement...");
+      console.log("Supabase client:", supabase);
+      console.log("Test connexion Supabase...");
+
+      try {
+        const { data: testData, error: testError } = await supabase
+          .from('profiles')
+          .select('id')
+          .limit(1);
+        console.log("Test Supabase réussi:", testData, testError);
+      } catch (testErr) {
+        console.error("❌ Test Supabase échoué:", testErr);
+      }
 
       const allTables = availableTables.map(t => t.id);
       const tablesToExport = selectedTables === "all"
