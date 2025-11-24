@@ -87,7 +87,7 @@ export default function MessageriePartenaireModal({ open, onClose, partenaire })
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
+      <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col bg-white">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MessageSquare className="w-5 h-5 text-blue-600" />
@@ -118,9 +118,11 @@ export default function MessageriePartenaireModal({ open, onClose, partenaire })
               <p className="text-xs mt-1">Partenaire ID: {partenaire?.id}</p>
             </div>
           ) : (
-            messages.map((msg) => {
-              const isAdmin = msg.expediteur_type === 'admin';
-              return (
+            <>
+              {console.log('Rendering messages:', messages)}
+              {messages.map((msg) => {
+                const isAdmin = msg.expediteur_type === 'admin';
+                return (
                 <div
                   key={msg.id}
                   className={`flex ${isAdmin ? 'justify-end' : 'justify-start'}`}
@@ -153,7 +155,8 @@ export default function MessageriePartenaireModal({ open, onClose, partenaire })
                   </div>
                 </div>
               );
-            })
+              })}
+            </>
           )}
           <div ref={messagesEndRef} />
         </div>
