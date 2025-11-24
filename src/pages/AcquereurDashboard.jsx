@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Home, FileText, MessageSquare, Hammer, Image as ImageIcon, HelpCircle, Check, Clock, Send, Download, Mail, Phone, MapPin, User, Building, Calendar, TrendingUp, LogOut } from 'lucide-react';
+import { Home, FileText, MessageSquare, Hammer, Image as ImageIcon, HelpCircle, Check, Clock, Send, Download, Mail, Phone, MapPin, User, Building, Calendar, TrendingUp, LogOut, CheckCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -231,19 +231,18 @@ export default function AcquereurDashboard() {
     }
   };
 
-  useEffect(() => {
-    if (activeSection === 'messages' && messages.length > 0 && acquereur?.id) {
-      const unreadAdminMessages = messages.filter(msg => msg.expediteur_type === 'admin' && !msg.lu);
-      if (unreadAdminMessages.length > 0) {
-        unreadAdminMessages.forEach(msg => {
-          messagesAdminService.marquerLu(msg.id).catch(err => console.error('Erreur marquage auto:', err));
-        });
-        setTimeout(() => {
-          queryClient.invalidateQueries(['messages-portal', acquereur.id]);
-        }, 500);
-      }
+  const marquerTousLus = () => {
+    const messagesNonLusItems = messages.filter(msg => msg.expediteur_type === 'admin' && !msg.lu);
+    messagesNonLusItems.forEach(msg => {
+      messagesAdminService.marquerLu(msg.id).catch(err => console.error('Erreur marquage:', err));
+    });
+    if (messagesNonLusItems.length > 0) {
+      setTimeout(() => {
+        queryClient.invalidateQueries(['messages-portal', acquereur.id]);
+      }, 500);
+      toast.success(`${messagesNonLusItems.length} message${messagesNonLusItems.length > 1 ? 's' : ''} marqué${messagesNonLusItems.length > 1 ? 's' : ''} comme lu${messagesNonLusItems.length > 1 ? 's' : ''}`);
     }
-  }, [activeSection, messages, acquereur?.id, queryClient]);
+  };
 
   const getStatutIcon = (statut) => {
     switch (statut) {
@@ -744,7 +743,27 @@ export default function AcquereurDashboard() {
             {activeSection === 'messages' && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-[#1E40AF]">Messagerie</CardTitle>
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-3">
+                      <CardTitle className="text-[#1E40AF]">Messagerie</CardTitle>
+                      {unreadMessagesCount > 0 && (
+                        <Badge className="bg-red-500 text-white">
+                          {unreadMessagesCount} non lu{unreadMessagesCount > 1 ? 's' : ''}
+                        </Badge>
+                      )}
+                    </div>
+                    {unreadMessagesCount > 0 && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={marquerTousLus}
+                        className="text-xs"
+                      >
+                        <CheckCheck className="w-4 h-4 mr-1" />
+                        Marquer tout comme lu
+                      </Button>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4 mb-6 max-h-[500px] overflow-y-auto">
@@ -758,12 +777,15 @@ export default function AcquereurDashboard() {
                         <div className={`max-w-md p-4 rounded-lg relative ${
                           msg.expediteur_type === 'acquereur'
                             ? 'bg-[#1E40AF] text-white'
-                            : 'bg-slate-100 text-slate-700'
+                            : `bg-white text-slate-800 border ${!msg.lu ? 'border-red-300 border-2' : 'border-slate-200'}`
                         }`}>
                           <div className="flex items-start justify-between gap-2 mb-1">
                             <p className="text-sm font-medium">
                               {msg.expediteur_type === 'admin' ? 'Administrateur YAM' : 'Vous'}
                             </p>
+                            {msg.expediteur_type === 'admin' && !msg.lu && (
+                              <Badge className="bg-red-500 text-white text-[10px] px-1.5 py-0.5">Non lu</Badge>
+                            )}
                           </div>
                           <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
                           <div className="flex items-center justify-between gap-2 mt-2">
@@ -772,8 +794,8 @@ export default function AcquereurDashboard() {
                             }`}>
                               {format(new Date(msg.created_at), 'dd MMM yyyy à HH:mm', { locale: fr })}
                             </p>
-                            {msg.expediteur_type === 'admin' && msg.lu && (
-                              <div className="flex items-center gap-1 text-green-600">
+                            {msg.expediteur_type === 'acquereur' && msg.lu && (
+                              <div className="flex items-center gap-0.5 text-green-600">
                                 <Check className="w-3 h-3" />
                                 <Check className="w-3 h-3 -ml-2" />
                               </div>
