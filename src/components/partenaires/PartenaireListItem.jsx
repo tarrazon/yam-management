@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, Eye, Mail, Phone, Handshake, Trash2 } from "lucide-react";
+import { Edit, Eye, Mail, Phone, Handshake, Trash2, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatPartenaireTypes } from "@/utils/partenaireTypes";
 import { useCreatorName } from "@/hooks/useCreatorName";
+import { useQuery } from "@tanstack/react-query";
+import MessageriePartenaireModal from "./MessageriePartenaireModal";
 
 const statusColors = {
   actif: "bg-green-100 text-green-800",
@@ -23,6 +25,24 @@ const statusLabels = {
 export default function PartenaireListItem({ partenaire, onEdit, onView, onDelete }) {
   const partenaireTypes = formatPartenaireTypes(partenaire.type_partenaire);
   const { creatorName } = useCreatorName(partenaire.created_by);
+  const [showMessagerie, setShowMessagerie] = useState(false);
+
+  const { data: unreadCount = 0 } = useQuery({
+    queryKey: ['unread-messages-partenaires', partenaire.id],
+    queryFn: async () => {
+      const { supabase } = await import('@/lib/supabase');
+      const { count, error } = await supabase
+        .from('messages_partenaires')
+        .select('*', { count: 'exact', head: true })
+        .eq('partenaire_id', partenaire.id)
+        .eq('expediteur_type', 'partenaire')
+        .eq('lu', false);
+
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: !!partenaire.id,
+  });
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
@@ -82,6 +102,20 @@ export default function PartenaireListItem({ partenaire, onEdit, onView, onDelet
             <Button
               variant="ghost"
               size="icon"
+              onClick={() => setShowMessagerie(true)}
+              className="hover:bg-blue-50 h-8 w-8 relative"
+              title="Messagerie"
+            >
+              <MessageSquare className="w-4 h-4 text-blue-600" />
+              {unreadCount > 0 && (
+                <Badge className="absolute -top-1 -right-1 bg-red-500 text-white border-2 border-white h-4 w-4 p-0 flex items-center justify-center rounded-full text-[10px]">
+                  {unreadCount}
+                </Badge>
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => onView(partenaire)}
               className="hover:bg-slate-100 h-8 w-8"
               title="Voir"
@@ -111,6 +145,11 @@ export default function PartenaireListItem({ partenaire, onEdit, onView, onDelet
           </div>
         </div>
       </div>
+      <MessageriePartenaireModal
+        open={showMessagerie}
+        onClose={() => setShowMessagerie(false)}
+        partenaire={partenaire}
+      />
     </motion.div>
   );
 }

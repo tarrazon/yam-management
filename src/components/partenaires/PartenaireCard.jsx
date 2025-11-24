@@ -1,12 +1,14 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Handshake, Edit, Mail, Phone, MapPin, Eye, TrendingUp, Trash2 } from "lucide-react";
+import { Handshake, Edit, Mail, Phone, MapPin, Eye, TrendingUp, Trash2, MessageSquare } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatPartenaireTypes } from "@/utils/partenaireTypes";
 import { useCreatorName } from "@/hooks/useCreatorName";
+import { useQuery } from "@tanstack/react-query";
+import MessageriePartenaireModal from "./MessageriePartenaireModal";
 
 const statusColors = {
   actif: "bg-green-100 text-green-800 border-green-200",
@@ -25,6 +27,24 @@ const statusLabels = {
 export default function PartenaireCard({ partenaire, onEdit, onView, onDelete }) {
   const partenaireTypes = formatPartenaireTypes(partenaire.type_partenaire);
   const { creatorName } = useCreatorName(partenaire.created_by);
+  const [showMessagerie, setShowMessagerie] = useState(false);
+
+  const { data: unreadCount = 0 } = useQuery({
+    queryKey: ['unread-messages-partenaires', partenaire.id],
+    queryFn: async () => {
+      const { supabase } = await import('@/lib/supabase');
+      const { count, error } = await supabase
+        .from('messages_partenaires')
+        .select('*', { count: 'exact', head: true })
+        .eq('partenaire_id', partenaire.id)
+        .eq('expediteur_type', 'partenaire')
+        .eq('lu', false);
+
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: !!partenaire.id,
+  });
 
   return (
     <motion.div
@@ -124,7 +144,7 @@ export default function PartenaireCard({ partenaire, onEdit, onView, onDelete })
           {partenaire.telephone && (
             <div className="flex items-center gap-3 text-sm">
               <Phone className="w-4 h-4 text-slate-400 flex-shrink-0" />
-              <a 
+              <a
                 href={`tel:${partenaire.telephone}`}
                 className="text-slate-600 hover:text-[#1E40AF]"
               >
@@ -132,6 +152,31 @@ export default function PartenaireCard({ partenaire, onEdit, onView, onDelete })
               </a>
             </div>
           )}
+
+          {unreadCount > 0 && (
+            <div className="flex items-center justify-center gap-2 py-2 px-3 bg-red-50 border border-red-200 rounded-md">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                <span className="text-xs font-semibold text-red-700">
+                  {unreadCount} message{unreadCount > 1 ? 's' : ''} non lu{unreadCount > 1 ? 's' : ''}
+                </span>
+              </div>
+            </div>
+          )}
+
+          <Button
+            size="sm"
+            onClick={() => setShowMessagerie(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white w-full relative"
+          >
+            <MessageSquare className="w-4 h-4 mr-2" />
+            Messagerie
+            {unreadCount > 0 && (
+              <Badge className="absolute -top-2 -right-2 bg-red-500 text-white border-2 border-white h-6 w-6 p-0 flex items-center justify-center rounded-full text-xs">
+                {unreadCount}
+              </Badge>
+            )}
+          </Button>
 
           {partenaire.zone_activite && (
             <div className="pt-3 border-t border-slate-100">
@@ -173,6 +218,11 @@ export default function PartenaireCard({ partenaire, onEdit, onView, onDelete })
           )}
         </CardContent>
       </Card>
+      <MessageriePartenaireModal
+        open={showMessagerie}
+        onClose={() => setShowMessagerie(false)}
+        partenaire={partenaire}
+      />
     </motion.div>
   );
 }
