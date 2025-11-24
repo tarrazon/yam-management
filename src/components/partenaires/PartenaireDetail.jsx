@@ -7,6 +7,7 @@ import { X, Edit, Mail, Phone, MapPin, Handshake, FileText, TrendingUp, Users, E
 import { motion } from "framer-motion";
 import PartenaireStats from "./PartenaireStats";
 import { formatPartenaireTypes } from "@/utils/partenaireTypes";
+import { useCreatorName } from "@/hooks/useCreatorName";
 
 const statusColors = {
   actif: "bg-green-100 text-green-800 border-green-200",
@@ -24,6 +25,7 @@ const statusLabels = {
 
 export default function PartenaireDetail({ partenaire, onClose, onEdit, onDelete }) {
   const partenaireTypes = formatPartenaireTypes(partenaire.type_partenaire);
+  const { creatorName } = useCreatorName(partenaire.created_by);
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -153,10 +155,10 @@ export default function PartenaireDetail({ partenaire, onClose, onEdit, onDelete
                   <p className="font-medium text-slate-700">{partenaire.specialite}</p>
                 </div>
               )}
-              {partenaire.created_by && (
+              {partenaire.created_by && creatorName && (
                 <div className="pt-3 border-t">
                   <p className="text-xs text-slate-500">Créé par</p>
-                  <p className="font-medium text-slate-700">{partenaire.created_by}</p>
+                  <p className="font-medium text-slate-700">{creatorName}</p>
                 </div>
               )}
             </CardContent>

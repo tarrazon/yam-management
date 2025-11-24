@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Edit, Eye, Mail, Phone, Handshake, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatPartenaireTypes } from "@/utils/partenaireTypes";
+import { useCreatorName } from "@/hooks/useCreatorName";
 
 const statusColors = {
   actif: "bg-green-100 text-green-800",
@@ -21,6 +22,7 @@ const statusLabels = {
 
 export default function PartenaireListItem({ partenaire, onEdit, onView, onDelete }) {
   const partenaireTypes = formatPartenaireTypes(partenaire.type_partenaire);
+  const { creatorName } = useCreatorName(partenaire.created_by);
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
@@ -69,10 +71,10 @@ export default function PartenaireListItem({ partenaire, onEdit, onView, onDelet
             </div>
           )}
 
-          {partenaire.created_by && (
+          {partenaire.created_by && creatorName && (
             <div className="flex flex-col">
               <span className="text-xs text-slate-500">Créé par</span>
-              <span className="text-sm text-slate-700 truncate font-medium">{partenaire.created_by}</span>
+              <span className="text-sm text-slate-700 truncate font-medium">{creatorName}</span>
             </div>
           )}
 

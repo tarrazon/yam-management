@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Handshake, Edit, Mail, Phone, MapPin, Eye, TrendingUp, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatPartenaireTypes } from "@/utils/partenaireTypes";
+import { useCreatorName } from "@/hooks/useCreatorName";
 
 const statusColors = {
   actif: "bg-green-100 text-green-800 border-green-200",
@@ -23,6 +24,7 @@ const statusLabels = {
 
 export default function PartenaireCard({ partenaire, onEdit, onView, onDelete }) {
   const partenaireTypes = formatPartenaireTypes(partenaire.type_partenaire);
+  const { creatorName } = useCreatorName(partenaire.created_by);
 
   return (
     <motion.div
@@ -138,10 +140,10 @@ export default function PartenaireCard({ partenaire, onEdit, onView, onDelete })
             </div>
           )}
 
-          {partenaire.created_by && (
+          {partenaire.created_by && creatorName && (
             <div className="pt-3 border-t border-slate-100">
               <p className="text-xs text-slate-500">Créé par</p>
-              <p className="text-sm font-medium text-slate-700">{partenaire.created_by}</p>
+              <p className="text-sm font-medium text-slate-700">{creatorName}</p>
             </div>
           )}
 
