@@ -121,6 +121,14 @@ export default function EspaceClientModal({ acquereur, isOpen, onClose }) {
     };
 
     loadData();
+
+    const interval = setInterval(() => {
+      if (isOpen && acquereur.id) {
+        messagesAdminService.list(acquereur.id).then(setMessages).catch(console.error);
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
   }, [isOpen, acquereur.id, lotLmnp?.id]);
 
   const handleSendMessage = async () => {

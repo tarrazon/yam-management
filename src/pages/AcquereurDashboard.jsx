@@ -245,13 +245,16 @@ export default function AcquereurDashboard() {
   useEffect(() => {
     if (activeSection === 'messages' && messages.length > 0 && acquereur?.id) {
       const unreadAdminMessages = messages.filter(msg => msg.expediteur_type === 'admin' && !msg.lu);
-      unreadAdminMessages.forEach(msg => {
-        messagesAdminService.marquerLu(msg.id).then(() => {
+      if (unreadAdminMessages.length > 0) {
+        unreadAdminMessages.forEach(msg => {
+          messagesAdminService.marquerLu(msg.id).catch(err => console.error('Erreur marquage auto:', err));
+        });
+        setTimeout(() => {
           queryClient.invalidateQueries(['messages-portal', acquereur.id]);
-        }).catch(err => console.error('Erreur marquage auto:', err));
-      });
+        }, 500);
+      }
     }
-  }, [activeSection, messages, acquereur?.id]);
+  }, [activeSection, messages, acquereur?.id, queryClient]);
 
   const getStatutIcon = (statut) => {
     switch (statut) {
