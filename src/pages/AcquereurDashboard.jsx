@@ -6,7 +6,7 @@ import { faqService } from '@/api/faq';
 import { galeriePhotosService } from '@/api/galeriePhotos';
 import { messagesAdminService } from '@/api/messagesAdmin';
 import { getSignedUrl } from '@/api/uploadService';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -231,15 +231,17 @@ export default function AcquereurDashboard() {
     }
   };
 
+  const marquerLuMutation = useMutation({
+    mutationFn: (id) => messagesAdminService.marquerLu(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['messages-portal', acquereur?.id]);
+    }
+  });
+
   const marquerTousLus = () => {
     const messagesNonLusItems = messages.filter(msg => msg.expediteur_type === 'admin' && !msg.lu);
-    messagesNonLusItems.forEach(msg => {
-      messagesAdminService.marquerLu(msg.id).catch(err => console.error('Erreur marquage:', err));
-    });
+    messagesNonLusItems.forEach(msg => marquerLuMutation.mutate(msg.id));
     if (messagesNonLusItems.length > 0) {
-      setTimeout(() => {
-        queryClient.invalidateQueries(['messages-portal', acquereur.id]);
-      }, 500);
       toast.success(`${messagesNonLusItems.length} message${messagesNonLusItems.length > 1 ? 's' : ''} marqué${messagesNonLusItems.length > 1 ? 's' : ''} comme lu${messagesNonLusItems.length > 1 ? 's' : ''}`);
     }
   };
