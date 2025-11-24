@@ -12,7 +12,7 @@ import { formatCurrency } from "@/utils/formHelpers";
 export default function CommercialDashboard() {
   const { profile } = useAuth();
 
-  const { data: partenairesCommercial = [] } = useQuery({
+  const { data: partenairesCommercial = [], isLoading: isLoadingPartenaires } = useQuery({
     queryKey: ['partenaires_commercial', profile?.id],
     queryFn: async () => {
       if (!profile?.id) return [];
@@ -21,26 +21,26 @@ export default function CommercialDashboard() {
         .select('*')
         .eq('created_by', profile.id)
         .order('nom', { ascending: true });
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching partenaires:', error);
+        throw error;
+      }
       return data || [];
     },
     enabled: !!profile?.id,
   });
 
-  const { data: lots = [] } = useQuery({
+  const { data: lots = [], isLoading: isLoadingLots } = useQuery({
     queryKey: ['lots_lmnp'],
     queryFn: () => base44.entities.LotLMNP.list(),
   });
 
-  const { data: acquereurs = [] } = useQuery({
+  const { data: acquereurs = [], isLoading: isLoadingAcquereurs } = useQuery({
     queryKey: ['acquereurs'],
     queryFn: () => base44.entities.Acquereur.list(),
   });
 
-  const { data: residences = [] } = useQuery({
-    queryKey: ['residences_gestion'],
-    queryFn: () => base44.entities.ResidenceGestion.list(),
-  });
+  const isLoading = isLoadingPartenaires || isLoadingLots || isLoadingAcquereurs;
 
   const partenaireIds = partenairesCommercial.map(p => p.id);
 
@@ -65,7 +65,40 @@ export default function CommercialDashboard() {
     acq.partenaire_id && partenaireIds.includes(acq.partenaire_id)
   );
 
-  const residencesActives = [...new Set(lotsPartenaires.map(l => l.residence_id).filter(Boolean))].length;
+  // Debug logs
+  console.log('CommercialDashboard Debug:', {
+    profileId: profile?.id,
+    partenairesCount: partenairesCommercial.length,
+    partenaireIds,
+    lotsTotal: lots.length,
+    lotsPartenaires: lotsPartenaires.length,
+    lotsVendus: lotsVendus.length,
+    lotsEnCours: lotsEnCours.length,
+    caRealise,
+    acquereursTotal: acquereurs.length,
+    acquereursPartenaires: acquereursPartenaires.length,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="p-6 md:p-8 bg-[#F9FAFB] min-h-screen">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-[#1E40AF] mb-2">Mon Activité Commerciale</h1>
+            <p className="text-slate-500">Chargement des données...</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white p-6 rounded-lg shadow-md animate-pulse">
+                <div className="h-4 bg-slate-200 rounded w-1/2 mb-4"></div>
+                <div className="h-8 bg-slate-200 rounded w-3/4"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 md:p-8 bg-[#F9FAFB] min-h-screen">
@@ -161,18 +194,6 @@ export default function CommercialDashboard() {
                     <div>
                       <p className="text-sm text-slate-600">Acquéreurs</p>
                       <p className="text-lg font-bold text-slate-800">{acquereursPartenaires.length}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                      <Building2 className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-slate-600">Résidences actives</p>
-                      <p className="text-lg font-bold text-slate-800">{residencesActives}</p>
                     </div>
                   </div>
                 </div>
