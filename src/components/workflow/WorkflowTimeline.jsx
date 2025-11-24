@@ -33,8 +33,6 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
   const [vendeur, setVendeur] = useState(null);
   const [sendingEmail, setSendingEmail] = useState({});
   const [refreshKey, setRefreshKey] = useState(0);
-  const [partenaire, setPartenaire] = useState(null);
-  const [contactsResidence, setContactsResidence] = useState([]);
 
   useEffect(() => {
     loadWorkflow();
@@ -44,7 +42,7 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
     try {
       setLoading(true);
       const [progressData, stepsData, lotData] = await Promise.all([
-        workflowService.getLotWorkflowProgress(lotId, workflowType),
+        workflowService.getLotWorkflowProgress(lotId),
         workflowService.getWorkflowSteps(workflowType),
         base44.entities.LotLMNP.findOne(lotId)
       ]);
@@ -81,31 +79,6 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
         setVendeur(vendeurData);
       } else {
         setVendeur(null);
-      }
-
-      if (lotData?.partenaire_id) {
-        const partenaireData = await base44.entities.Partenaire.findOne(lotData.partenaire_id);
-        console.log('[WorkflowTimeline] Loaded partenaire:', {
-          id: partenaireData?.id,
-          nom: partenaireData?.nom,
-          email: partenaireData?.email
-        });
-        setPartenaire(partenaireData);
-      } else {
-        setPartenaire(null);
-      }
-
-      if (lotData?.residence_id) {
-        const { data: contactsData } = await base44.entities.ContactResidence.list({
-          filters: {
-            residence_id: lotData.residence_id,
-            type_contact: 'syndic'
-          }
-        });
-        console.log('[WorkflowTimeline] Loaded contacts residence:', contactsData);
-        setContactsResidence(contactsData || []);
-      } else {
-        setContactsResidence([]);
       }
 
       const progressMap = {};
@@ -339,86 +312,37 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
                       )}
                     </div>
                   )}
-                  {step.send_email && step.email_subject && step.email_body && (
-                    <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded">
-                      <p className="text-xs text-blue-700 flex items-center gap-1 mb-1">
-                        <Mail className="w-3 h-3" />
-                        Email prévu pour :
-                      </p>
-                      <div className="text-xs text-blue-600 ml-4 space-y-0.5">
-                        {(() => {
-                          const emailRecipients = step.email_recipients || ['acquereur', 'vendeur'];
-                          const recipients = [];
-
-                          if (emailRecipients.includes('acquereur') && acquereur?.email) {
-                            recipients.push(`→ Acquéreur : ${acquereur.email}`);
-                          }
-                          if (emailRecipients.includes('vendeur') && vendeur?.email) {
-                            recipients.push(`→ Vendeur : ${vendeur.email}`);
-                          }
-                          if (emailRecipients.includes('partenaire') && partenaire?.email) {
-                            recipients.push(`→ Partenaire : ${partenaire.email}`);
-                          }
-                          if (emailRecipients.includes('contact_residence') && contactsResidence.length > 0) {
-                            contactsResidence.forEach(contact => {
-                              if (contact.email) {
-                                recipients.push(`→ Syndic : ${contact.email}`);
-                              }
-                            });
-                          }
-                          if (emailRecipients.includes('bo')) {
-                            recipients.push('→ Back Office');
-                          }
-
-                          if (recipients.length === 0) {
-                            return <p className="text-amber-600">⚠ Aucun destinataire disponible</p>;
-                          }
-
-                          return recipients.map((recipient, idx) => (
-                            <p key={idx}>{recipient}</p>
-                          ));
-                        })()}
-                      </div>
-                    </div>
-                  )}
                   {step.progress?.email_sent_at && (
                     <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded">
                       <p className="text-xs text-green-700 flex items-center gap-1 mb-1">
                         <Mail className="w-3 h-3" />
-                        Email envoyé le : {format(new Date(step.progress.email_sent_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}
+                        Dernier email envoyé le : {format(new Date(step.progress.email_sent_at), 'dd/MM/yyyy à HH:mm', { locale: fr })}
                       </p>
                       <div className="text-xs text-green-600 ml-4 space-y-0.5">
                         {(() => {
                           const emailRecipients = step.email_recipients || ['acquereur', 'vendeur'];
-                          const recipients = [];
+                          const hasRecipients =
+                            (emailRecipients.includes('acquereur') && acquereur?.email) ||
+                            (emailRecipients.includes('vendeur') && vendeur?.email) ||
+                            emailRecipients.includes('bo');
 
-                          if (emailRecipients.includes('acquereur') && acquereur?.email) {
-                            recipients.push(`→ Acquéreur : ${acquereur.email}`);
-                          }
-                          if (emailRecipients.includes('vendeur') && vendeur?.email) {
-                            recipients.push(`→ Vendeur : ${vendeur.email}`);
-                          }
-                          if (emailRecipients.includes('partenaire') && partenaire?.email) {
-                            recipients.push(`→ Partenaire : ${partenaire.email}`);
-                          }
-                          if (emailRecipients.includes('contact_residence') && contactsResidence.length > 0) {
-                            contactsResidence.forEach(contact => {
-                              if (contact.email) {
-                                recipients.push(`→ Syndic : ${contact.email}`);
-                              }
-                            });
-                          }
-                          if (emailRecipients.includes('bo')) {
-                            recipients.push('→ Back Office');
+                          if (!hasRecipients) {
+                            return <p className="text-amber-600">⚠ Aucun email de destinataire disponible</p>;
                           }
 
-                          if (recipients.length === 0) {
-                            return <p className="text-amber-600">⚠ Aucun destinataire disponible</p>;
-                          }
-
-                          return recipients.map((recipient, idx) => (
-                            <p key={idx}>{recipient}</p>
-                          ));
+                          return (
+                            <>
+                              {emailRecipients.includes('acquereur') && acquereur?.email && (
+                                <p>→ Acquéreur : {acquereur.email}</p>
+                              )}
+                              {emailRecipients.includes('vendeur') && vendeur?.email && (
+                                <p>→ Vendeur : {vendeur.email}</p>
+                              )}
+                              {emailRecipients.includes('bo') && (
+                                <p>→ Back Office</p>
+                              )}
+                            </>
+                          );
                         })()}
                       </div>
                     </div>
