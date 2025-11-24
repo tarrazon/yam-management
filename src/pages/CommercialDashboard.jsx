@@ -59,8 +59,8 @@ export default function CommercialDashboard() {
     ['sous_option', 'reserve', 'compromis', 'acte_programme'].includes(lot.statut)
   );
 
-  const caRealise = lotsVendus.reduce((sum, lot) => sum + (parseFloat(lot.prix) || 0), 0);
-  const caPotentiel = lotsEnCours.reduce((sum, lot) => sum + (parseFloat(lot.prix) || 0), 0);
+  const caRealise = lotsVendus.reduce((sum, lot) => sum + (parseFloat(lot.prix_fai) || 0), 0);
+  const caPotentiel = lotsEnCours.reduce((sum, lot) => sum + (parseFloat(lot.prix_fai) || 0), 0);
 
   const tauxConversion = lotsPartenaires.length > 0
     ? ((lotsVendus.length / lotsPartenaires.length) * 100).toFixed(1)

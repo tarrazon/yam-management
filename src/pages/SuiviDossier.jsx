@@ -123,7 +123,7 @@ export default function SuiviDossier() {
                 {lotsEnCours.length} dossiers en cours · {stats.compromis} compromis · {stats.vendu} vendus
               </p>
             </div>
-            {honorairesAVenir > 0 && (
+            {userRole === 'admin' && honorairesAVenir > 0 && (
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200 shadow-sm">
                 <p className="text-sm text-blue-700 font-semibold mb-1">Honoraires à venir</p>
                 <p className="text-2xl font-bold text-blue-600">
