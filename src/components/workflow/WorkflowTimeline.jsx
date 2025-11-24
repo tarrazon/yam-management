@@ -22,6 +22,7 @@ import { format, addDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { base44 } from '@/api/base44Client';
 import { getDocumentsByWorkflowStep } from '@/hooks/useDocumentsManquants';
+import { supabase } from '@/lib/supabase';
 
 export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnly = false }) {
   const [progress, setProgress] = useState([]);
@@ -99,18 +100,37 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
         setNotaire(null);
       }
 
-      if (lotData?.gestionnaire_id) {
-        const gestionnaireData = await base44.entities.Gestionnaire.findOne(lotData.gestionnaire_id);
-        setGestionnaire(gestionnaireData);
-      } else {
-        setGestionnaire(null);
-      }
+      const residenceId = lotData?.residence_id || lotData?.residence_gestion_id;
 
-      if (lotData?.residence_gestion_id) {
+      if (residenceId) {
         try {
-          const contactsData = await base44.entities.ContactResidence.filter({ residence_gestion_id: lotData.residence_gestion_id });
+          const { data: gestionnaireLinks } = await supabase
+            .from('gestionnaires_residences')
+            .select('gestionnaire_id')
+            .eq('residence_id', residenceId)
+            .limit(1)
+            .maybeSingle();
+
+          if (gestionnaireLinks?.gestionnaire_id) {
+            const gestionnaireData = await base44.entities.Gestionnaire.findOne(gestionnaireLinks.gestionnaire_id);
+            console.log('[WorkflowTimeline] Loaded gestionnaire:', {
+              id: gestionnaireData?.id,
+              nom: gestionnaireData?.nom,
+              email: gestionnaireData?.email
+            });
+            setGestionnaire(gestionnaireData);
+          } else {
+            setGestionnaire(null);
+          }
+        } catch (error) {
+          console.error('[WorkflowTimeline] Error loading gestionnaire:', error);
+          setGestionnaire(null);
+        }
+
+        try {
+          const contactsData = await base44.entities.ContactResidence.filter({ residence_gestion_id: residenceId });
           console.log('[WorkflowTimeline] Loaded contacts residence:', {
-            residence_gestion_id: lotData.residence_gestion_id,
+            residence_id: residenceId,
             count: contactsData?.length || 0,
             contacts: contactsData?.map(c => ({ nom: c.nom, prenom: c.prenom, email: c.email, fonction: c.fonction }))
           });
@@ -120,7 +140,8 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
           setContactsResidence([]);
         }
       } else {
-        console.log('[WorkflowTimeline] No residence_gestion_id on lot');
+        console.log('[WorkflowTimeline] No residence_id on lot');
+        setGestionnaire(null);
         setContactsResidence([]);
       }
 
