@@ -7,6 +7,7 @@ import { Handshake, Users, Target, TrendingUp, Euro, Building2, FileText, Chevro
 import { supabase } from "@/lib/supabase";
 import StatsCard from "../components/dashboard/StatsCardCRM";
 import ActivityTimeline from "../components/dashboard/ActivityTimeline";
+import NotificationsCommerciales from "../components/dashboard/NotificationsCommerciales";
 import { formatCurrency } from "@/utils/formHelpers";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -45,7 +46,26 @@ export default function CommercialDashboard() {
     queryFn: () => base44.entities.Acquereur.list(),
   });
 
-  const isLoading = isLoadingPartenaires || isLoadingLots || isLoadingAcquereurs;
+  const { data: notifications = [], isLoading: isLoadingNotifications } = useQuery({
+    queryKey: ['notifications_commerciales', profile?.id],
+    queryFn: async () => {
+      if (!profile?.id) return [];
+      const { data, error } = await supabase
+        .from('notifications_commerciales')
+        .select('*')
+        .eq('commercial_id', profile.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+      if (error) {
+        console.error('Error fetching notifications:', error);
+        throw error;
+      }
+      return data || [];
+    },
+    enabled: !!profile?.id,
+  });
+
+  const isLoading = isLoadingPartenaires || isLoadingLots || isLoadingAcquereurs || isLoadingNotifications;
 
   const partenaireIds = partenairesCommercial.map(p => p.id);
 
@@ -140,6 +160,10 @@ export default function CommercialDashboard() {
             trend={parseFloat(tauxConversion) > 20 ? "up" : "neutral"}
             iconBgColor="bg-gradient-to-br from-purple-500 to-purple-600"
           />
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 mb-8">
+          <NotificationsCommerciales notifications={notifications} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">

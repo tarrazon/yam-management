@@ -150,7 +150,7 @@ export default function LotsPartenaire() {
       };
 
       // Créer l'option - le trigger sync_lot_statut_on_option_change gérera automatiquement le statut du lot
-      await createOptionMutation.mutateAsync(optionData);
+      const createdOption = await createOptionMutation.mutateAsync(optionData);
 
       try {
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -163,14 +163,17 @@ export default function LotsPartenaire() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            partenaire_id: currentUser.partenaire_id,
             partenaire_nom: partenaire?.nom || '',
             partenaire_prenom: partenaire?.prenom || '',
+            lot_id: lot.id,
             lot_numero: lot.reference || '',
             residence_nom: lot.residence_nom || '',
             acquereur_nom: acquereur?.nom || '',
             acquereur_prenom: acquereur?.prenom || '',
             date_debut: dateDebut.toISOString(),
             date_fin: dateFin.toISOString(),
+            option_id: createdOption?.id || null,
           }),
         });
       } catch (error) {

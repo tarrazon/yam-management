@@ -8,14 +8,17 @@ const corsHeaders = {
 };
 
 interface NotificationPayload {
+  partenaire_id: string;
   partenaire_nom: string;
   partenaire_prenom: string;
+  lot_id: string;
   lot_numero: string;
   residence_nom: string;
   acquereur_nom?: string;
   acquereur_prenom?: string;
   date_debut: string;
   date_fin: string;
+  option_id?: string;
 }
 
 Deno.serve(async (req: Request) => {
@@ -42,7 +45,47 @@ Deno.serve(async (req: Request) => {
       throw new Error(`Error fetching notification emails: ${emailsError.message}`);
     }
 
-    if (!notificationEmails || notificationEmails.length === 0) {
+    const { data: partenaire, error: partenaireError } = await supabase
+      .from("partenaires")
+      .select("created_by")
+      .eq("id", payload.partenaire_id)
+      .single();
+
+    if (partenaireError) {
+      console.error("Error fetching partenaire:", partenaireError);
+    }
+
+    let commercialEmail = null;
+    if (partenaire?.created_by) {
+      const { data: commercial, error: commercialError } = await supabase
+        .from("profiles")
+        .select("id, email, nom, prenom")
+        .eq("id", partenaire.created_by)
+        .single();
+
+      if (!commercialError && commercial) {
+        commercialEmail = commercial.email;
+
+        await supabase
+          .from("notifications_commerciales")
+          .insert({
+            commercial_id: commercial.id,
+            partenaire_id: payload.partenaire_id,
+            lot_id: payload.lot_id,
+            option_id: payload.option_id || null,
+            type: "option_posee",
+            titre: `Option posée - ${payload.residence_nom}`,
+            message: `${payload.partenaire_prenom} ${payload.partenaire_nom} a posé une option sur le lot ${payload.lot_numero} de ${payload.residence_nom}`,
+          });
+      }
+    }
+
+    const allEmails = [
+      ...(notificationEmails || []).map(item => item.email),
+      ...(commercialEmail ? [commercialEmail] : []),
+    ];
+
+    if (allEmails.length === 0) {
       return new Response(
         JSON.stringify({ message: "No active notification emails configured" }),
         {
@@ -170,7 +213,7 @@ Période d'option: Du ${new Date(payload.date_debut).toLocaleDateString('fr-FR')
 Y'am Asset Management - Gestion LMNP
     `;
 
-    const emailPromises = notificationEmails.map((item) =>
+    const emailPromises = allEmails.map((email) =>
       fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
@@ -179,7 +222,7 @@ Y'am Asset Management - Gestion LMNP
         },
         body: JSON.stringify({
           from: "Y'am Asset Management <noreply@yam-management.fr>",
-          to: [item.email],
+          to: [email],
           subject: `Nouvelle option - ${payload.residence_nom} - Lot ${payload.lot_numero}`,
           html: emailHtml,
           text: emailText,
@@ -196,7 +239,8 @@ Y'am Asset Management - Gestion LMNP
       JSON.stringify({
         success: true,
         message: `Notifications envoyées: ${successful} réussies, ${failed} échouées`,
-        sent_to: notificationEmails.length,
+        sent_to: allEmails.length,
+        commercial_notified: !!commercialEmail,
       }),
       {
         status: 200,
