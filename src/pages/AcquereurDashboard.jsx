@@ -231,17 +231,6 @@ export default function AcquereurDashboard() {
     }
   };
 
-  const handleMarkMessageAsRead = async (messageId) => {
-    try {
-      await messagesAdminService.marquerLu(messageId);
-      queryClient.invalidateQueries(['messages-portal', acquereur.id]);
-      toast.success('Message marqué comme lu');
-    } catch (error) {
-      console.error('Erreur marquage message:', error);
-      toast.error('Erreur lors du marquage du message');
-    }
-  };
-
   useEffect(() => {
     if (activeSection === 'messages' && messages.length > 0 && acquereur?.id) {
       const unreadAdminMessages = messages.filter(msg => msg.expediteur_type === 'admin' && !msg.lu);
@@ -769,15 +758,12 @@ export default function AcquereurDashboard() {
                         <div className={`max-w-md p-4 rounded-lg relative ${
                           msg.expediteur_type === 'acquereur'
                             ? 'bg-[#1E40AF] text-white'
-                            : `bg-slate-100 text-slate-700 ${!msg.lu ? 'border-2 border-red-300' : ''}`
+                            : 'bg-slate-100 text-slate-700'
                         }`}>
                           <div className="flex items-start justify-between gap-2 mb-1">
                             <p className="text-sm font-medium">
                               {msg.expediteur_type === 'admin' ? 'Administrateur YAM' : 'Vous'}
                             </p>
-                            {msg.expediteur_type === 'admin' && !msg.lu && (
-                              <Badge className="bg-red-500 text-white text-[10px] px-1.5 py-0.5">Non lu</Badge>
-                            )}
                           </div>
                           <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
                           <div className="flex items-center justify-between gap-2 mt-2">
@@ -786,16 +772,11 @@ export default function AcquereurDashboard() {
                             }`}>
                               {format(new Date(msg.created_at), 'dd MMM yyyy à HH:mm', { locale: fr })}
                             </p>
-                            {msg.expediteur_type === 'admin' && !msg.lu && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => handleMarkMessageAsRead(msg.id)}
-                                className="h-6 px-2 text-[10px] hover:bg-green-100 text-green-700"
-                              >
-                                <Check className="w-3 h-3 mr-0.5" />
-                                Lu
-                              </Button>
+                            {msg.expediteur_type === 'admin' && msg.lu && (
+                              <div className="flex items-center gap-1 text-green-600">
+                                <Check className="w-3 h-3" />
+                                <Check className="w-3 h-3 -ml-2" />
+                              </div>
                             )}
                           </div>
                         </div>
