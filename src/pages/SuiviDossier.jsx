@@ -11,8 +11,10 @@ import SuiviDossierCard from "../components/suivi-dossier/SuiviDossierCard";
 import SuiviDossierListItem from "../components/suivi-dossier/SuiviDossierListItem";
 import SuiviDossierDetail from "../components/suivi-dossier/SuiviDossierDetail";
 import SuiviDossierForm from "../components/suivi-dossier/SuiviDossierForm";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function SuiviDossier() {
+  const { profile } = useAuth();
   const [filter, setFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [dateDebut, setDateDebut] = useState("");
@@ -21,6 +23,10 @@ export default function SuiviDossier() {
   const [viewingLot, setViewingLot] = useState(null);
   const [editingLot, setEditingLot] = useState(null);
   const queryClient = useQueryClient();
+
+  const userRole = profile?.role_custom || 'admin';
+  const userId = profile?.id;
+  const userEmail = profile?.email;
 
   const { data: lots = [], isLoading } = useQuery({
     queryKey: ['lots_lmnp'],
@@ -41,8 +47,22 @@ export default function SuiviDossier() {
     },
   });
 
+  // Filtrer les partenaires selon le rôle
+  const partenaireIds = userRole === 'commercial'
+    ? partenaires
+        .filter(p => p.created_by === userId || p.created_by === userEmail)
+        .map(p => p.id)
+    : null;
+
   // Filtrer uniquement les lots non disponibles et non en allotement
-  const lotsEnCours = lots.filter(l => l.statut !== 'disponible' && l.statut !== 'allotement');
+  let lotsEnCours = lots.filter(l => l.statut !== 'disponible' && l.statut !== 'allotement');
+
+  // Pour les commerciaux, filtrer par partenaires
+  if (userRole === 'commercial' && partenaireIds) {
+    lotsEnCours = lotsEnCours.filter(l =>
+      l.partenaire_id && partenaireIds.includes(l.partenaire_id)
+    );
+  }
 
   const filteredLots = lotsEnCours
     .filter(l => filter === "all" || l.statut === filter)

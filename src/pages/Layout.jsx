@@ -37,6 +37,12 @@ const getNavigationItems = (userRole) => {
       roles: ['commercial'],
     },
     {
+      title: "Suivi de dossier",
+      url: createPageUrl("SuiviDossier"),
+      icon: FileCheck,
+      roles: ['commercial'],
+    },
+    {
       title: "Résidences",
       url: createPageUrl("ResidencesGestion"),
       icon: Building2,
