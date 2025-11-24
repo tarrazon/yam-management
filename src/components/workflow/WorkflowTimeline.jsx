@@ -108,47 +108,24 @@ export function WorkflowTimeline({ lotId, onUpdate, workflowType = null, readOnl
         setContactsResidence([]);
       }
 
-      if (!progressData || progressData.length === 0) {
-        console.log('[WorkflowTimeline] No progress data, initializing workflow...');
-        await workflowService.initializeWorkflowForLot(lotId, workflowType);
-        const newProgressData = await workflowService.getLotWorkflowProgress(lotId);
-
-        const progressMap = {};
-        if (newProgressData && Array.isArray(newProgressData)) {
-          newProgressData.forEach(p => {
-            progressMap[p.step_code] = p;
-          });
-        }
-
-        const combined = stepsData.map(step => ({
-          ...step,
-          progress: progressMap[step.code] || {
-            status: 'pending',
-            step_code: step.code,
-            lot_id: lotId
-          }
-        }));
-
-        setSteps(combined);
-        setProgress(newProgressData || []);
-      } else {
-        const progressMap = {};
+      const progressMap = {};
+      if (progressData && Array.isArray(progressData)) {
         progressData.forEach(p => {
           progressMap[p.step_code] = p;
         });
-
-        const combined = stepsData.map(step => ({
-          ...step,
-          progress: progressMap[step.code] || {
-            status: 'pending',
-            step_code: step.code,
-            lot_id: lotId
-          }
-        }));
-
-        setSteps(combined);
-        setProgress(progressData || []);
       }
+
+      const combined = stepsData.map(step => ({
+        ...step,
+        progress: progressMap[step.code] || {
+          status: 'pending',
+          step_code: step.code,
+          lot_id: lotId
+        }
+      }));
+
+      setSteps(combined);
+      setProgress(progressData || []);
     } catch (error) {
       console.error('Error loading workflow:', error);
       toast.error(`Erreur: ${error.message}`);
