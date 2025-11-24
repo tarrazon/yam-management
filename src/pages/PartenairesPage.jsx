@@ -115,10 +115,10 @@ export default function PartenairesPage() {
     if (editingPartenaire) {
       updateMutation.mutate({ id: editingPartenaire.id, data });
     } else {
-      // Ajouter l'email de l'utilisateur qui crée le partenaire
+      // Ajouter l'ID de l'utilisateur qui crée le partenaire
       const dataWithCreator = {
         ...data,
-        created_by: userEmail
+        created_by: userId || userEmail // Utilise l'ID en priorité, email en fallback
       };
       createMutation.mutate(dataWithCreator);
     }
@@ -142,12 +142,14 @@ export default function PartenairesPage() {
   // Filtrer selon le rôle de l'utilisateur
   const userRole = currentUser?.role_custom || 'admin';
   const userEmail = currentUser?.email;
+  const userId = currentUser?.id;
 
   const filteredPartenaires = partenaires
     .filter(p => {
       // Si commercial, ne voir que ses propres partenaires
       if (userRole === 'commercial') {
-        return p.created_by === userEmail;
+        // Vérifie avec l'ID (nouveau format) ou l'email (ancien format)
+        return p.created_by === userId || p.created_by === userEmail;
       }
       return true;
     })
