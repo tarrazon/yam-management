@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { formatCurrency, calculateRetrocession } from "@/utils/formHelpers";
 import { formatPartenaireTypes } from "@/utils/partenaireTypes";
+import { useMessagesNonLus } from "@/hooks/useMessagesNonLus";
 
 export default function PartenairesDashboard() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -51,6 +52,8 @@ export default function PartenairesDashboard() {
     queryFn: () => base44.entities.Partenaire.filter({ id: currentUser?.partenaire_id }).then(res => res[0]),
     enabled: !!currentUser?.partenaire_id,
   });
+
+  const { data: messagesNonLus = 0 } = useMessagesNonLus(currentUser?.partenaire_id);
 
   const updateOptionMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.OptionLot.update(id, data),
@@ -374,6 +377,33 @@ export default function PartenairesDashboard() {
             </Card>
           </Link>
         </div>
+
+        {/* Messagerie */}
+        {messagesNonLus > 0 && (
+          <Card className="border-l-4 border-l-blue-500 bg-blue-50">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-xl bg-blue-100">
+                    <Mail className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-blue-900">
+                      {messagesNonLus} nouveau{messagesNonLus > 1 ? 'x' : ''} message{messagesNonLus > 1 ? 's' : ''}
+                    </p>
+                    <p className="text-sm text-blue-700">Vous avez reçu des messages de l'équipe administrative</p>
+                  </div>
+                </div>
+                <Link to={createPageUrl("MessageriePartenaire")}>
+                  <Button className="bg-blue-600 hover:bg-blue-700">
+                    <Mail className="w-4 h-4 mr-2" />
+                    Voir les messages
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import { messagesPartenairesService } from '@/api/messagesPartenaires';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { Badge } from "@/components/ui/badge";
 
 export default function MessageriePartenaireModal({ open, onClose, partenaire }) {
   const [message, setMessage] = useState('');
@@ -25,6 +26,8 @@ export default function MessageriePartenaireModal({ open, onClose, partenaire })
     enabled: !!partenaire?.id && open,
     refetchInterval: 3000,
   });
+
+  const messagesNonLus = messages.filter(msg => msg.expediteur_type === 'partenaire' && !msg.lu).length;
 
   useEffect(() => {
     if (error) {
@@ -96,6 +99,11 @@ export default function MessageriePartenaireModal({ open, onClose, partenaire })
               <span className="text-sm font-normal text-slate-500">
                 ({messages.length} message{messages.length > 1 ? 's' : ''})
               </span>
+            )}
+            {messagesNonLus > 0 && (
+              <Badge className="bg-red-500 text-white">
+                {messagesNonLus} non lu{messagesNonLus > 1 ? 's' : ''}
+              </Badge>
             )}
           </DialogTitle>
         </DialogHeader>
