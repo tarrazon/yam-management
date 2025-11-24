@@ -691,13 +691,26 @@ L'équipe YAM Management`
                 Variables disponibles pour ce template
               </h4>
               <div className="text-sm text-blue-800 space-y-1">
-                {editingSpecial?.variables_available &&
-                  JSON.parse(editingSpecial.variables_available).map((variable) => (
-                    <p key={variable}>
-                      <code className="bg-blue-100 px-1 rounded">{`{{${variable}}}`}</code> - {variable === 'prenom' ? 'Prénom de l\'acquéreur' : variable === 'nom' ? 'Nom de l\'acquéreur' : 'Email de l\'acquéreur'}
-                    </p>
-                  ))
-                }
+                {editingSpecial?.variables_available && (() => {
+                  const vars = typeof editingSpecial.variables_available === 'string'
+                    ? JSON.parse(editingSpecial.variables_available)
+                    : editingSpecial.variables_available;
+
+                  if (Array.isArray(vars)) {
+                    return vars.map((variable) => (
+                      <p key={variable}>
+                        <code className="bg-blue-100 px-1 rounded">{`{{${variable}}}`}</code> - {variable === 'prenom' ? 'Prénom de l\'acquéreur' : variable === 'nom' ? 'Nom de l\'acquéreur' : 'Email de l\'acquéreur'}
+                      </p>
+                    ));
+                  } else if (typeof vars === 'object') {
+                    return Object.entries(vars).map(([key, description]) => (
+                      <p key={key}>
+                        <code className="bg-blue-100 px-1 rounded">{`{{${key}}}`}</code> - {description}
+                      </p>
+                    ));
+                  }
+                  return null;
+                })()}
               </div>
             </div>
 
