@@ -24,7 +24,7 @@ const statusLabels = {
   vendu: "Vendu",
 };
 
-export default function SuiviDossierDetail({ lot, onClose, onEdit }) {
+export default function SuiviDossierDetail({ lot, onClose, onEdit, readOnly = false }) {
   const [refreshKey, setRefreshKey] = useState(0);
   const { documentsManquantsAcquereur, documentsManquantsVendeur } = useDocumentsManquants(lot);
 
@@ -115,7 +115,7 @@ export default function SuiviDossierDetail({ lot, onClose, onEdit }) {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-              <WorkflowTimeline key={refreshKey} lotId={lot.id} onUpdate={handleWorkflowUpdate} workflowType="acquereur" />
+              <WorkflowTimeline key={refreshKey} lotId={lot.id} onUpdate={handleWorkflowUpdate} workflowType="acquereur" readOnly={readOnly} />
             </CardContent>
           </Card>
 
@@ -129,7 +129,7 @@ export default function SuiviDossierDetail({ lot, onClose, onEdit }) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-6">
-                <WorkflowTimeline key={refreshKey} lotId={lot.id} onUpdate={handleWorkflowUpdate} workflowType="vendeur" />
+                <WorkflowTimeline key={refreshKey} lotId={lot.id} onUpdate={handleWorkflowUpdate} workflowType="vendeur" readOnly={readOnly} />
               </CardContent>
             </Card>
           )}

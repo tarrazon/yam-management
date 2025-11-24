@@ -271,6 +271,7 @@ export default function SuiviDossier() {
               lot={viewingLot}
               onClose={() => setViewingLot(null)}
               onEdit={userRole === 'admin' ? handleEdit : undefined}
+              readOnly={userRole !== 'admin'}
             />
           )}
         </AnimatePresence>
