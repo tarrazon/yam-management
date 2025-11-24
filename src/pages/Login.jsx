@@ -35,6 +35,8 @@ export default function Login() {
       // Rediriger selon le rôle
       if (profile?.role_custom === 'partenaire') {
         navigate('/partenairesdashboard');
+      } else if (profile?.role_custom === 'acquereur') {
+        navigate('/acquereur-dashboard');
       } else {
         navigate('/dashboardcrm');
       }
