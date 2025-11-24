@@ -66,7 +66,10 @@ export default function DatabaseExport() {
         return;
       }
 
-      const url = `${apiEndpoint}?format=${format}${selectedTables === "custom" ? `&tables=${tablesToExport}` : ""}`;
+      const url = `${apiEndpoint}?format=${format}${selectedTables === "custom" ? `&tables=${tablesToExport}` : ""}&limit=10000`;
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 90000);
 
       const response = await fetch(url, {
         method: "GET",
@@ -74,7 +77,10 @@ export default function DatabaseExport() {
           Authorization: `Bearer ${session.access_token}`,
           "Content-Type": "application/json",
         },
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status}`);
@@ -110,7 +116,11 @@ export default function DatabaseExport() {
       }
     } catch (error) {
       console.error("Erreur lors de l'export:", error);
-      toast.error(`Erreur lors de l'export: ${error.message}`);
+      if (error.name === 'AbortError') {
+        toast.error("L'export a pris trop de temps (timeout après 90s). Essayez avec moins de tables.");
+      } else {
+        toast.error(`Erreur lors de l'export: ${error.message}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -153,7 +163,10 @@ export default function DatabaseExport() {
         <Alert className="border-amber-200 bg-amber-50">
           <AlertCircle className="h-4 w-4 text-amber-600" />
           <AlertDescription className="text-amber-800">
-            L'export contient toutes les données sensibles. Assurez-vous de stocker les fichiers en sécurité.
+            <div className="space-y-1">
+              <div>L'export contient toutes les données sensibles. Assurez-vous de stocker les fichiers en sécurité.</div>
+              <div className="text-sm">L'export est limité à 10 000 enregistrements par table. Pour des exports complets de grandes bases, utilisez les outils Supabase.</div>
+            </div>
           </AlertDescription>
         </Alert>
 

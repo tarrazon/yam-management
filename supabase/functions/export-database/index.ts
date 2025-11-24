@@ -23,6 +23,7 @@ Deno.serve(async (req: Request) => {
     const url = new URL(req.url);
     const format = url.searchParams.get("format") || "json";
     const tables = url.searchParams.get("tables")?.split(",") || "all";
+    const limit = parseInt(url.searchParams.get("limit") || "10000");
 
     const allTables = [
       "profiles",
@@ -59,7 +60,8 @@ Deno.serve(async (req: Request) => {
       try {
         const { data, error, count } = await supabase
           .from(tableName)
-          .select("*", { count: "exact" });
+          .select("*", { count: "exact" })
+          .limit(limit);
 
         if (error) {
           console.error(`Erreur lors de l'export de ${tableName}:`, error);
@@ -71,6 +73,7 @@ Deno.serve(async (req: Request) => {
         } else {
           exportData.tables[tableName] = {
             count: count || 0,
+            exported: data?.length || 0,
             data: data || [],
           };
         }
