@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Database, Download, FileJson, FileSpreadsheet, FileCode, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
 
 export default function DatabaseExport() {
   const { session } = useAuth();
@@ -56,41 +57,70 @@ export default function DatabaseExport() {
     setExportResult(null);
 
     try {
+      const allTables = availableTables.map(t => t.id);
       const tablesToExport = selectedTables === "all"
-        ? "all"
-        : Object.keys(checkedTables).filter(key => checkedTables[key]).join(",");
+        ? allTables
+        : Object.keys(checkedTables).filter(key => checkedTables[key]);
 
-      if (selectedTables === "custom" && tablesToExport === "") {
+      if (tablesToExport.length === 0) {
         toast.error("Veuillez sélectionner au moins une table");
         setLoading(false);
         return;
       }
 
-      const url = `${apiEndpoint}?format=${format}${selectedTables === "custom" ? `&tables=${tablesToExport}` : ""}&limit=10000`;
+      const exportData = {
+        export_date: new Date().toISOString(),
+        database: "yam-management",
+        tables: {},
+      };
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 90000);
+      let totalRecords = 0;
 
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-          "Content-Type": "application/json",
-        },
-        signal: controller.signal,
-      });
+      for (const tableName of tablesToExport) {
+        try {
+          const { data, error, count } = await supabase
+            .from(tableName)
+            .select("*", { count: "exact" })
+            .limit(10000);
 
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
+          if (error) {
+            console.error(`Erreur pour ${tableName}:`, error);
+            exportData.tables[tableName] = {
+              error: error.message,
+              count: 0,
+              data: [],
+            };
+          } else {
+            exportData.tables[tableName] = {
+              count: count || 0,
+              exported: data?.length || 0,
+              data: data || [],
+            };
+            totalRecords += count || 0;
+          }
+        } catch (err) {
+          console.error(`Exception pour ${tableName}:`, err);
+          exportData.tables[tableName] = {
+            error: err.message,
+            count: 0,
+            data: [],
+          };
+        }
       }
 
       if (format === "json") {
-        const data = await response.json();
-        setExportResult(data);
+        const jsonData = {
+          success: true,
+          export_date: exportData.export_date,
+          database: exportData.database,
+          total_tables: tablesToExport.length,
+          total_records: totalRecords,
+          tables: exportData.tables,
+        };
 
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        setExportResult(jsonData);
+
+        const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: "application/json" });
         const downloadUrl = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = downloadUrl;
@@ -100,27 +130,91 @@ export default function DatabaseExport() {
         document.body.removeChild(link);
         window.URL.revokeObjectURL(downloadUrl);
 
-        toast.success(`Export réussi ! ${data.total_records} enregistrements exportés`);
-      } else {
-        const blob = await response.blob();
+        toast.success(`Export réussi ! ${totalRecords} enregistrements dans ${tablesToExport.length} table(s)`);
+      } else if (format === "csv") {
+        let csvContent = "# YAM Management - Database Export\n";
+        csvContent += `# Export Date: ${exportData.export_date}\n\n`;
+
+        for (const [tableName, tableData] of Object.entries(exportData.tables)) {
+          csvContent += `\n## Table: ${tableName} (${tableData.count} rows)\n`;
+
+          if (tableData.error) {
+            csvContent += `# ERROR: ${tableData.error}\n`;
+            continue;
+          }
+
+          if (tableData.data.length > 0) {
+            const headers = Object.keys(tableData.data[0]);
+            csvContent += headers.join(",") + "\n";
+
+            for (const row of tableData.data) {
+              const values = headers.map((header) => {
+                const value = row[header];
+                if (value === null || value === undefined) return "";
+                if (typeof value === "object") return JSON.stringify(value).replace(/"/g, '""');
+                return `"${String(value).replace(/"/g, '""')}"`;
+              });
+              csvContent += values.join(",") + "\n";
+            }
+          }
+        }
+
+        const blob = new Blob([csvContent], { type: "text/csv" });
         const downloadUrl = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = downloadUrl;
-        link.download = `yam_export_${new Date().toISOString().split('T')[0]}.${format}`;
+        link.download = `yam_export_${new Date().toISOString().split('T')[0]}.csv`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         window.URL.revokeObjectURL(downloadUrl);
 
-        toast.success(`Export ${format.toUpperCase()} réussi !`);
+        toast.success(`Export CSV réussi ! ${totalRecords} enregistrements`);
+      } else if (format === "sql") {
+        let sqlContent = `-- YAM Management - Database Export\n`;
+        sqlContent += `-- Export Date: ${exportData.export_date}\n`;
+        sqlContent += `-- Database: ${exportData.database}\n\n`;
+
+        for (const [tableName, tableData] of Object.entries(exportData.tables)) {
+          sqlContent += `\n-- Table: ${tableName} (${tableData.count} rows)\n`;
+
+          if (tableData.error) {
+            sqlContent += `-- ERROR: ${tableData.error}\n`;
+            continue;
+          }
+
+          if (tableData.data.length > 0) {
+            for (const row of tableData.data) {
+              const columns = Object.keys(row);
+              const values = columns.map((col) => {
+                const value = row[col];
+                if (value === null || value === undefined) return "NULL";
+                if (typeof value === "object") return `'${JSON.stringify(value).replace(/'/g, "''")}'`;
+                if (typeof value === "string") return `'${value.replace(/'/g, "''")}'`;
+                if (typeof value === "boolean") return value ? "TRUE" : "FALSE";
+                return value;
+              });
+
+              sqlContent += `INSERT INTO ${tableName} (${columns.join(", ")}) VALUES (${values.join(", ")});\n`;
+            }
+          }
+        }
+
+        const blob = new Blob([sqlContent], { type: "text/plain" });
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = `yam_export_${new Date().toISOString().split('T')[0]}.sql`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(downloadUrl);
+
+        toast.success(`Export SQL réussi ! ${totalRecords} enregistrements`);
       }
     } catch (error) {
       console.error("Erreur lors de l'export:", error);
-      if (error.name === 'AbortError') {
-        toast.error("L'export a pris trop de temps (timeout après 90s). Essayez avec moins de tables.");
-      } else {
-        toast.error(`Erreur lors de l'export: ${error.message}`);
-      }
+      toast.error(`Erreur lors de l'export: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -165,7 +259,7 @@ export default function DatabaseExport() {
           <AlertDescription className="text-amber-800">
             <div className="space-y-1">
               <div>L'export contient toutes les données sensibles. Assurez-vous de stocker les fichiers en sécurité.</div>
-              <div className="text-sm">L'export est limité à 10 000 enregistrements par table. Pour des exports complets de grandes bases, utilisez les outils Supabase.</div>
+              <div className="text-sm">L'export est effectué directement depuis votre navigateur et est limité à 10 000 enregistrements par table.</div>
             </div>
           </AlertDescription>
         </Alert>
