@@ -14,6 +14,7 @@ export default function DatabaseExport() {
   const [loading, setLoading] = useState(false);
   const [exportResult, setExportResult] = useState(null);
   const [selectedTables, setSelectedTables] = useState("all");
+  const [progress, setProgress] = useState({ current: 0, total: 0, table: "" });
 
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const apiEndpoint = `${supabaseUrl}/functions/v1/export-database`;
@@ -55,18 +56,25 @@ export default function DatabaseExport() {
 
     setLoading(true);
     setExportResult(null);
+    setProgress({ current: 0, total: 0, table: "" });
 
     try {
+      console.log("Session vérifiée, début du traitement...");
+
       const allTables = availableTables.map(t => t.id);
       const tablesToExport = selectedTables === "all"
         ? allTables
         : Object.keys(checkedTables).filter(key => checkedTables[key]);
+
+      console.log("Tables à exporter:", tablesToExport);
 
       if (tablesToExport.length === 0) {
         toast.error("Veuillez sélectionner au moins une table");
         setLoading(false);
         return;
       }
+
+      setProgress({ current: 0, total: tablesToExport.length, table: "" });
 
       const exportData = {
         export_date: new Date().toISOString(),
@@ -78,23 +86,27 @@ export default function DatabaseExport() {
 
       console.log(`Début de l'export de ${tablesToExport.length} table(s):`, tablesToExport);
 
-      for (const tableName of tablesToExport) {
+      for (let i = 0; i < tablesToExport.length; i++) {
+        const tableName = tablesToExport[i];
+        setProgress({ current: i + 1, total: tablesToExport.length, table: tableName });
+
         try {
-          console.log(`Récupération de la table: ${tableName}...`);
+          console.log(`[${i + 1}/${tablesToExport.length}] Récupération de la table: ${tableName}...`);
+
           const { data, error, count } = await supabase
             .from(tableName)
             .select("*", { count: "exact" })
             .limit(10000);
 
           if (error) {
-            console.error(`Erreur pour ${tableName}:`, error);
+            console.error(`❌ Erreur pour ${tableName}:`, error);
             exportData.tables[tableName] = {
               error: error.message,
               count: 0,
               data: [],
             };
           } else {
-            console.log(`✓ ${tableName}: ${count} enregistrement(s)`);
+            console.log(`✓ ${tableName}: ${count} enregistrement(s), ${data?.length || 0} exporté(s)`);
             exportData.tables[tableName] = {
               count: count || 0,
               exported: data?.length || 0,
@@ -103,7 +115,7 @@ export default function DatabaseExport() {
             totalRecords += count || 0;
           }
         } catch (err) {
-          console.error(`Exception pour ${tableName}:`, err);
+          console.error(`❌ Exception pour ${tableName}:`, err);
           exportData.tables[tableName] = {
             error: err.message,
             count: 0,
@@ -223,10 +235,12 @@ export default function DatabaseExport() {
         toast.success(`Export SQL réussi ! ${totalRecords} enregistrements`);
       }
     } catch (error) {
-      console.error("Erreur lors de l'export:", error);
+      console.error("❌ Erreur GLOBALE lors de l'export:", error);
+      console.error("Stack trace:", error.stack);
       toast.error(`Erreur lors de l'export: ${error.message}`);
     } finally {
       setLoading(false);
+      setProgress({ current: 0, total: 0, table: "" });
     }
   };
 
@@ -402,6 +416,25 @@ export default function DatabaseExport() {
                 </div>
               </Button>
             </div>
+
+            {loading && progress.total > 0 && (
+              <div className="mt-6 space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-600">
+                    Export en cours... {progress.current}/{progress.total}
+                  </span>
+                  <span className="text-slate-900 font-medium">
+                    {progress.table}
+                  </span>
+                </div>
+                <div className="w-full bg-slate-200 rounded-full h-2.5">
+                  <div
+                    className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+                    style={{ width: `${(progress.current / progress.total) * 100}%` }}
+                  ></div>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
