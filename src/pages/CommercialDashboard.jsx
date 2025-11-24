@@ -1,16 +1,19 @@
-import React from "react";
+import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Handshake, Users, Target, TrendingUp, Euro, Building2 } from "lucide-react";
+import { Handshake, Users, Target, TrendingUp, Euro, Building2, FileText, ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import StatsCard from "../components/dashboard/StatsCardCRM";
 import ActivityTimeline from "../components/dashboard/ActivityTimeline";
 import { formatCurrency } from "@/utils/formHelpers";
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
 
 export default function CommercialDashboard() {
   const { profile } = useAuth();
+  const [expandedLots, setExpandedLots] = useState({});
 
   const { data: partenairesCommercial = [], isLoading: isLoadingPartenaires } = useQuery({
     queryKey: ['partenaires_commercial', profile?.id, profile?.email],
@@ -204,55 +207,145 @@ export default function CommercialDashboard() {
           </Card>
         </div>
 
-        <Card className="border-none shadow-md">
-          <CardHeader>
-            <CardTitle className="text-[#1E40AF]">Mes Partenaires</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {partenairesCommercial.length === 0 ? (
-              <div className="text-center py-8 text-slate-500">
-                <Handshake className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-                <p>Vous n'avez pas encore de partenaires</p>
-                <p className="text-sm mt-1">Créez votre premier partenaire depuis le menu Partenaires</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {partenairesCommercial.map((partenaire) => {
-                  const lotsPartenaire = lotsPartenaires.filter(l => l.partenaire_id === partenaire.id);
-                  const vendusPartenaire = lotsPartenaire.filter(l => l.statut === 'vendu').length;
-                  const caPartenaire = lotsPartenaire
-                    .filter(l => l.statut === 'vendu')
-                    .reduce((sum, l) => sum + (parseFloat(l.prix_vente) || 0), 0);
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <Card className="border-none shadow-md">
+            <CardHeader>
+              <CardTitle className="text-[#1E40AF]">Mes Partenaires</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {partenairesCommercial.length === 0 ? (
+                <div className="text-center py-8 text-slate-500">
+                  <Handshake className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+                  <p>Vous n'avez pas encore de partenaires</p>
+                  <p className="text-sm mt-1">Créez votre premier partenaire depuis le menu Partenaires</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {partenairesCommercial.map((partenaire) => {
+                    const lotsPartenaire = lotsPartenaires.filter(l => l.partenaire_id === partenaire.id);
+                    const vendusPartenaire = lotsPartenaire.filter(l => l.statut === 'vendu').length;
+                    const caPartenaire = lotsPartenaire
+                      .filter(l => l.statut === 'vendu')
+                      .reduce((sum, l) => sum + (parseFloat(l.prix_vente) || 0), 0);
 
-                  return (
-                    <div
-                      key={partenaire.id}
-                      className="flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center">
-                          <Handshake className="w-5 h-5 text-white" />
+                    return (
+                      <div
+                        key={partenaire.id}
+                        className="flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center">
+                            <Handshake className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-slate-800">{partenaire.nom}</p>
+                            <p className="text-sm text-slate-500">{partenaire.contact_principal}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-semibold text-slate-800">{partenaire.nom}</p>
-                          <p className="text-sm text-slate-500">{partenaire.contact_principal}</p>
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-slate-600">
+                            {vendusPartenaire} vente{vendusPartenaire > 1 ? 's' : ''}
+                          </p>
+                          <p className="text-sm text-green-600 font-semibold">
+                            {formatCurrency(caPartenaire)}
+                          </p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-slate-600">
-                          {vendusPartenaire} vente{vendusPartenaire > 1 ? 's' : ''}
-                        </p>
-                        <p className="text-sm text-green-600 font-semibold">
-                          {formatCurrency(caPartenaire)}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-md">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-[#1E40AF]">
+                <FileText className="w-5 h-5" />
+                Suivi des dossiers
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {lotsPartenaires.filter(l => ['reserve', 'compromis', 'acte_programme', 'vendu'].includes(l.statut)).length === 0 ? (
+                <div className="text-center py-8 text-slate-500">
+                  <FileText className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+                  <p>Aucun dossier en cours</p>
+                  <p className="text-sm mt-1">Les dossiers de vos partenaires apparaîtront ici</p>
+                </div>
+              ) : (
+                <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                  {lotsPartenaires
+                    .filter(l => ['reserve', 'compromis', 'acte_programme', 'vendu'].includes(l.statut))
+                    .sort((a, b) => {
+                      const order = { 'reserve': 1, 'compromis': 2, 'acte_programme': 3, 'vendu': 4 };
+                      return order[a.statut] - order[b.statut];
+                    })
+                    .map((lot) => {
+                      const partenaire = partenairesCommercial.find(p => p.id === lot.partenaire_id);
+                      const isExpanded = expandedLots[lot.id];
+
+                      return (
+                        <div
+                          key={lot.id}
+                          className="border border-slate-200 rounded-lg overflow-hidden"
+                        >
+                          <div
+                            className="flex items-center justify-between p-3 bg-slate-50 hover:bg-slate-100 cursor-pointer transition-colors"
+                            onClick={() => setExpandedLots(prev => ({ ...prev, [lot.id]: !prev[lot.id] }))}
+                          >
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <p className="font-semibold text-slate-800 text-sm">
+                                  {lot.residence_nom} - {lot.numero}
+                                </p>
+                                <Badge variant={
+                                  lot.statut === 'reserve' ? 'default' :
+                                  lot.statut === 'compromis' ? 'secondary' :
+                                  lot.statut === 'acte_programme' ? 'outline' :
+                                  'success'
+                                } className="text-xs">
+                                  {lot.statut}
+                                </Badge>
+                              </div>
+                              <p className="text-xs text-slate-500">{partenaire?.nom || 'Partenaire inconnu'}</p>
+                            </div>
+                            {isExpanded ? (
+                              <ChevronUp className="w-4 h-4 text-slate-400" />
+                            ) : (
+                              <ChevronDown className="w-4 h-4 text-slate-400" />
+                            )}
+                          </div>
+
+                          {isExpanded && (
+                            <div className="p-3 bg-white border-t border-slate-200 space-y-2">
+                              {lot.acquereur_nom && (
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-slate-600">Acquéreur:</span>
+                                  <span className="font-medium text-slate-800">{lot.acquereur_nom}</span>
+                                </div>
+                              )}
+                              {lot.prix_vente && (
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-slate-600">Prix:</span>
+                                  <span className="font-medium text-green-600">{formatCurrency(lot.prix_vente)}</span>
+                                </div>
+                              )}
+                              {lot.phase_post_vente && (
+                                <div className="flex justify-between text-xs">
+                                  <span className="text-slate-600">Phase:</span>
+                                  <span className="font-medium text-slate-800">{lot.phase_post_vente}</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
