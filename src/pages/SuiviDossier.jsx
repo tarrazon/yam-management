@@ -237,7 +237,7 @@ export default function SuiviDossier() {
                   <SuiviDossierCard
                     key={lot.id}
                     lot={lot}
-                    onEdit={handleEdit}
+                    onEdit={userRole === 'admin' ? handleEdit : undefined}
                     onView={handleView}
                     honoraires={getHonoraires(lot)}
                     partenaire={partenaire}
@@ -255,7 +255,7 @@ export default function SuiviDossier() {
                   <SuiviDossierListItem
                     key={lot.id}
                     lot={lot}
-                    onEdit={handleEdit}
+                    onEdit={userRole === 'admin' ? handleEdit : undefined}
                     onView={handleView}
                     partenaire={partenaire}
                   />
@@ -270,13 +270,13 @@ export default function SuiviDossier() {
             <SuiviDossierDetail
               lot={viewingLot}
               onClose={() => setViewingLot(null)}
-              onEdit={handleEdit}
+              onEdit={userRole === 'admin' ? handleEdit : undefined}
             />
           )}
         </AnimatePresence>
 
         <AnimatePresence>
-          {editingLot && (
+          {editingLot && userRole === 'admin' && (
             <SuiviDossierForm
               lot={editingLot}
               onSubmit={handleSubmit}

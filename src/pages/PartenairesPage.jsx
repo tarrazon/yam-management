@@ -240,10 +240,15 @@ export default function PartenairesPage() {
     document.body.removeChild(link);
   };
 
+  // Utiliser filteredPartenaires pour les stats selon le rôle
+  const partenairesForStats = userRole === 'commercial'
+    ? partenaires.filter(p => p.created_by === userId || p.created_by === userEmail)
+    : partenaires;
+
   const stats = {
-    actif: partenaires.filter(p => p.statut === 'actif').length,
-    inactif: partenaires.filter(p => p.statut === 'inactif').length,
-    a_relancer: partenaires.filter(p => p.statut === 'a_relancer').length,
+    actif: partenairesForStats.filter(p => p.statut === 'actif').length,
+    inactif: partenairesForStats.filter(p => p.statut === 'inactif').length,
+    a_relancer: partenairesForStats.filter(p => p.statut === 'a_relancer').length,
   };
 
   const acquereursForDeletion = deletingPartenaire ? acquereurs.filter(a => a.partenaire_id === deletingPartenaire.id).length : 0;
