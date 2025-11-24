@@ -72,6 +72,8 @@ import AcquereurDashboard from "./AcquereurDashboard";
 
 import FAQManagement from "./FAQManagement";
 
+import CommercialDashboard from "./CommercialDashboard";
+
 import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -86,6 +88,10 @@ function HomeRedirect() {
 
     if (profile?.role_custom === 'acquereur') {
         return <Navigate to="/acquereur-dashboard" replace />;
+    }
+
+    if (profile?.role_custom === 'commercial') {
+        return <Navigate to="/commercial-dashboard" replace />;
     }
 
     return <Navigate to="/dashboardcrm" replace />;
@@ -164,6 +170,8 @@ const PAGES = {
     AcquereurDashboard: AcquereurDashboard,
 
     FAQManagement: FAQManagement,
+
+    CommercialDashboard: CommercialDashboard,
 
 }
 
@@ -279,6 +287,8 @@ function PagesContent() {
             <Route path="/APIDocumentation" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['admin']}><APIDocumentation /></ProtectedRoute></Layout>} />
 
             <Route path="/acquereur-dashboard" element={<ProtectedRoute allowedRoles={['acquereur']}><AcquereurDashboard /></ProtectedRoute>} />
+
+            <Route path="/commercial-dashboard" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['commercial']}><CommercialDashboard /></ProtectedRoute></Layout>} />
 
             <Route path="/faq-management" element={<Layout currentPageName={currentPage}><ProtectedRoute allowedRoles={['admin']}><FAQManagement /></ProtectedRoute></Layout>} />
 

@@ -31,6 +31,12 @@ const getNavigationItems = (userRole) => {
       roles: ['admin'],
     },
     {
+      title: "Mon activité",
+      url: "/commercial-dashboard",
+      icon: LayoutDashboard,
+      roles: ['commercial'],
+    },
+    {
       title: "Résidences",
       url: createPageUrl("ResidencesGestion"),
       icon: Building2,

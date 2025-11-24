@@ -37,6 +37,8 @@ export default function Login() {
         navigate('/partenairesdashboard');
       } else if (profile?.role_custom === 'acquereur') {
         navigate('/acquereur-dashboard');
+      } else if (profile?.role_custom === 'commercial') {
+        navigate('/commercial-dashboard');
       } else {
         navigate('/dashboardcrm');
       }
